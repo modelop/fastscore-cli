@@ -5,7 +5,7 @@ This is an early prototype of the FastScore CLI.
 
 The next version should use virtualenv to capture dependencies of the utility.
 
-# How to use
+## How to use
 
 The tool must know the Connect endpoint. To set the endpoint:
 ```
