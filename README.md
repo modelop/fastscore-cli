@@ -14,7 +14,7 @@ fastscore connect https://127.0.0.1:8001
 
 This saves the endpoint into a file named `.fastscore` in the current directory.
 
-The next mandatory command is to set the Connect configuration.
+The next mandatory step is to set the Connect configuration.
 ```
 fastscore config set config.yaml
 ```
