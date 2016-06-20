@@ -34,6 +34,8 @@ def main():
     model(args[1:])
   elif cmd == "stream":
     stream(args[1:])
+  elif cmd == "help":
+    help()
   else:
     usage()
 
@@ -79,7 +81,7 @@ def config(args):
 def fleet(args):
     r = requests.get(connect_prefix + "/1/connect", verify=False)
     if r.status_code == 403:
-      print "Connect not congigured"
+      print "Connect not configured"
     elif r.status_code == 200:
       t = [ [x["name"],x["api"],x["host"],x["port"],x["health"]] for x in r.json() ]
       print tabulate(t, headers=["Name","API","Host","Port","Health"])
@@ -201,11 +203,22 @@ def lookup_api(api):
   return service["host"],service["port"]
 
 def help():
-  print "TODO (help)"
+  print "The FastScore CLI v1.0"
+  print "  fastscore connect https://<connect>:8001"
+  print "  fastscore config set <file.yaml>"
+  print "  fastscore config show"
+  print "  fastscore fleet"
+  print "  fastscore model list"
+  print "  fastscore model add name <file.pfa>"
+  print "  fastscore model show name"
+  print "  fastscore stream remove name"
+  print "  fastscore stream list"
+  print "  fastscore stream add name <desc.json>"
+  print "  fastscore stream remove name"
   sys.exit(0)
 
 def usage():
-  print "TODO (usage)"
+  print "Usage: fastscore command [subcommand] ..."
   sys.exit(1)
 
 if __name__ == "__main__":
