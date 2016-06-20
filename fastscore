@@ -6,6 +6,7 @@ import os.path
 
 import yaml
 import requests
+from tabulate import tabulate
 
 def main():
   global connect_prefix
@@ -27,6 +28,8 @@ def main():
     connect(args[1:])
   elif cmd == "config":
     config(args[1:])
+  elif cmd == "fleet":
+    fleet(args[1:])
   elif cmd == "model":
     model(args[1:])
   elif cmd == "stream":
@@ -73,6 +76,16 @@ def config(args):
   else:
     usage()
 
+def fleet(args):
+    r = requests.get(connect_prefix + "/1/connect", verify=False)
+    if r.status_code == 403:
+      print "Connect not congigured"
+    elif r.status_code == 200:
+      t = [ [x["name"],x["api"],x["host"],x["port"],x["health"]] for x in r.json() ]
+      print tabulate(t, headers=["Name","API","Host","Port","Health"])
+    else:
+      raise Exception(r)
+  
 def model(args):
   host,port = lookup_api("model-manage")
   sub_cmd = args[0]
