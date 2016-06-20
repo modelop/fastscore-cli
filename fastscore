@@ -1,0 +1,153 @@
+#!/usr/bin/python2
+
+from optparse import OptionParser
+import sys
+import os.path
+
+import yaml
+import requests
+
+def main():
+  global connect_prefix
+  if len(sys.argv) == 1:
+    help()
+
+  if os.path.exists(".fastscore"):
+    with open(".fastscore", "r") as f:
+      y = yaml.load(f)
+      connect_prefix = y["connect"]
+  else:
+    print "Use 'fastscore connect https://host:port' to create a primary connection"
+    sys.exit(1)
+
+  parser = OptionParser()
+  _,args = parser.parse_args()
+  cmd = args[0]
+  if cmd == "connect":
+    connect(args[1:])
+  elif cmd == "config":
+    config(args[1:])
+  elif cmd == "model":
+    model(args[1:])
+  else:
+    usage()
+
+def connect(args):
+  prefix = args[0]
+  try:
+    r = requests.get(prefix + "/1/swagger", verify=False)
+    swagger = r.json()
+    assert swagger["info"]["title"] == "Connect API"
+    with open(".fastscore", "w") as f:
+      f.write("connect: %s\n" % prefix)
+    print "Connect API: ok"
+  except:
+    print "Error: Connect API unreachable at " + prefix
+
+def config(args):
+  sub_cmd = args[0]
+  if sub_cmd == "set":
+    name = args[1]  # config.yaml
+    if not os.path.exists(name):
+      print "%s not found\n" % name
+      sys.exit(1)
+    with open(name) as f:
+      config = f.read()
+      headers = {'content-type': 'application/x-yaml'}
+      r = requests.put(connect_prefix + "/1/config",
+            data=config, headers=headers, verify=False)
+      if r.status_code == 201:
+        print "Config set"
+      elif r.status_code == 204:
+        print "Config updated"
+      else:
+        raise Exception(r)
+  elif sub_cmd == "show":
+    r = requests.get(connect_prefix + "/1/config", verify=False)
+    if r.status_code == 200:
+      print r.text,
+    else:
+      raise Exception(r)
+  else:
+    usage()
+
+def model(args):
+  host,port = lookup_api("model-manage")
+  sub_cmd = args[0]
+  if sub_cmd == "list":
+    r = requests.get("https://%s:%d/1/model" % (host,port), verify=False)
+    for name in r.json():
+      print name
+  elif sub_cmd == "add":
+    name = args[1]
+    resource = args[2]
+    if not os.path.exists(resource):
+      print "%s not found\n" % resource
+      sys.exit(1)
+    with open(resource) as f:
+      doc = f.read()
+      headers = {'content-type': mime(resource)}
+      r = requests.put("https://%s:%d/1/model/%s" % (host,port,name),
+              data=doc, headers=headers, verify=False)
+      if r.status_code == 201:
+        print "Model added"
+      elif r.status_code == 204:
+        print "Model updated"
+      else:
+        raise Exception(r)
+  elif sub_cmd == "show":
+    name = args[1]
+    r = requests.get("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
+    if r.status_code == 200:
+      print r.text,
+    elif r.status_code == 404:
+      print "Model %s not found" % name
+    else:
+      raise Exception(r)
+  elif sub_cmd == "remove":
+    name = args[1]
+    r = requests.delete("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
+    if r.status_code == 204:
+      print "Model deleted"
+    elif r.status_code == 404:
+      print "Model %s not found" % name
+    else:
+      raise Exception(r)
+  else:
+    usage()
+
+def mime(filename):
+  _,ext = os.path.splitext(filename)
+  if ext == ".pfa":
+    return "application/vnd.pfa+json"
+  if ext == ".json":
+    return "application/vnd.pfa+json"
+  elif ext == ".ppfa":
+    return "application/vnd.ppfa"
+  else:
+    print "%s must have proper extension (.pfa, .ppda, or .json)"
+    sys.exit(1)
+
+def lookup_api(api):
+  r = requests.get(connect_prefix + "/1/connect?api=%s" % api, verify=False)
+  fleet = r.json()
+  if len(fleet) == 0:
+    print "%s not found\n" % api
+    sys.exit()
+  service = fleet[0]
+  if service["health"] != "ok":
+    print "%s API health check failed" % api
+    sys.exit()
+  return service["host"],service["port"]
+
+def help():
+  print "TODO (help)"
+  sys.exit(0)
+
+def usage():
+  print "TODO (usage)"
+  sys.exit(1)
+
+if __name__ == "__main__":
+  main()
+
