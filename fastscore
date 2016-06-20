@@ -29,6 +29,8 @@ def main():
     config(args[1:])
   elif cmd == "model":
     model(args[1:])
+  elif cmd == "stream":
+    stream(args[1:])
   else:
     usage()
 
@@ -111,6 +113,51 @@ def model(args):
       print "Model deleted"
     elif r.status_code == 404:
       print "Model %s not found" % name
+    else:
+      raise Exception(r)
+  else:
+    usage()
+
+def stream(args):
+  host,port = lookup_api("model-manage")
+  sub_cmd = args[0]
+  if sub_cmd == "list":
+    r = requests.get("https://%s:%d/1/stream" % (host,port), verify=False)
+    for name in r.json():
+      print name
+  elif sub_cmd == "add":
+    name = args[1]
+    resource = args[2]
+    if not os.path.exists(resource):
+      print "%s not found\n" % resource
+      sys.exit(1)
+    with open(resource) as f:
+      doc = f.read()
+      headers = {"content-type": "application/json"}
+      r = requests.put("https://%s:%d/1/stream/%s" % (host,port,name),
+              data=doc, headers=headers, verify=False)
+      if r.status_code == 201:
+        print "Stream added"
+      elif r.status_code == 204:
+        print "Stream updated"
+      else:
+        raise Exception(r)
+  elif sub_cmd == "show":
+    name = args[1]
+    r = requests.get("https://%s:%d/1/stream/%s" % (host,port,name), verify=False)
+    if r.status_code == 200:
+      print r.text,
+    elif r.status_code == 404:
+      print "Stream %s not found" % name
+    else:
+      raise Exception(r)
+  elif sub_cmd == "remove":
+    name = args[1]
+    r = requests.delete("https://%s:%d/1/stream/%s" % (host,port,name), verify=False)
+    if r.status_code == 204:
+      print "Stream deleted"
+    elif r.status_code == 404:
+      print "Stream %s not found" % name
     else:
       raise Exception(r)
   else:
