@@ -13,31 +13,33 @@ def main():
   if len(sys.argv) == 1:
     help()
 
-  if os.path.exists(".fastscore"):
-    with open(".fastscore", "r") as f:
-      y = yaml.load(f)
-      connect_prefix = y["connect"]
-  else:
-    print "Use 'fastscore connect https://host:port' to create a primary connection"
-    sys.exit(1)
-
   parser = OptionParser()
   _,args = parser.parse_args()
   cmd = args[0]
+
   if cmd == "connect":
     connect(args[1:])
-  elif cmd == "config":
-    config(args[1:])
-  elif cmd == "fleet":
-    fleet(args[1:])
-  elif cmd == "model":
-    model(args[1:])
-  elif cmd == "stream":
-    stream(args[1:])
-  elif cmd == "help":
-    help()
   else:
-    usage()
+    if os.path.exists(".fastscore"):
+      with open(".fastscore", "r") as f:
+        y = yaml.load(f)
+        connect_prefix = y["connect"]
+    else:
+      print "Use 'fastscore connect https://host:port' to create a primary connection"
+      sys.exit(1)
+
+    if cmd == "config":
+      config(args[1:])
+    elif cmd == "fleet":
+      fleet(args[1:])
+    elif cmd == "model":
+      model(args[1:])
+    elif cmd == "stream":
+      stream(args[1:])
+    elif cmd == "help":
+      help()
+    else:
+      usage()
 
 def connect(args):
   prefix = args[0]
