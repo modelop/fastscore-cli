@@ -5,8 +5,14 @@ import sys
 import os.path
 
 import yaml
+import json
 import requests
+import ssl
+from websocket import create_connection
 from tabulate import tabulate
+
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def main():
   global connect_prefix
@@ -25,7 +31,7 @@ def main():
         y = yaml.load(f)
         connect_prefix = y["connect"]
     else:
-      print "Use 'fastscore connect https://host:port' to create a primary connection"
+      print "Use 'fastscore connect https://<host>:<port>' to create a primary connection"
       sys.exit(1)
 
     if cmd == "config":
@@ -36,6 +42,8 @@ def main():
       model(args[1:])
     elif cmd == "stream":
       stream(args[1:])
+    elif cmd == "job":
+      job(args[1:])
     elif cmd == "help":
       help()
     else:
@@ -91,7 +99,7 @@ def fleet(args):
       raise Exception(r)
   
 def model(args):
-  host,port = lookup_api("model-manage")
+  _,host,port = lookup_api("model-manage")
   sub_cmd = args[0]
   if sub_cmd == "list":
     r = requests.get("https://%s:%d/1/model" % (host,port), verify=False)
@@ -136,7 +144,7 @@ def model(args):
     usage()
 
 def stream(args):
-  host,port = lookup_api("model-manage")
+  _,host,port = lookup_api("model-manage")
   sub_cmd = args[0]
   if sub_cmd == "list":
     r = requests.get("https://%s:%d/1/stream" % (host,port), verify=False)
@@ -180,6 +188,52 @@ def stream(args):
   else:
     usage()
 
+def job(args):
+  name,host,port = lookup_api("engine")
+  #print "%s selected" % name
+  sub_cmd = args[0]
+  if sub_cmd == "status":
+    r = requests.get("https://%s:%d/1/job/status" % (host,port), verify=False)
+    print json.dumps(r.json(), indent=2)
+  elif sub_cmd == "run":
+    model = get_model(args[1])
+    stream = get_stream(args[2])
+    print "Upload model %s to %s..." % (args[0],name),
+    headers = {"content-type": "application/vnd.pfa+json"}
+    r = requests.put("https://%s:%d/1/job/model" % (host,port),
+            data=model, headers=headers, verify=False)
+    if r.status_code != 204:
+      print r.text  #DBG
+      raise Exception(r)
+    print "done"
+    print "Upload stream descriptor %s to %s..." % (args[1],name),
+    headers = {"content-type": "application/json"}
+    r = requests.put("https://%s:%d/1/job/stream" % (host,port),
+            data=stream, headers=headers, verify=False)
+    if r.status_code != 204:
+      print r.text  #DBG
+      raise Exception(r)
+    print "done"
+    print "The engine is running"
+  elif sub_cmd == "stop":
+    r = requests.delete("https://%s:%d/1/job" % (host,port), verify=False)
+    if r.status_code != 204:
+      print r.text  #DBG
+      raise Exception(r)
+    print "%s stopped" % name
+  elif sub_cmd == "output":
+    ws = create_connection("wss://%s:%d/1/job/output" % (host,port),
+                              sslopt={"cert_reqs": ssl.CERT_NONE})
+    try:
+      while True:
+        o = ws.recv()
+        print json.dumps(o, indent=2)
+    except:
+      ws.close
+      print "Output websocket closed"
+  else:
+    usage()
+
 def mime(filename):
   _,ext = os.path.splitext(filename)
   if ext == ".pfa":
@@ -202,7 +256,27 @@ def lookup_api(api):
   if service["health"] != "ok":
     print "%s API health check failed" % api
     sys.exit()
-  return service["host"],service["port"]
+  return service["name"],service["host"],service["port"]
+
+def get_model(name):
+  print "Retrieve model %s..." % name,
+  _,host,port = lookup_api("model-manage")
+  r = requests.get("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
+  if r.status_code == 200:
+    print "done"
+    return r.text
+  else:
+    raise Exception(r)
+
+def get_stream(name):
+  print "Retrieve stream descriptor %s..." % name,
+  _,host,port = lookup_api("model-manage")
+  r = requests.get("https://%s:%d/1/stream/%s" % (host,port,name), verify=False)
+  if r.status_code == 200:
+    print "done"
+    return r.text
+  else:
+    raise Exception(r)
 
 def help():
   print "The FastScore CLI v1.0"

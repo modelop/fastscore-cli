@@ -1,6 +1,0 @@
-{
-  "name": "str-1",
-  "connect": {
-    "type": "kafka"
-  }
-}

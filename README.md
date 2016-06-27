@@ -21,3 +21,11 @@ fastscore config set config.yaml
 
 Run `fastscore` or `fastscore help` to get the list of commands.
 
+# pip
+
+```
+pip install PyYAML
+pip install requests
+pip install tabulate
+```
+
