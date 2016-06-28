@@ -1,7 +1,7 @@
 {
-  "description": "Random integers (embedded)",
+  "description": "A sample stream of 1000 consecutive numbers",
+  "type": "file",
   "connect": {
-    "type": "file",
-    "path": "data/sample1.dat"
+    "path": "data/numbersInput.jsons"
   }
 }

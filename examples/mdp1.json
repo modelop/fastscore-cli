@@ -1,0 +1,8 @@
+{
+  "description": "CME incremental updates",
+  "type": "kafka",
+  "connect": {
+    "bootstrap-servers": "10.0.5.181:1",
+    "topic": "mdp"
+  }
+}

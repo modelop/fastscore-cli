@@ -1,7 +1,0 @@
-{
-  "description": "Random integers (embedded)",
-  "connect": {
-    "type": "file",
-    "path": "data/sample2.dat"
-  }
-}

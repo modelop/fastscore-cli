@@ -1,0 +1,7 @@
+{
+  "description": "A sample S3 data stream; contains x, y, z, and label fields",
+  "type": "http",
+  "connect": {
+    "url": "https://s3-us-west-1.amazonaws.com/fastscore-sample-data/sample1.dat"
+  }
+}

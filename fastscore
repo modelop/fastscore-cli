@@ -15,12 +15,14 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def main():
-  global connect_prefix
+  global connect_prefix, options
   if len(sys.argv) == 1:
     help()
 
   parser = OptionParser()
-  _,args = parser.parse_args()
+  parser.add_option("-r", "--reset", dest="reset", action="store_true",
+                    default=False, help="reset statistics")
+  options,args = parser.parse_args()
   cmd = args[0]
 
   if cmd == "connect":
@@ -198,7 +200,7 @@ def job(args):
   elif sub_cmd == "run":
     model = get_model(args[1])
     stream = get_stream(args[2])
-    print "Upload model %s to %s..." % (args[0],name),
+    print "Upload model %s to %s..." % (args[1],name),
     headers = {"content-type": "application/vnd.pfa+json"}
     r = requests.put("https://%s:%d/1/job/model" % (host,port),
             data=model, headers=headers, verify=False)
@@ -227,10 +229,38 @@ def job(args):
     try:
       while True:
         o = ws.recv()
-        print json.dumps(o, indent=2)
+        print o
     except:
       ws.close
       print "Output websocket closed"
+  elif sub_cmd == "scale":
+    n = int(args[1])
+    r = requests.post("https://%s:%d/1/job/scale?instances=%d" % (host,port,n), verify=False)
+    if r.status_code == 200:
+      print r.text
+    else:
+      print r.text   #DBG
+      raise Exception(r)
+  elif sub_cmd == "statistics":
+    if options.reset:
+      r = requests.delete("https://%s:%d/1/job/statistics" % (host,port), verify=False)
+      if r.status_code == 204:
+        print "Statistics reset"
+      else:
+        raise Exception(r)
+    else:
+      r = requests.get("https://%s:%d/1/job/statistics" % (host,port), verify=False)
+      if r.status_code == 200:
+        print json.dumps(r.json(), indent=2)
+      else:
+        raise Exception(r)
+  elif sub_cmd == "memory":
+    r = requests.get("https://%s:%d/1/job/memory" % (host,port), verify=False)
+    if r.status_code == 200:
+      print json.dumps(r.json(), indent=2)
+    else:
+      print r.text   #DBG
+      raise Exception(r)
   else:
     usage()
 
@@ -281,16 +311,23 @@ def get_stream(name):
 def help():
   print "The FastScore CLI v1.0"
   print "  fastscore connect https://<connect>:8001"
-  print "  fastscore config set <file.yaml>"
+  print "  fastscore config set <config.yaml>"
   print "  fastscore config show"
   print "  fastscore fleet"
   print "  fastscore model list"
-  print "  fastscore model add name <file.pfa>"
-  print "  fastscore model show name"
-  print "  fastscore stream remove name"
+  print "  fastscore model add <name> <file.pfa>"
+  print "  fastscore model show <name>"
+  print "  fastscore stream remove <name>"
   print "  fastscore stream list"
-  print "  fastscore stream add name <desc.json>"
-  print "  fastscore stream remove name"
+  print "  fastscore stream add <name> <desc.json>"
+  print "  fastscore stream remove <name>"
+  print "  fastscore job run <model> <stream>"
+  print "  fastscore job scale <instances>"
+  print "  fastscore job status"
+  print "  fastscore job output"
+  print "  fastscore job stop"
+  print "  fastscore job statistics [--reset]"
+  print "  fastscore job memory"
   sys.exit(0)
 
 def usage():
