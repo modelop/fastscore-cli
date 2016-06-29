@@ -6,9 +6,6 @@ fastscore:
     - api: engine
       host: dev-2
       port: 8003
-    - api: engine
-      host: 127.0.0.1
-      port: 8003
   db:
     type: mysql
     host: 10.0.5.183
