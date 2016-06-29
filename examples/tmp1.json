@@ -1,0 +1,7 @@
+{
+  "description": "Saves output to a file in /tmp directory",
+  "type": "file",
+  "connect": {
+    "path": "/tmp/tmp1.out"
+  }
+}
