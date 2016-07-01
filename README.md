@@ -26,6 +26,7 @@ Run `fastscore` or `fastscore help` to get the list of commands.
 ```
 pip install PyYAML
 pip install requests
+pip install websocket-client
 pip install tabulate
 ```
 
