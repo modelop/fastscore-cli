@@ -1,0 +1,11 @@
+{
+  "description": "0 1 2 ... 98 99",
+  "type": "kafka",
+  "loop": true,
+  "connect": {
+    "bootstrap-servers": "10.0.5.181:1",
+    "topic": "from0to99",
+    "commit": false,
+    "end-marker": "23"
+  }
+}
