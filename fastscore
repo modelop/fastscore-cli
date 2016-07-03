@@ -22,6 +22,7 @@ def main():
   parser = OptionParser()
   parser.add_option("-r", "--reset", dest="reset", action="store_true",
                     default=False, help="reset statistics")
+  parser.add_option("-n", "--count", dest="count", type="int")
   options,args = parser.parse_args()
   cmd = args[0]
 
@@ -187,6 +188,25 @@ def stream(args):
       print "Stream %s not found" % name
     else:
       raise Exception(r)
+  elif sub_cmd == "sample":
+    name = args[1]
+    r = requests.get("https://%s:%d/1/stream/%s" % (host,port,name), verify=False)
+    if r.status_code == 200:
+      stream = r.text
+      engine,eng_host,eng_port = lookup_api("engine")
+      url = "https://%s:%d/1/stream/sample" % (eng_host,eng_port)
+      if options.count != None:
+        url += "?n=%d" % options.count
+      r = requests.get(url, data=stream, verify=False)
+      if r.status_code == 200:
+        print json.dumps(r.json(), indent=2)
+      else:
+        print r.text
+        raise Exception(r)
+    elif r.status_code == 404:
+      print "Stream %s not found" % name
+    else:
+      raise Exception(r)
   else:
     usage()
 
@@ -334,6 +354,7 @@ def help():
   print "  fastscore stream remove <name>"
   print "  fastscore stream list"
   print "  fastscore stream add <name> <desc.json>"
+  print "  fastscore stream sample <name>"
   print "  fastscore stream remove <name>"
   print "  fastscore job run <model> <in-stream> [<out-stream>]"
   print "  fastscore job scale <instances>"
