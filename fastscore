@@ -285,6 +285,13 @@ def job(args):
         print json.dumps(r.json(), indent=2)
       else:
         raise Exception(r)
+  elif sub_cmd == "snapshot":
+      r = requests.post("https://%s:%d/1/job/snapshot" % (host,port), verify=False)
+      if r.status_code == 200:
+        print json.dumps(r.json(), indent=2)
+      else:
+        print r.text  #DBG
+        raise Exception(r)
   elif sub_cmd == "memory":
     r = requests.get("https://%s:%d/1/job/memory" % (host,port), verify=False)
     if r.status_code == 200:
@@ -362,6 +369,7 @@ def help():
   print "  fastscore job output"
   print "  fastscore job stop"
   print "  fastscore job statistics [--reset]"
+  print "  fastscore job snapshot"
   print "  fastscore job memory"
   sys.exit(0)
 
