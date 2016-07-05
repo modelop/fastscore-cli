@@ -69,7 +69,7 @@ def config(args):
   if sub_cmd == "set":
     name = args[1]  # config.yaml
     if not os.path.exists(name):
-      print "%s not found\n" % name
+      print "%s not found" % name
       sys.exit(1)
     with open(name) as f:
       config = f.read()
@@ -112,7 +112,7 @@ def model(args):
     name = args[1]
     resource = args[2]
     if not os.path.exists(resource):
-      print "%s not found\n" % resource
+      print "%s not found" % resource
       sys.exit(1)
     with open(resource) as f:
       doc = f.read()
@@ -157,7 +157,7 @@ def stream(args):
     name = args[1]
     resource = args[2]
     if not os.path.exists(resource):
-      print "%s not found\n" % resource
+      print "%s not found" % resource
       sys.exit(1)
     with open(resource) as f:
       doc = f.read()
@@ -218,12 +218,12 @@ def job(args):
     r = requests.get("https://%s:%d/1/job/status" % (host,port), verify=False)
     print json.dumps(r.json(), indent=2)
   elif sub_cmd == "run":
-    model = get_model(args[1])
+    mime,model = get_model(args[1])
     stream_in = get_stream(args[2])
     # use "discard" output stream if none provided
     stream_out = get_stream(args[3]) if len(args) == 4 else discard_stream()
     print "Upload model '%s' to %s..." % (args[1],name),
-    headers = {"content-type": "application/vnd.pfa+json"}
+    headers = {"content-type": mime}
     r = requests.put("https://%s:%d/1/job/model" % (host,port),
             data=model, headers=headers, verify=False)
     if r.status_code != 204:
@@ -306,19 +306,21 @@ def mime(filename):
   _,ext = os.path.splitext(filename)
   if ext == ".pfa":
     return "application/vnd.pfa+json"
-  if ext == ".json":
+  elif ext == ".json":
     return "application/vnd.pfa+json"
   elif ext == ".ppfa":
     return "application/vnd.ppfa"
+  elif ext == ".yaml":
+    return "application/x-yaml"
   else:
-    print "%s must have proper extension (.pfa, .ppda, or .json)"
+    print "%s must have proper extension (.json, .ppfa, or .yaml)" % filename
     sys.exit(1)
 
 def lookup_api(api):
   r = requests.get(connect_prefix + "/1/connect?api=%s" % api, verify=False)
   fleet = r.json()
   if len(fleet) == 0:
-    print "%s not found\n" % api
+    print "%s not found" % api
     sys.exit()
   service = fleet[0]
   if service["health"] != "ok":
@@ -331,8 +333,10 @@ def get_model(name):
   _,host,port = lookup_api("model-manage")
   r = requests.get("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
   if r.status_code == 200:
+    mime = r.headers['content-type']
+    model = r.text
     print "done"
-    return r.text
+    return mime,model
   else:
     raise Exception(r)
 
