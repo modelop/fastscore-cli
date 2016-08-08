@@ -11,6 +11,8 @@ import ssl
 from websocket import create_connection
 from tabulate import tabulate
 
+import cgi
+
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -73,7 +75,7 @@ def config(args):
       sys.exit(1)
     with open(name) as f:
       config = f.read()
-      headers = {'content-type': 'application/x-yaml'}
+      headers = {"content-type": "application/x-yaml"}
       r = requests.put(connect_prefix + "/1/config",
             data=config, headers=headers, verify=False)
       if r.status_code == 201:
@@ -116,7 +118,7 @@ def model(args):
       sys.exit(1)
     with open(resource) as f:
       doc = f.read()
-      headers = {'content-type': mime(resource)}
+      headers = {"content-type": source_mime(resource)}
       r = requests.put("https://%s:%d/1/model/%s" % (host,port,name),
               data=doc, headers=headers, verify=False)
       if r.status_code == 201:
@@ -127,13 +129,21 @@ def model(args):
         raise Exception(r)
   elif sub_cmd == "show":
     name = args[1]
-    r = requests.get("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
+    r = requests.get("https://%s:%d/1/model/%s" % (host,port,name), verify=False, stream=True)
     if r.status_code == 200:
-      print r.text,
+      h = r.headers["content-type"]
+      if h.split(";")[0] == "multipart/mixed":
+        pdict = dict([tuple(x.lstrip().split("=")) for x in h.split(";")[1:]])
+        print pdict
+        print cgi.parse_multipart(r.raw, pdict)
+      else:
+        print r.text,
     elif r.status_code == 404:
       print "Model %s not found" % name
     else:
       raise Exception(r)
+  elif sub_cmd == "attachment":
+    attachment(args[1:])
   elif sub_cmd == "remove":
     name = args[1]
     r = requests.delete("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
@@ -141,6 +151,65 @@ def model(args):
       print "Model deleted"
     elif r.status_code == 404:
       print "Model %s not found" % name
+    else:
+      raise Exception(r)
+  else:
+    usage()
+
+def attachment(args):
+  _,host,port = lookup_api("model-manage")
+  sub_cmd = args[0]
+  if sub_cmd == "list":
+    model = args[1]
+    r = requests.get("https://%s:%d/1/model/%s/attachment" % (host,port,model), verify=False)
+    if r.status_code == 200:
+      for name in r.json():
+        print name
+    elif r.status_code == 404:
+      print "Model %s not found" % model
+    else:
+      raise Exception(r)
+  elif sub_cmd == "upload":
+    model = args[1]
+    resource = args[2]
+    if not os.path.exists(resource):
+      print "%s not found" % resource
+      sys.exit(1)
+    with open(resource) as f:
+      data = f.read()
+      headers = {"content-type": att_mime(resource)}
+      att_name = os.path.basename(resource)
+      r = requests.put("https://%s:%d/1/model/%s/attachment/%s"
+                          % (host,port,model,att_name),
+                        data=data, headers=headers, verify=False)
+      if r.status_code == 201:
+        print "Attachment %s added to model %s" % (att_name,model)
+      elif r.status_code == 204:
+        print "Attachment %s updated" % att_name
+      else:
+        raise Exception(r)
+  elif sub_cmd == "download":
+    model = args[1]
+    att_name = args[2]
+    r = requests.get("https://%s:%d/1/model/%s/attachment/%s"
+                        % (host,port,model,att_name), verify=False)
+    if r.status_code == 200:
+      with open(att_name, "w") as f:
+        f.write(r.content)
+      print "Attachment written to %s" % att_name
+    elif r.status_code == 404:
+      print "Attachment (or model) not found"
+    else:
+      raise Exception(r)
+  elif sub_cmd == "remove":
+    model = args[1]
+    att_name = args[2]
+    r = requests.delete("https://%s:%d/1/model/%s/attachment/%s"
+                        % (host,port,model,att_name), verify=False)
+    if r.status_code == 204:
+      print "Attachment deleted"
+    elif r.status_code == 404:
+      print "Attachment (or model) not found"
     else:
       raise Exception(r)
   else:
@@ -218,12 +287,12 @@ def job(args):
     r = requests.get("https://%s:%d/1/job/status" % (host,port), verify=False)
     print json.dumps(r.json(), indent=2)
   elif sub_cmd == "run":
-    mime,model = get_model(args[1])
+    ctype,model = get_model(args[1])
     stream_in = get_stream(args[2])
     # use "discard" output stream if none provided
     stream_out = get_stream(args[3]) if len(args) == 4 else discard_stream()
     print "Upload model '%s' to %s..." % (args[1],name),
-    headers = {"content-type": mime}
+    headers = {"content-type": ctype}
     r = requests.put("https://%s:%d/1/job/model" % (host,port),
             data=model, headers=headers, verify=False)
     if r.status_code != 204:
@@ -302,7 +371,7 @@ def job(args):
   else:
     usage()
 
-def mime(filename):
+def source_mime(filename):
   _,ext = os.path.splitext(filename)
   if ext == ".pfa":
     return "application/vnd.pfa+json"
@@ -312,9 +381,22 @@ def mime(filename):
     return "application/vnd.ppfa"
   elif ext == ".yaml":
     return "application/x-yaml"
+  elif ext == ".py":
+    return "application/vnd.ppfa"
+  elif ext == ".R":
+    return "application/x-yaml"
   else:
-    print "%s must have proper extension (.json, .ppfa, or .yaml)" % filename
+    print "%s must have proper extension (.json, .ppfa, .yaml, .py, or .R)" % filename
     sys.exit(1)
+
+def att_mime(filename):
+  _,ext = os.path.splitext(filename)
+  if ext == ".zip":
+    return "application/zip"
+  elif ext == ".gz":
+    return "application/gzip"
+  else:
+    print "%s must have proper extension (.zip or .gz)" % filename
 
 def lookup_api(api):
   r = requests.get(connect_prefix + "/1/connect?api=%s" % api, verify=False)
@@ -333,7 +415,7 @@ def get_model(name):
   _,host,port = lookup_api("model-manage")
   r = requests.get("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
   if r.status_code == 200:
-    mime = r.headers['content-type']
+    mime = r.headers["content-type"]
     model = r.text
     print "done"
     return mime,model
@@ -362,12 +444,16 @@ def help():
   print "  fastscore model list"
   print "  fastscore model add <name> <file.pfa>"
   print "  fastscore model show <name>"
-  print "  fastscore stream remove <name>"
+  print "  fastscore model attachment list <model-name>"
+  print "  fastscore model attachment add <model-name> <att-name> <file.zip>"
+  print "  fastscore model attachment show <model-name> <att-name>"
+  print "  fastscore model attachment remove <model-name> <att-name>"
+  print "  fastscore stream remove <model-name>"
   print "  fastscore stream list"
-  print "  fastscore stream add <name> <desc.json>"
-  print "  fastscore stream sample <name>"
-  print "  fastscore stream remove <name>"
-  print "  fastscore job run <model> <in-stream> [<out-stream>]"
+  print "  fastscore stream add <stream-name> <desc.json>"
+  print "  fastscore stream sample <stream-name>"
+  print "  fastscore stream remove <stream-name>"
+  print "  fastscore job run <model-name> <in-stream> [<out-stream>]"
   print "  fastscore job scale <instances>"
   print "  fastscore job status"
   print "  fastscore job output"
