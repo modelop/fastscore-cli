@@ -107,9 +107,9 @@ def model(args):
   _,host,port = lookup_api("model-manage")
   sub_cmd = args[0]
   if sub_cmd == "list":
-    r = requests.get("https://%s:%d/1/model" % (host,port), verify=False)
-    for name in r.json():
-      print name
+    r = requests.get("https://%s:%d/1/model?i=type" % (host,port), verify=False)
+    t = [ [x["name"],x["type"]] for x in r.json() ]
+    print tabulate(t, headers=["Name","Type"])
   elif sub_cmd == "add":
     name = args[1]
     resource = args[2]
