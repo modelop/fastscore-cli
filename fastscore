@@ -382,9 +382,9 @@ def source_mime(filename):
   elif ext == ".yaml":
     return "application/x-yaml"
   elif ext == ".py":
-    return "application/vnd.ppfa"
+    return "application/x-python"
   elif ext == ".R":
-    return "application/x-yaml"
+    return "application/x-r"
   else:
     print "%s must have proper extension (.json, .ppfa, .yaml, .py, or .R)" % filename
     sys.exit(1)
