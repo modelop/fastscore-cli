@@ -287,7 +287,7 @@ def job(args):
     r = requests.get("https://%s:%d/1/job/status" % (host,port), verify=False)
     print json.dumps(r.json(), indent=2)
   elif sub_cmd == "run":
-    ctype,model = get_model(args[1])
+    ctype,model,attachments = get_model(args[1])
     stream_in = get_stream(args[2])
     # use "discard" output stream if none provided
     stream_out = get_stream(args[3]) if len(args) == 4 else discard_stream()
@@ -415,10 +415,25 @@ def get_model(name):
   _,host,port = lookup_api("model-manage")
   r = requests.get("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
   if r.status_code == 200:
-    mime = r.headers["content-type"]
+    ctype = r.headers["content-type"]
     model = r.text
     print "done"
-    return mime,model
+
+    r = requests.get("https://%s:%d/1/model/%s/attachment" % (host,port,name), verify=False)
+    att_names = r.json()
+
+    attachments = []
+    for att_name in att_names:
+      print "Retrieve model attachment '%s'..." % att_name,
+      r = requests.get("https://%s:%d/1/model/%s/attachment/%s"
+                            % (host,port,name,att_name), verify=False)
+      att_type = r.headers["content-type"]
+      attachments.append( (att_name,att_type,r.content) )
+      print "done"
+
+    print attachments
+
+    return ctype,model,[]
   else:
     raise Exception(r)
 
@@ -445,8 +460,8 @@ def help():
   print "  fastscore model add <name> <file.pfa>"
   print "  fastscore model show <name>"
   print "  fastscore model attachment list <model-name>"
-  print "  fastscore model attachment add <model-name> <att-name> <file.zip>"
-  print "  fastscore model attachment show <model-name> <att-name>"
+  print "  fastscore model attachment upload <model-name> <file.zip>"
+  print "  fastscore model attachment download <model-name> <att-name>"
   print "  fastscore model attachment remove <model-name> <att-name>"
   print "  fastscore stream remove <model-name>"
   print "  fastscore stream list"
