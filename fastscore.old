@@ -1,0 +1,487 @@
+#!/usr/bin/python2
+
+from optparse import OptionParser
+import sys
+import os.path
+
+import yaml
+import json
+import requests
+import ssl
+from websocket import create_connection
+from tabulate import tabulate
+
+import cgi
+
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+def main():
+  global connect_prefix, options
+  if len(sys.argv) == 1:
+    help()
+
+  parser = OptionParser()
+  parser.add_option("-r", "--reset", dest="reset", action="store_true",
+                    default=False, help="reset statistics")
+  parser.add_option("-n", "--count", dest="count", type="int")
+  options,args = parser.parse_args()
+  cmd = args[0]
+
+  if cmd == "connect":
+    connect(args[1:])
+  else:
+    if os.path.exists(".fastscore"):
+      with open(".fastscore", "r") as f:
+        y = yaml.load(f)
+        connect_prefix = y["connect-prefix"]
+    else:
+      print "Use 'fastscore connect https://<host>:<port>' to create a primary connection"
+      sys.exit(1)
+
+    if cmd == "config":
+      config(args[1:])
+    elif cmd == "fleet":
+      fleet(args[1:])
+    elif cmd == "model":
+      model(args[1:])
+    elif cmd == "stream":
+      stream(args[1:])
+    elif cmd == "job":
+      job(args[1:])
+    elif cmd == "help":
+      help()
+    else:
+      usage()
+
+def connect(args):
+  prefix = args[0]
+  try:
+    r = requests.get(prefix + "/1/swagger", verify=False)
+    swagger = r.json()
+    assert swagger["info"]["title"] == "Connect API"
+    with open(".fastscore", "w") as f:
+      f.write("connect: %s\n" % prefix)
+    print "Connect API: ok"
+  except:
+    print "Error: Connect API unreachable at " + prefix
+
+def config(args):
+  sub_cmd = args[0]
+  if sub_cmd == "set":
+    name = args[1]  # config.yaml
+    if not os.path.exists(name):
+      print "%s not found" % name
+      sys.exit(1)
+    with open(name) as f:
+      config = f.read()
+      headers = {"content-type": "application/x-yaml"}
+      r = requests.put(connect_prefix + "/1/config",
+            data=config, headers=headers, verify=False)
+      if r.status_code == 201:
+        print "Config set"
+      elif r.status_code == 204:
+        print "Config updated"
+      else:
+        raise Exception(r)
+  elif sub_cmd == "show":
+    r = requests.get(connect_prefix + "/1/config", verify=False)
+    if r.status_code == 200:
+      print r.text,
+    else:
+      raise Exception(r)
+  else:
+    usage()
+
+def fleet(args):
+    r = requests.get(connect_prefix + "/1/connect", verify=False)
+    if r.status_code == 403:
+      print "Connect not configured"
+    elif r.status_code == 200:
+      t = [ [x["name"],x["api"],x["host"],x["port"],x["health"]] for x in r.json() ]
+      print tabulate(t, headers=["Name","API","Host","Port","Health"])
+    else:
+      raise Exception(r)
+  
+def model(args):
+  _,host,port = lookup_api("model-manage")
+  sub_cmd = args[0]
+  if sub_cmd == "list":
+    r = requests.get("https://%s:%d/1/model?i=type" % (host,port), verify=False)
+    t = [ [x["name"],x["type"]] for x in r.json() ]
+    print tabulate(t, headers=["Name","Type"])
+  elif sub_cmd == "add":
+    name = args[1]
+    resource = args[2]
+    if not os.path.exists(resource):
+      print "%s not found" % resource
+      sys.exit(1)
+    with open(resource) as f:
+      doc = f.read()
+      headers = {"content-type": source_mime(resource)}
+      r = requests.put("https://%s:%d/1/model/%s" % (host,port,name),
+              data=doc, headers=headers, verify=False)
+      if r.status_code == 201:
+        print "Model added"
+      elif r.status_code == 204:
+        print "Model updated"
+      else:
+        raise Exception(r)
+  elif sub_cmd == "show":
+    name = args[1]
+    r = requests.get("https://%s:%d/1/model/%s" % (host,port,name), verify=False, stream=True)
+    if r.status_code == 200:
+      h = r.headers["content-type"]
+      if h.split(";")[0] == "multipart/mixed":
+        pdict = dict([tuple(x.lstrip().split("=")) for x in h.split(";")[1:]])
+        print pdict
+        print cgi.parse_multipart(r.raw, pdict)
+      else:
+        print r.text,
+    elif r.status_code == 404:
+      print "Model %s not found" % name
+    else:
+      raise Exception(r)
+  elif sub_cmd == "attachment":
+    attachment(args[1:])
+  elif sub_cmd == "remove":
+    name = args[1]
+    r = requests.delete("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
+    if r.status_code == 204:
+      print "Model deleted"
+    elif r.status_code == 404:
+      print "Model %s not found" % name
+    else:
+      raise Exception(r)
+  else:
+    usage()
+
+def attachment(args):
+  _,host,port = lookup_api("model-manage")
+  sub_cmd = args[0]
+  if sub_cmd == "list":
+    model = args[1]
+    r = requests.get("https://%s:%d/1/model/%s/attachment" % (host,port,model), verify=False)
+    if r.status_code == 200:
+      for name in r.json():
+        print name
+    elif r.status_code == 404:
+      print "Model %s not found" % model
+    else:
+      raise Exception(r)
+  elif sub_cmd == "upload":
+    model = args[1]
+    resource = args[2]
+    if not os.path.exists(resource):
+      print "%s not found" % resource
+      sys.exit(1)
+    with open(resource) as f:
+      data = f.read()
+      headers = {"content-type": att_mime(resource)}
+      att_name = os.path.basename(resource)
+      r = requests.put("https://%s:%d/1/model/%s/attachment/%s"
+                          % (host,port,model,att_name),
+                        data=data, headers=headers, verify=False)
+      if r.status_code == 201:
+        print "Attachment %s added to model %s" % (att_name,model)
+      elif r.status_code == 204:
+        print "Attachment %s updated" % att_name
+      else:
+        raise Exception(r)
+  elif sub_cmd == "download":
+    model = args[1]
+    att_name = args[2]
+    r = requests.get("https://%s:%d/1/model/%s/attachment/%s"
+                        % (host,port,model,att_name), verify=False)
+    if r.status_code == 200:
+      with open(att_name, "w") as f:
+        f.write(r.content)
+      print "Attachment written to %s" % att_name
+    elif r.status_code == 404:
+      print "Attachment (or model) not found"
+    else:
+      raise Exception(r)
+  elif sub_cmd == "remove":
+    model = args[1]
+    att_name = args[2]
+    r = requests.delete("https://%s:%d/1/model/%s/attachment/%s"
+                        % (host,port,model,att_name), verify=False)
+    if r.status_code == 204:
+      print "Attachment deleted"
+    elif r.status_code == 404:
+      print "Attachment (or model) not found"
+    else:
+      raise Exception(r)
+  else:
+    usage()
+
+def stream(args):
+  _,host,port = lookup_api("model-manage")
+  sub_cmd = args[0]
+  if sub_cmd == "list":
+    r = requests.get("https://%s:%d/1/stream" % (host,port), verify=False)
+    for name in r.json():
+      print name
+  elif sub_cmd == "add":
+    name = args[1]
+    resource = args[2]
+    if not os.path.exists(resource):
+      print "%s not found" % resource
+      sys.exit(1)
+    with open(resource) as f:
+      doc = f.read()
+      headers = {"content-type": "application/json"}
+      r = requests.put("https://%s:%d/1/stream/%s" % (host,port,name),
+              data=doc, headers=headers, verify=False)
+      if r.status_code == 201:
+        print "Stream added"
+      elif r.status_code == 204:
+        print "Stream updated"
+      else:
+        raise Exception(r)
+  elif sub_cmd == "show":
+    name = args[1]
+    r = requests.get("https://%s:%d/1/stream/%s" % (host,port,name), verify=False)
+    if r.status_code == 200:
+      print r.text,
+    elif r.status_code == 404:
+      print "Stream %s not found" % name
+    else:
+      raise Exception(r)
+  elif sub_cmd == "remove":
+    name = args[1]
+    r = requests.delete("https://%s:%d/1/stream/%s" % (host,port,name), verify=False)
+    if r.status_code == 204:
+      print "Stream deleted"
+    elif r.status_code == 404:
+      print "Stream %s not found" % name
+    else:
+      raise Exception(r)
+  elif sub_cmd == "sample":
+    name = args[1]
+    r = requests.get("https://%s:%d/1/stream/%s" % (host,port,name), verify=False)
+    if r.status_code == 200:
+      stream = r.text
+      engine,eng_host,eng_port = lookup_api("engine")
+      url = "https://%s:%d/1/stream/sample" % (eng_host,eng_port)
+      if options.count != None:
+        url += "?n=%d" % options.count
+      r = requests.get(url, data=stream, verify=False)
+      if r.status_code == 200:
+        print json.dumps(r.json(), indent=2)
+      else:
+        print r.text
+        raise Exception(r)
+    elif r.status_code == 404:
+      print "Stream %s not found" % name
+    else:
+      raise Exception(r)
+  else:
+    usage()
+
+def job(args):
+  name,host,port = lookup_api("engine")
+  #print "%s selected" % name
+  sub_cmd = args[0]
+  if sub_cmd == "status":
+    r = requests.get("https://%s:%d/1/job/status" % (host,port), verify=False)
+    print json.dumps(r.json(), indent=2)
+  elif sub_cmd == "run":
+    ctype,model,attachments = get_model(args[1])
+    stream_in = get_stream(args[2])
+    # use "discard" output stream if none provided
+    stream_out = get_stream(args[3]) if len(args) == 4 else discard_stream()
+    print "Upload model '%s' to %s..." % (args[1],name),
+    headers = {"content-type": ctype}
+    r = requests.put("https://%s:%d/1/job/model" % (host,port),
+            data=model, headers=headers, verify=False)
+    if r.status_code != 204:
+      print r.text  #DBG
+      raise Exception(r)
+    print "done"
+    print "Upload input stream descriptor '%s' to %s..." % (args[2],name),
+    headers = {"content-type": "application/json"}
+    r = requests.put("https://%s:%d/1/job/stream/in" % (host,port),
+            data=stream_in, headers=headers, verify=False)
+    if r.status_code != 204:
+      print r.text  #DBG
+      raise Exception(r)
+    print "done"
+    s = args[3] if len(args) == 4 else "discard"
+    print "Upload output stream descriptor '%s' to %s..." % (s,name),
+    headers = {"content-type": "application/json"}
+    r = requests.put("https://%s:%d/1/job/stream/out" % (host,port),
+            data=stream_out, headers=headers, verify=False)
+    if r.status_code != 204:
+      print r.text  #DBG
+      raise Exception(r)
+    print "done"
+    print "The engine is running"
+  elif sub_cmd == "stop":
+    r = requests.delete("https://%s:%d/1/job" % (host,port), verify=False)
+    if r.status_code != 204:
+      print r.text  #DBG
+      raise Exception(r)
+    print "%s stopped" % name
+  elif sub_cmd == "output":
+    ws = create_connection("wss://%s:%d/1/job/output" % (host,port),
+                              sslopt={"cert_reqs": ssl.CERT_NONE})
+    try:
+      while True:
+        o = ws.recv()
+        print o
+    except:
+      ws.close
+      print "Output websocket closed"
+  elif sub_cmd == "scale":
+    n = int(args[1])
+    r = requests.post("https://%s:%d/1/job/scale?instances=%d" % (host,port,n), verify=False)
+    if r.status_code == 200:
+      print r.text
+    else:
+      print r.text   #DBG
+      raise Exception(r)
+  elif sub_cmd == "statistics":
+    if options.reset:
+      r = requests.delete("https://%s:%d/1/job/statistics" % (host,port), verify=False)
+      if r.status_code == 204:
+        print "Statistics reset"
+      else:
+        raise Exception(r)
+    else:
+      r = requests.get("https://%s:%d/1/job/statistics" % (host,port), verify=False)
+      if r.status_code == 200:
+        print json.dumps(r.json(), indent=2)
+      else:
+        raise Exception(r)
+  elif sub_cmd == "snapshot":
+      r = requests.post("https://%s:%d/1/job/snapshot" % (host,port), verify=False)
+      if r.status_code == 200:
+        print json.dumps(r.json(), indent=2)
+      else:
+        print r.text  #DBG
+        raise Exception(r)
+  elif sub_cmd == "memory":
+    r = requests.get("https://%s:%d/1/job/memory" % (host,port), verify=False)
+    if r.status_code == 200:
+      print json.dumps(r.json(), indent=2)
+    else:
+      print r.text   #DBG
+      raise Exception(r)
+  else:
+    usage()
+
+def source_mime(filename):
+  _,ext = os.path.splitext(filename)
+  if ext == ".pfa":
+    return "application/vnd.pfa+json"
+  elif ext == ".json":
+    return "application/vnd.pfa+json"
+  elif ext == ".ppfa":
+    return "application/vnd.ppfa"
+  elif ext == ".yaml":
+    return "application/x-yaml"
+  elif ext == ".py":
+    return "application/x-python"
+  elif ext == ".R":
+    return "application/x-r"
+  else:
+    print "%s must have proper extension (.json, .ppfa, .yaml, .py, or .R)" % filename
+    sys.exit(1)
+
+def att_mime(filename):
+  _,ext = os.path.splitext(filename)
+  if ext == ".zip":
+    return "application/zip"
+  elif ext == ".gz":
+    return "application/gzip"
+  else:
+    print "%s must have proper extension (.zip or .gz)" % filename
+
+def lookup_api(api):
+  r = requests.get(connect_prefix + "/1/connect?api=%s" % api, verify=False)
+  fleet = r.json()
+  if len(fleet) == 0:
+    print "%s not found" % api
+    sys.exit()
+  service = fleet[0]
+  if service["health"] != "ok":
+    print "%s API health check failed" % api
+    sys.exit()
+  return service["name"],service["host"],service["port"]
+
+def get_model(name):
+  print "Retrieve model '%s'..." % name,
+  _,host,port = lookup_api("model-manage")
+  r = requests.get("https://%s:%d/1/model/%s" % (host,port,name), verify=False)
+  if r.status_code == 200:
+    ctype = r.headers["content-type"]
+    model = r.text
+    print "done"
+
+    r = requests.get("https://%s:%d/1/model/%s/attachment" % (host,port,name), verify=False)
+    att_names = r.json()
+
+    attachments = []
+    for att_name in att_names:
+      print "Retrieve model attachment '%s'..." % att_name,
+      r = requests.get("https://%s:%d/1/model/%s/attachment/%s"
+                            % (host,port,name,att_name), verify=False)
+      att_type = r.headers["content-type"]
+      attachments.append( (att_name,att_type,r.content) )
+      print "done"
+
+    print attachments
+
+    return ctype,model,[]
+  else:
+    raise Exception(r)
+
+def get_stream(name):
+  print "Retrieve stream descriptor '%s'..." % name,
+  _,host,port = lookup_api("model-manage")
+  r = requests.get("https://%s:%d/1/stream/%s" % (host,port,name), verify=False)
+  if r.status_code == 200:
+    print "done"
+    return r.text
+  else:
+    raise Exception(r)
+
+def discard_stream():
+  return """{"type": "discard", "connect": {} }"""
+
+def help():
+  print "The FastScore CLI v1.0"
+  print "  fastscore connect https://<connect>:8001"
+  print "  fastscore config set <config.yaml>"
+  print "  fastscore config show"
+  print "  fastscore fleet"
+  print "  fastscore model list"
+  print "  fastscore model add <name> <file.pfa>"
+  print "  fastscore model show <name>"
+  print "  fastscore model attachment list <model-name>"
+  print "  fastscore model attachment upload <model-name> <file.zip>"
+  print "  fastscore model attachment download <model-name> <att-name>"
+  print "  fastscore model attachment remove <model-name> <att-name>"
+  print "  fastscore stream remove <model-name>"
+  print "  fastscore stream list"
+  print "  fastscore stream add <stream-name> <desc.json>"
+  print "  fastscore stream sample <stream-name>"
+  print "  fastscore stream remove <stream-name>"
+  print "  fastscore job run <model-name> <in-stream> [<out-stream>]"
+  print "  fastscore job scale <instances>"
+  print "  fastscore job status"
+  print "  fastscore job output"
+  print "  fastscore job stop"
+  print "  fastscore job statistics [--reset]"
+  print "  fastscore job snapshot"
+  print "  fastscore job memory"
+  sys.exit(0)
+
+def usage():
+  print "Usage: fastscore command [subcommand] ..."
+  sys.exit(1)
+
+if __name__ == "__main__":
+  main()
+
