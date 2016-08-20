@@ -1,6 +1,7 @@
 
 import json
 from tabulate import tabulate
+import locale
 
 import fastscore
 
@@ -50,52 +51,62 @@ def scale(args):
     raise Exception(body)
 
 def status(args):
+  status = get_status()
+  print json.dumps(status, indent=2)
+
+def get_status():
   code,body = fastscore.get("engine", "/1/job/status")
   if code == 200:
-    print json.dumps(json.loads(body), indent=2)
+    return json.loads(body)
   else:
     raise Exception(body)
-
+  
 def output(args):
   raise Exception("TODO")
 
 def statistics(args):
-  code,body = fastscore.get("engine", "/1/job/status")
-  if code == 200:
-    status = json.loads(body)
-    print "Streams:"
-    print format_stats1(status)
-    print "Jets:"
-    print format_stats2(status)
-  else:
-    raise Exception(body)
+  status = get_status()
+  jets = status["jets"]
+  for i in range(len(jets)):
+    jets[i]["name"] = "jet-" + str(i+1)
+  t = [ stat_line(x) for x in jets ]
+  if len(jets) > 1:
+    summary = {"name":"TOTAL",
+               "total_consumed": sum([ x["total_consumed"] for x in jets ]),
+               "total_produced": sum([ x["total_produced"] for x in jets ]),
+               "run_time": max([ x["run_time"] for x in jets ])}
+    t.append(stat_line(summary))
+  headers = ["name","total-in","rate-in, rec/s",
+                    "total-out","rate-out, rec/s"]
+  print tabulate(t, headers=headers)
 
-def format_stats1(status):
-  ni = "-"
-  bi = "-"
-  if status["input"] != None:
-    ni = status["input"]["total_records"]
-    bi = status["input"]["total_bytes"]
-  no = "-"
-  bo = "-"
-  if status["output"] != None:
-    no = status["output"]["total_records"]
-    bo = status["output"]["total_bytes"]
-  headers = ["","records", "bytes"]
-  t = [["input",ni,bi],
-       ["output",no,bo]]
-  return tabulate(t, headers=headers)
+def stat_line(x):
+	secs = x["run_time"]
+	rate_in = x["total_consumed"] / secs
+	rate_out = x["total_produced"] / secs
+	return [x["name"],x["total_consumed"],rate_in,
+									  x["total_produced"],rate_out]
 
-def format_stats2(status):
-  t = [ [x["pid"],fmt1(x, "total_consumed"),fmt1(x, "total_produced")]
-            for x in status["jets"] ]
-  headers = ["pid","in","out"]
-  return tabulate(t,  headers=headers)
+def statistics_io(args):
+  status = get_status()
+  t = [io_line(status, "input"),
+       io_line(status, "output")]
+  headers = ["","count","size",""]
+  print tabulate(t, headers=headers)
 
-def fmt1(x, f):
-  t = x["run_time"]
-  rate = x[f] / t
-  return "%d (%.1f/s)" % (x[f],rate)
+def io_line(status, dir):
+  x = status[dir]
+  if x == None:
+    return [dir,0,0,""]
+  (b,unit) = human_fmt(x["total_bytes"])
+  return [dir,x["total_records"],b,unit]
+
+def human_fmt(num, suffix='B'):
+  for unit in ['','KB','MB','GB','TB','PB','EB','ZB']:
+    if abs(num) < 1024.0:
+      return (num,unit)
+    num /= 1024.0
+  return (num,'YB')
 
 def statistics0(args):
   raise Exception("TODO")

@@ -34,6 +34,7 @@ command_specs = \
   (job.status,          ["job","status"]),
   (job.output,          ["job","output"]),
   (job.statistics,      ["job","statistics"]),
+  (job.statistics_io,   ["job","statistics","io"]),
   (job.statistics0,     ["job","statistics","reset"]),
   (job.memory,          ["job","memory"])]
 
