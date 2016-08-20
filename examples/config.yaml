@@ -1,10 +1,10 @@
 fastscore:
   fleet:
     - api: model-manage
-      host: dev-2
+      host: localhost
       port: 8002
     - api: engine
-      host: dev-2
+      host: localhost
       port: 8003
   db:
     type: mysql

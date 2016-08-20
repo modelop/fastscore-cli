@@ -16,7 +16,7 @@ def connect_prefix():
 def get(api, path, data=None):
   _,host,port = lookup(api)
   r = requests.get("https://%s:%d%s" % (host,port,path), data=data, verify=False)
-  return r.status_code,r.text
+  return r.status_code,r.content
 
 def get_str(api, path):
   _,host,port = lookup(api)
@@ -27,24 +27,29 @@ def get_with_ct(api, path):
   _,host,port = lookup(api)
   r = requests.get("https://%s:%d%s" % (host,port,path), verify=False)
   ctype = r.headers["content-type"]
-  return r.status_code,r.text,ctype
+  return r.status_code,r.content,ctype
 
 def put(api, path, ctype, data):
   _,host,port = lookup(api)
   headers = {"content-type": ctype}
   r = requests.put("https://%s:%d%s" % (host,port,path),
                       headers=headers, data=data, verify=False)
-  return r.status_code,r.text
+  return r.status_code,r.content
+
+def put_multi(api, path, parts):
+  _,host,port = lookup(api)
+  r = requests.put("https://%s:%d%s" % (host,port,path), files=parts, verify=False)
+  return r.status_code,r.content
 
 def post(api, path):
   _,host,port = lookup(api)
   r = requests.post("https://%s:%d%s" % (host,port,path), verify=False)
-  return r.status_code,r.text
+  return r.status_code,r.content
 
 def delete(api, path):
   _,host,port = lookup(api)
   r = requests.delete("https://%s:%d%s" % (host,port,path), verify=False)
-  return r.status_code,r.text
+  return r.status_code,r.content
 
 def lookup(api):
   if api in conf:

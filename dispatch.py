@@ -3,7 +3,7 @@ import sys
 import traceback
 
 from fastscore import conf
-from cmd import connect, config, fleet, model, attachment, stream, job
+from cmd import connect, config, fleet, model, attachment, stream, job, stats
 
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -35,12 +35,12 @@ command_specs = \
   (job.run,             ["job","run","<model-name>","<in-stream-name>","<out-stream-name>"]),
   (job.run,             ["job","run","<model-name>","<in-stream-name>"]),
   (job.scale,           ["job","scale","<num-jets>"]),
-  (job.status,          ["job","status"]),
   (job.output,          ["job","output"]),
-  (job.statistics,      ["job","statistics"]),
-  (job.statistics_io,   ["job","statistics","io"]),
-  (job.statistics0,     ["job","statistics","reset"]),
-  (job.memory,          ["job","memory"])]
+  (stats.status,        ["job","status"]),
+  (stats.statistics,    ["job","statistics"]),
+  (stats.statistics_io, ["job","statistics","io"]),
+  (stats.statistics0,   ["job","statistics","reset"]),
+  (stats.memory,        ["job","memory"])]
 
 def main():
   conf["verbose"] = 0

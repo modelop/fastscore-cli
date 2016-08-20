@@ -1,24 +1,45 @@
 
+import sys
 import json
-from tabulate import tabulate
-import locale
 
 import fastscore
 
 def run(args):
   model_name = args["model-name"]
   in_desc = get_stream_desc(args["in-stream-name"])
-  out_desc = get_stream_desc(args["out-stream-name"]) if "out-stream-name" in args else discard_desc()
+  out_desc = get_stream_desc(args["out-stream-name"]) \
+                  if "out-stream-name" in args else discard_desc()
   code,body,ctype = fastscore.get_with_ct("model-manage", "/1/model/%s" % model_name)
   if code == 200:
-    run1(in_desc, out_desc, ctype, body)
+    att = attachments(model_name)
+    run1(in_desc, out_desc, ctype, body, attachments=att)
   elif code == 404:
     print "Model '%s' not found" % model_name
   else:
     raise Exception(body)
 
-def run1(in_desc, out_desc, ctype, body):
-  code1,body1 = fastscore.put("engine", "/1/job/model", ctype, body)
+def attachments(model_name):
+  code,body = fastscore.get("model-manage", "/1/model/%s/attachment" % model_name)
+  if code == 200:
+    return [ get_att(model_name, att_name) for att_name in json.loads(body) ]
+  else:
+    raise Exception(body)
+
+def get_att(model_name, att_name):
+  code,body,ctype = fastscore.get_with_ct("model-manage",
+                  "/1/model/%s/attachment/%s" % (model_name,att_name))
+  if code == 200:
+    return (att_name,body,ctype)
+  else:
+    raise Exception(body)
+
+def run1(in_desc, out_desc, ctype, body, attachments=[]):
+  if attachments == []:
+    code1,body1 = fastscore.put("engine", "/1/job/model", ctype, body)
+  else:
+    parts = [ ('attachments',x) for x in attachments ]
+    parts.append( ('model',('(source)',body,ctype)) )
+    code1,body1 = fastscore.put_multi("engine", "/1/job/model", parts)
   if code1 != 204:
     raise Exception(body1)
   print "Model sent to engine"
@@ -50,85 +71,6 @@ def scale(args):
   else:
     raise Exception(body)
 
-def status(args):
-  status = get_status()
-  print json.dumps(status, indent=2)
-
-def get_status():
-  code,body = fastscore.get("engine", "/1/job/status")
-  if code == 200:
-    return json.loads(body)
-  else:
-    raise Exception(body)
-  
 def output(args):
   raise Exception("TODO")
-
-def statistics(args):
-  status = get_status()
-  jets = status["jets"]
-  for i in range(len(jets)):
-    jets[i]["name"] = "jet-" + str(i+1)
-  t = [ stat_line(x) for x in jets ]
-  if len(jets) > 1:
-    summary = {"name":"TOTAL",
-               "total_consumed": sum([ x["total_consumed"] for x in jets ]),
-               "total_produced": sum([ x["total_produced"] for x in jets ]),
-               "run_time": max([ x["run_time"] for x in jets ])}
-    t.append(stat_line(summary))
-  headers = ["name","total-in","rate-in, rec/s",
-                    "total-out","rate-out, rec/s"]
-  print tabulate(t, headers=headers)
-
-def stat_line(x):
-	secs = x["run_time"]
-	rate_in = x["total_consumed"] / secs
-	rate_out = x["total_produced"] / secs
-	return [x["name"],x["total_consumed"],rate_in,
-									  x["total_produced"],rate_out]
-
-def statistics_io(args):
-  status = get_status()
-  t = [io_line(status, "input"),
-       io_line(status, "output")]
-  headers = ["","count","size",""]
-  print tabulate(t, headers=headers)
-
-def io_line(status, dir):
-  x = status[dir]
-  if x == None:
-    return [dir,0,0,""]
-  (b,unit) = human_fmt(x["total_bytes"])
-  return [dir,x["total_records"],b,unit]
-
-def statistics0(args):
-  code,body = fastscore.delete("engine", "/1/job/statistics")
-  if code == 204:
-    print "Reset"
-  else:
-    raise Exception(body)
-
-def memory(args):
-  status = get_status()
-  jets = status["jets"]
-  for i in range(len(jets)):
-    jets[i]["name"] = "jet-" + str(i+1)
-  t = [ mem_line(x) for x in jets ]
-  if len(jets) > 1:
-    summary = {"name":"TOTAL",
-               "memory": sum([ x["memory"] for x in jets ])}
-    t.append(mem_line(summary))
-  headers = ["name","size",""]
-  print tabulate(t, headers=headers)
-
-def mem_line(x):
-  (b,unit) = human_fmt(x["memory"])
-  return [x["name"],b,unit]
-
-def human_fmt(num, suffix='B'):
-  for unit in ['','KB','MB','GB','TB','PB','EB','ZB']:
-    if abs(num) < 1024.0:
-      return (num,unit)
-    num /= 1024.0
-  return (num,'YB')
 
