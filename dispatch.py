@@ -9,8 +9,12 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+def help(args):
+  usage()
+
 command_specs = \
- [(connect.main,        ["connect","<url-prefix>"]),
+ [(help,                ["help"]),
+  (connect.main,        ["connect","<url-prefix>"]),
   (config.set,          ["config","set","<config-file>"]),
   (config.show,         ["config","show"]),
   (fleet.main,          ["fleet"]),
@@ -73,6 +77,12 @@ def match(acc, (t,s)):
   if t == s:
     return acc
   return None
+
+def usage():
+  print "FastScore CLI v1.1"
+  print "Usage:"
+  for (_,spec) in command_specs:
+    print "  fastscore", str.join(" ", spec)
 
 def usage():
   print "FastScore CLI v1.1"
