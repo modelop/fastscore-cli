@@ -101,16 +101,34 @@ def io_line(status, dir):
   (b,unit) = human_fmt(x["total_bytes"])
   return [dir,x["total_records"],b,unit]
 
+def statistics0(args):
+  code,body = fastscore.delete("engine", "/1/job/statistics")
+  if code == 204:
+    print "Reset"
+  else:
+    raise Exception(body)
+
+def memory(args):
+  status = get_status()
+  jets = status["jets"]
+  for i in range(len(jets)):
+    jets[i]["name"] = "jet-" + str(i+1)
+  t = [ mem_line(x) for x in jets ]
+  if len(jets) > 1:
+    summary = {"name":"TOTAL",
+               "memory": sum([ x["memory"] for x in jets ])}
+    t.append(mem_line(summary))
+  headers = ["name","size",""]
+  print tabulate(t, headers=headers)
+
+def mem_line(x):
+  (b,unit) = human_fmt(x["memory"])
+  return [x["name"],b,unit]
+
 def human_fmt(num, suffix='B'):
   for unit in ['','KB','MB','GB','TB','PB','EB','ZB']:
     if abs(num) < 1024.0:
       return (num,unit)
     num /= 1024.0
   return (num,'YB')
-
-def statistics0(args):
-  raise Exception("TODO")
-
-def memory(args):
-  raise Exception("TODO")
 
