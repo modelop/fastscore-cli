@@ -4,6 +4,7 @@ import traceback
 
 from fastscore import conf
 from cmd import connect, config, fleet, model, attachment, stream, job, stats
+import interactive
 
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -55,18 +56,32 @@ def main():
       print "Unknown option '%s' ignored" % x
 
   words = [ x for x in sys.argv[1:] if x[0] != '-' ]
+  if words == []:
+    # for auto-complete
+    w = sorted(set([ w for _,spec in command_specs
+                       for w in spec
+                       if w[0] != '<' ]))
+    interactive.words = w
+    interactive.loop()
+    return 0
+  elif not run(words):
+    usage()
+    return 1
+
+  return 0 # exit status
+
+def run(words):
   for command,spec in command_specs:
     if len(words) == len(spec):
       args = reduce(match, zip(words, spec), {})
       if args != None:
         try:
           command(args)
+          return True
         except Exception as e:
           traceback.print_exc()   # Debug only
           print e.message
-        return 0
-
-  usage()
+          return False
 
 def match(acc, (t,s)):
   if acc == None:
@@ -77,12 +92,6 @@ def match(acc, (t,s)):
   if t == s:
     return acc
   return None
-
-def usage():
-  print "FastScore CLI v1.1"
-  print "Usage:"
-  for (_,spec) in command_specs:
-    print "  fastscore", str.join(" ", spec)
 
 def usage():
   print "FastScore CLI v1.1"
