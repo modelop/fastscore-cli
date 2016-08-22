@@ -3,6 +3,7 @@ import readline
 import thread
 import ssl
 from websocket import create_connection
+import json
 
 import fastscore
 import dispatch
@@ -38,7 +39,15 @@ def connect_notify():
     ws = create_connection(prefix.replace("https:", "wss:") + "/1/notify",
                               sslopt={"cert_reqs": ssl.CERT_NONE})
     while True:
-      x = ws.recv()
-      print x
+      x = json.loads(ws.recv())
+      t = x["type"]
+      m = x["msg"]
+      print "[%s] %s" % (t,explain(t, m))
   thread.start_new_thread(notify, ())
-  
+
+def explain(t, m):
+  if t == "health":
+    return "%s is %s" % (m["name"],"DOWN" if m["dir"] == "down" else "up")
+  else:
+    return json.dumps(m, indent=2)
+
