@@ -40,14 +40,25 @@ def connect_notify():
                               sslopt={"cert_reqs": ssl.CERT_NONE})
     while True:
       x = json.loads(ws.recv())
-      t = x["type"]
-      m = x["msg"]
-      print "[%s] %s" % (t,explain(t, m))
+      t = x["topic"]
+      m = x["message"]
+      print explain(t, m)
   thread.start_new_thread(notify, ())
 
 def explain(t, m):
-  if t == "health":
-    return "%s is %s" % (m["name"],"DOWN" if m["dir"] == "down" else "up")
+  if t == "notify" and m["type"] == "health":
+    return "[notify] %s is %s" % (m["name"],"DOWN" if m["dir"] == "down" else "up")
+  elif t == "log":
+    return "[%s] %s [%s] %s" % (m["src"],m["time"],level_text(m["level"]),m["text"])
   else:
     return json.dumps(m, indent=2)
+
+def level_text(l):
+  if   l == 128: return "debug"
+  elif l == 64:  return "info"
+  elif l == 32:  return "notice"
+  elif l == 16:  return "warning"
+  elif l == 8:   return "error"
+  elif l == 4:   return "critical"
+  else:          return str(l)
 
