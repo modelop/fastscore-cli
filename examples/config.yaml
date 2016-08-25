@@ -18,8 +18,5 @@ fastscore:
     type: kafka
     bootstrap:
       - localhost:9092
-    topics:
-      notify: notify
-      log: log
-      output: output
+    topic: notify
 

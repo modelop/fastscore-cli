@@ -40,18 +40,44 @@ def connect_notify():
                               sslopt={"cert_reqs": ssl.CERT_NONE})
     while True:
       x = json.loads(ws.recv())
-      t = x["topic"]
-      m = x["message"]
-      print explain(t, m)
+      print_notify(x)
   thread.start_new_thread(notify, ())
 
-def explain(t, m):
-  if t == "notify" and m["type"] == "health":
-    return "[notify] %s is %s" % (m["name"],"DOWN" if m["dir"] == "down" else "up")
-  elif t == "log":
-    return "[%s] %s [%s] %s" % (m["src"],m["time"],level_text(m["level"]),m["text"])
+def print_notify(msg):
+  src = msg["src"]
+  timestamp = msg["timestamp"]
+  type = msg["type"]
+
+  if type == "health":
+    print "[%s] %s %s is %s" % \
+           (src,
+            time_only(timestamp),
+            msg["instance"],
+            "up" if msg["health"] == "ok" else "DOWN")
+
+  elif type == "log":
+    print "[%s] %s [%s] %s" % \
+           (src,
+            time_only(timestamp),
+            level_text(msg["level"]),
+            msg["text"])
+  elif type == "output-report":
+    for x in msg["outputs"]:
+      print "[%s] output [%s] %s" % \
+           (src,
+            msg["model"],
+            json.dumps(x))
+    skipped = msg["skipped"]
+    if skipped > 0:
+      print "[%s] %d ouput(s) skipped" % (src,skipped)
+  elif type == "model-console":
+    print "[%s] %s" % (src,msg["text"]),
+
   else:
-    return json.dumps(m, indent=2)
+    print json.dumps(msg, indent=2)
+
+def time_only(timestamp):
+  return timestamp.split("T")[1].strip("Z")
 
 def level_text(l):
   if   l == 128: return "debug"
