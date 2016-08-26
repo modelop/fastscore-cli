@@ -57,6 +57,8 @@ def get_stream_desc(name):
   code,body = fastscore.get("model-manage", "/1/stream/%s" % name)
   if code == 200:
     return body
+  elif code == 404:
+    raise Exception("Stream '%s' not found" % name)
   else:
     raise Exception(body)
 
@@ -67,10 +69,14 @@ def scale(args):
   n = int(args["num-jets"])
   code,body = fastscore.post("engine", "/1/job/scale?n=%d" % n)
   if code == 204:
-    print "Ok"
+    print "Model scaling successful"
   else:
     raise Exception(body)
 
-def output(args):
-  raise Exception("TODO")
+def stop(args):
+  code,body = fastscore.delete("engine", "/1/job")
+  if code == 204:
+    print "Engine stopped"
+  else:
+    raise Exception(body)
 

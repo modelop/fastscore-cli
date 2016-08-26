@@ -36,7 +36,7 @@ command_specs = \
   (job.run,             ["job","run","<model-name>","<in-stream-name>","<out-stream-name>"]),
   (job.run,             ["job","run","<model-name>","<in-stream-name>"]),
   (job.scale,           ["job","scale","<num-jets>"]),
-  (job.output,          ["job","output"]),
+  (job.stop,            ["job","stop"]),
   (stats.status,        ["job","status"]),
   (stats.statistics,    ["job","statistics"]),
   (stats.statistics_io, ["job","statistics","io"]),
@@ -77,11 +77,11 @@ def run(words):
       if args != None:
         try:
           command(args)
-          return True
         except Exception as e:
-          traceback.print_exc()   # Debug only
+          #traceback.print_exc()   # Debug only
           print e.message
-          return False
+        return True
+  return False
 
 def match(acc, (t,s)):
   if acc == None:

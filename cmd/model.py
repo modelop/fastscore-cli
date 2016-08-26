@@ -64,5 +64,5 @@ def guess_ctype(resource):
   elif ext == ".R":
     return "application/x-r"
   else:
-    raise Exception("%s must have a proper extension (.pfa, .ppfa, .yaml, .py, .R)" % resource)
+    raise Exception("%s must have a proper extension (.pfa, .ppfa, .yaml, .py, or .R)" % resource)
 
