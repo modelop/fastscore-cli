@@ -1,6 +1,0 @@
-{
-  "type": "file",
-  "connect": {
-    "path": "/tmp/test.data"
-  }
-}

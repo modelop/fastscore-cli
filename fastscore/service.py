@@ -3,15 +3,16 @@ import os
 import yaml
 import requests
 
-conf = {}
+options = {}
+
 if os.path.exists(".fastscore"):
   with open(".fastscore", "r") as f:
-    conf = yaml.load(f)
+    options = yaml.load(f)
 
 def connect_prefix():
-  if not "connect-prefix" in conf:
+  if not "connect-prefix" in options:
     raise(Exception("Not connected - use 'fastscore connect <url-prefix>'"))
-  return conf["connect-prefix"]
+  return options["connect-prefix"]
 
 def get(api, path, data=None):
   _,host,port = lookup(api)
@@ -52,8 +53,8 @@ def delete(api, path):
   return r.status_code,r.content
 
 def lookup(api):
-  if api in conf:
-    return conf[api]
+  if api in options:
+    return options[api]
   r = requests.get(connect_prefix() + "/1/connect?api=%s" % api, verify=False)
   if r.status_code != 200:
     raise(Exception(r.text))
@@ -63,7 +64,7 @@ def lookup(api):
   for x in fleet:
     if x["health"] == "ok":
       trio = x["name"],x["host"],x["port"]
-      conf[api] = trio
+      options[api] = trio
       return trio
   raise(Exception("No healthy instances found"))
 

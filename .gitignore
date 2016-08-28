@@ -1,4 +1,9 @@
-.fastscore
+
+build/
+dist/
+*.egg-info/
 
 *.pyc
+
+.fastscore
 

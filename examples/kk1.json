@@ -1,8 +1,0 @@
-{
-  "description": "The first Kafka output stream",
-  "type": "kafka",
-  "connect": {
-    "bootstrap-servers": "10.0.5.181:1",
-    "topic": "out-1"
-  }
-}

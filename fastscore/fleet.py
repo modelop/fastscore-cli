@@ -1,7 +1,7 @@
 
 import requests
 
-from fastscore import connect_prefix
+from service import connect_prefix
 from tabulate import tabulate
 
 def main(args):

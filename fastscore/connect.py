@@ -1,7 +1,7 @@
 
 import requests
 
-import fastscore
+import service
 
 def main(args):
   prefix = args["url-prefix"]
@@ -10,6 +10,6 @@ def main(args):
   assert swagger["info"]["title"] == "Connect API"
   with open(".fastscore", "w") as f:
     f.write("connect-prefix: %s\n" % prefix)
-  fastscore.conf["connect-prefix"] = prefix
+  service.options["connect-prefix"] = prefix
   print "Connect API: ok"
 

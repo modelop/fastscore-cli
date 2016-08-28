@@ -2,7 +2,7 @@
 import os
 import requests
 
-from fastscore import connect_prefix
+from service import connect_prefix
 
 def show(args):
   r = requests.get(connect_prefix() + "/1/config", verify=False)

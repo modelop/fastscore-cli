@@ -2,10 +2,10 @@
 import os
 import json
 
-import fastscore
+import service
 
 def list(args):
-  code,body = fastscore.get("model-manage", "/1/stream")
+  code,body = service.get("model-manage", "/1/stream")
   if code == 200:
     for x in json.loads(body):
       print x
@@ -20,7 +20,7 @@ def add(args):
   with open(resource) as f:
     desc = f.read()
     ctype = "application/json"
-    code,body = fastscore.put("model-manage", "/1/stream/%s" % name, ctype, desc)
+    code,body = service.put("model-manage", "/1/stream/%s" % name, ctype, desc)
     if code == 201:
       print "Stream '%s' added" % name
     elif code == 204:
@@ -30,7 +30,7 @@ def add(args):
 
 def show(args):
   name = args["stream-name"]
-  code,body = fastscore.get("model-manage", "/1/stream/%s" % name)
+  code,body = service.get("model-manage", "/1/stream/%s" % name)
   if code == 200:
     print body,
   elif code == 404:
@@ -41,7 +41,7 @@ def show(args):
 def sample(args):
   name = args["stream-name"]
   n = int(args["num-items"]) if "num-items" in args else 10
-  code,body = fastscore.get("model-manage", "/1/stream/%s" % name)
+  code,body = service.get("model-manage", "/1/stream/%s" % name)
   if code == 200:
     sample1(n, body)
   elif code == 404:
@@ -50,7 +50,7 @@ def sample(args):
     raise Exception(body)
 
 def sample1(n, desc):
-  code,body = fastscore.get("engine", "/1/stream/sample?n=%d" % n, data=desc)
+  code,body = service.get("engine", "/1/stream/sample?n=%d" % n, data=desc)
   if code == 200:
     print json.dumps(json.loads(body), indent=2)
   else:
@@ -58,7 +58,7 @@ def sample1(n, desc):
 
 def remove(args):
   name = args["stream-name"]
-  code,body = fastscore.delete("model-manage", "/1/stream/%s" % name)
+  code,body = service.delete("model-manage", "/1/stream/%s" % name)
   if code == 404:
     raise Exception("Stream '%s' not found" % name)
   elif code == 204:

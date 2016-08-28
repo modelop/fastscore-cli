@@ -1,7 +1,0 @@
-{
-  "description": "A sample stream of 1000 consecutive numbers",
-  "type": "file",
-  "connect": {
-    "path": "data/numbersInput.jsons"
-  }
-}

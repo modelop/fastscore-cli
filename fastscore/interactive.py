@@ -5,7 +5,7 @@ import ssl
 from websocket import create_connection
 import json
 
-import fastscore
+import service
 import dispatch
 
 words = []
@@ -19,7 +19,7 @@ def complete(text, state):
   return None
 
 def loop():
-  if "connect-prefix" in fastscore.conf:
+  if "connect-prefix" in service.options:
     connect_notify()
     
   readline.set_completer(complete)
@@ -34,7 +34,7 @@ def loop():
     print
 
 def connect_notify():
-  prefix = fastscore.conf["connect-prefix"]
+  prefix = service.options["connect-prefix"]
   def notify():
     ws = create_connection(prefix.replace("https:", "wss:") + "/1/notify",
                               sslopt={"cert_reqs": ssl.CERT_NONE})

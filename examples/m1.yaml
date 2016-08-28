@@ -1,3 +1,0 @@
-input: int
-output: int
-action: {+: [input, 10]}

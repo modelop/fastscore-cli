@@ -3,10 +3,10 @@ import os
 import json
 from tabulate import tabulate
 
-import fastscore
+import service
 
 def list(args):
-  code,body = fastscore.get("model-manage", "/1/model?return=type")
+  code,body = service.get("model-manage", "/1/model?return=type")
   if code == 200:
     t = [ [x["name"],x["type"]] for x in json.loads(body) ]
     print tabulate(t, headers=["Name","Type"])
@@ -21,7 +21,7 @@ def add(args):
   ctype = guess_ctype(resource)
   with open(resource) as f:
     model = f.read()
-    code,body = fastscore.put("model-manage", "/1/model/%s" % name, ctype, model)
+    code,body = service.put("model-manage", "/1/model/%s" % name, ctype, model)
     if code == 201:
       print "Model '%s' added" % name
     elif code == 204:
@@ -31,7 +31,7 @@ def add(args):
 
 def show(args):
   name = args["model-name"]
-  code,body = fastscore.get("model-manage", "/1/model/%s" % name)
+  code,body = service.get("model-manage", "/1/model/%s" % name)
   if code == 200:
     print body,
   elif code == 404:
@@ -41,7 +41,7 @@ def show(args):
 
 def remove(args):
   name = args["model-name"]
-  code,body = fastscore.delete("model-manage", "/1/model/%s" % name)
+  code,body = service.delete("model-manage", "/1/model/%s" % name)
   if code == 404:
     raise Exception("Model '%s' not found" % name)
   elif code == 204:

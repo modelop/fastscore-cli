@@ -1,13 +1,22 @@
 
-# fastscore-cli
+# FastScore CLI
 
-This is an early prototype of the FastScore CLI.
+This is the command line interface (CLI) to FastScore.
 
-The next version should use virtualenv to capture dependencies of the utility.
+## How to install
+
+  wget https://s3-us-west-1.amazonaws.com/fastscore-cli/fastscore-cli-1.1.tar.gz
+  tar xzf fastscore-cli-1.1.tar.gz
+  cd fastscore-cli-1.1
+  python setup.py install
+  
+To verify the installation run:
+
+  fastscore help
 
 ## How to use
 
-The tool must know the Connect endpoint. To set the endpoint:
+The tool must know the Connect endpoint. To set the endpoint run:
 
   fastscore connect https://127.0.0.1:8001
 
@@ -17,11 +26,8 @@ The next mandatory step is to set the Connect configuration.
 
   fastscore config set config.yaml
 
-Run `fastscore` or `fastscore help` to get the list of commands.
+Run `fastscore help` to get the list of commands.
 
-# Required packages
-
-To install required packages run:
-
-  pip install -r requirements.txt
+Run `fastscore` without parameters to enter an interactive mode. In interactive
+mode you will receive asynchronous notifications from FastScore.
 

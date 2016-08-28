@@ -2,11 +2,11 @@
 import os
 import json
 
-import fastscore
+import service
 
 def list(args):
   model_name = args["model-name"]
-  code,body = fastscore.get("model-manage", "/1/model/%s/attachment" % model_name)
+  code,body = service.get("model-manage", "/1/model/%s/attachment" % model_name)
   if code == 200:
     for x in json.loads(body):
       print x
@@ -21,7 +21,7 @@ def upload(args):
   with open(resource, "r") as f:
     data = f.read()
     att_name = os.path.basename(resource)
-    code,body = fastscore.put("model-manage",
+    code,body = service.put("model-manage",
                     "/1/model/%s/attachment/%s" % (model_name,att_name),
                     guess_att_ctype(resource), data)
     if code == 201:
@@ -34,7 +34,7 @@ def upload(args):
 def download(args):
   model_name = args["model-name"]
   att_name = args["att-name"]
-  code,str = fastscore.get_str("model-manage",
+  code,str = service.get_str("model-manage",
                     "/1/model/%s/attachment/%s" % (model_name,att_name))
   if code == 200:
     with open(att_name, "w") as f:
@@ -48,7 +48,7 @@ def download(args):
 def remove(args):
   model_name = args["model-name"]
   att_name = args["att-name"]
-  code,body = fastscore.delete("model-manage",
+  code,body = service.delete("model-manage",
             "/1/model/%s/attachment/%s" % (model_name,att_name))
   if code == 204:
     print "Attachment '%s' removed" % att_name

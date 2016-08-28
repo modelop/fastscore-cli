@@ -2,9 +2,8 @@
 import sys
 import traceback
 
-from fastscore import conf
-from cmd import connect, config, fleet, model, attachment, stream, job, stats
-import interactive
+from fastscore import service, connect, config, fleet, model, attachment, stream, job, stats
+from fastscore import interactive
 
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -44,14 +43,14 @@ command_specs = \
   (stats.memory,        ["job","memory"])]
 
 def main():
-  conf["verbose"] = 0
+  service.options["verbose"] = 0
   for x in sys.argv[1:]:
     if x == '-v':
-      conf["verbose"] = 1
+      service.options["verbose"] = 1
     elif x == '-vv':
-      conf["verbose"] = 2
+      service.options["verbose"] = 2
     elif x == '-vvv':
-      conf["verbose"] = 3
+      service.options["verbose"] = 3
     elif x[0] == '-':
       print "Unknown option '%s' ignored" % x
 
@@ -78,8 +77,8 @@ def run(words):
         try:
           command(args)
         except Exception as e:
-          #traceback.print_exc()   # Debug only
-          print e.message
+          traceback.print_exc()   # Debug only
+          #print e.message
         return True
   return False
 
