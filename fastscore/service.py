@@ -14,9 +14,9 @@ def connect_prefix():
     raise(Exception("Not connected - use 'fastscore connect <url-prefix>'"))
   return options["connect-prefix"]
 
-def get(api, path, data=None):
+def get(api, path):
   _,host,port = lookup(api)
-  r = requests.get("https://%s:%d%s" % (host,port,path), data=data, verify=False)
+  r = requests.get("https://%s:%d%s" % (host,port,path), verify=False)
   return r.status_code,r.content
 
 def get_str(api, path):
@@ -42,9 +42,11 @@ def put_multi(api, path, parts):
   r = requests.put("https://%s:%d%s" % (host,port,path), files=parts, verify=False)
   return r.status_code,r.content
 
-def post(api, path):
+def post(api, path, ctype=None, data=None):
   _,host,port = lookup(api)
-  r = requests.post("https://%s:%d%s" % (host,port,path), verify=False)
+  headers = {"content-type": ctype} if ctype != None else None
+  r = requests.post("https://%s:%d%s" % (host,port,path),
+                  headers=headers, data=data, verify=False)
   return r.status_code,r.content
 
 def delete(api, path):
