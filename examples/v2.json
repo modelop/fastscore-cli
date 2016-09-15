@@ -1,0 +1,7 @@
+{
+  "type": "file",
+  "schema": "int",
+  "connect": {
+    "path": "data/numbersInput.jsons"
+  }
+}

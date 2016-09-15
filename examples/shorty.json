@@ -1,0 +1,7 @@
+{
+  "type":"file",
+  "loop": false,
+  "connect": {
+    "path": "data/short.test.stream"
+  }
+}

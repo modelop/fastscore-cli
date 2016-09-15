@@ -70,11 +70,23 @@ def print_notify(msg):
     skipped = msg["skipped"]
     if skipped > 0:
       print "[%s] %d ouput(s) skipped" % (src,skipped)
+  elif type == "jet-status-report":
+    m = [ j["memory"] for j in msg["jets"] ]
+    if len(m) == 1:
+      print "Mem: %s" % mb(m[0])
+    else:
+      print "Mem:",
+      for x in m:
+        print mb(x),
+      print "total %s" % mb(sum(m))
   elif type == "model-console":
     print "[%s] %s" % (src,msg["text"]),
 
   else:
     print json.dumps(msg, indent=2)
+
+def mb(bytes):
+  return "%.1fM" % (bytes / 1024 / 1024)
 
 def time_only(timestamp):
   return timestamp.split("T")[1].strip("Z")

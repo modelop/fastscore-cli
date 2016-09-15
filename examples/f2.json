@@ -1,0 +1,6 @@
+{
+  "type": "file",
+  "connect": {
+    "path": "data/numbersInput.jsons"
+  }
+}
