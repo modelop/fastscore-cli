@@ -53,6 +53,32 @@ def run1(in_desc, out_desc, ctype, body, attachments=[]):
   print "Output stream set"
   print "The engine is running"
 
+def debug(args):
+  model_name = args["model-name"]
+  in_desc = get_stream_desc(args["in-stream-name"])
+  out_desc = get_stream_desc(args["out-stream-name"]) \
+                  if "out-stream-name" in args else discard_desc()
+  code,body,ctype = service.get_with_ct("model-manage", "/1/model/%s" % model_name)
+  if code == 200:
+    spec = {
+      "input": in_desc,
+      "output": out_desc,
+      "type": ctype_to_type(ctype),
+      "model": body
+    }
+    debug1(json.dumps(spec))
+  elif code == 404:
+    print "Model '%s' not found" % model_name
+  else:
+    raise Exception(body)
+
+def debug1(data):
+  code,report = service.post("engine", "/1/job/debug", ctype="application/json", data=data)
+  if code == 200:
+    print report
+  else:
+    raise Exception(report)
+
 def get_stream_desc(name):
   code,body = service.get("model-manage", "/1/stream/%s" % name)
   if code == 200:
@@ -79,4 +105,18 @@ def stop(args):
     print "Engine stopped"
   else:
     raise Exception(body)
+
+def ctype_to_type(ctype):
+  if ctype == "application/vnd.pfa+json":
+    return "pfa"
+  elif ctype == "application/vnd.ppfa":
+    return "ppfa"
+  elif ctype == "application/x-yaml":
+    return "yaml"
+  elif ctype == "application/x-python":
+    return "python"
+  elif ctype == "application/x-r":
+    return "r"
+  else:
+    raise Exception("%s not recognized" % ctype)
 
