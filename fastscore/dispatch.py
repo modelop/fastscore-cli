@@ -80,6 +80,7 @@ def run(words):
           command(args)
         except Exception as e:
           traceback.print_exc()   # Debug only
+          sys.exit(1) # Added to output correct exit code
           #print e.message
         return True
   return False
@@ -99,4 +100,3 @@ def usage():
   print "Usage:"
   for (_,spec) in command_specs:
     print "  fastscore", str.join(" ", spec)
-
