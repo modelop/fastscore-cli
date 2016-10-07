@@ -14,22 +14,32 @@ def get_status():
     return json.loads(body)
   else:
     raise Exception(body)
-  
+
 def statistics(args):
   status = get_status()
-  jets = status["jets"]
-  for i in range(len(jets)):
-    jets[i]["name"] = "jet-" + str(i+1)
-  t = [ stat_line(x) for x in jets ]
-  if len(jets) > 1:
-    summary = {"name":"TOTAL",
-               "total_consumed": sum([ x["total_consumed"] for x in jets ]),
-               "total_produced": sum([ x["total_produced"] for x in jets ]),
-               "run_time": max([ x["run_time"] for x in jets ])}
-    t.append(stat_line(summary))
-  headers = ["name","total-in","rate-in, rec/s",
-                    "total-out","rate-out, rec/s"]
-  print tabulate(t, headers=headers)
+  try:
+    jets = status["jets"]
+    for i in range(len(jets)):
+      jets[i]["name"] = "jet-" + str(i+1)
+    t = [ stat_line(x) for x in jets ]
+    if len(jets) > 1:
+      summary = {"name":"TOTAL",
+                 "total_consumed": sum([ x["total_consumed"] for x in jets ]),
+                 "total_produced": sum([ x["total_produced"] for x in jets ]),
+                 "run_time": max([ x["run_time"] for x in jets ])}
+      t.append(stat_line(summary))
+    headers = ["name","total-in","rate-in, rec/s",
+                      "total-out","rate-out, rec/s"]
+    print tabulate(t, headers=headers)
+  except Exception as e:
+    if e.message != 'jets':
+        raise
+    else:
+      code,body = service.get("engine", "/1/job/statistics")
+      if code == 200:
+          print json.dumps(json.loads(body), indent=2)
+      else:
+          raise Exception(body)
 
 def stat_line(x):
 	secs = x["run_time"]
