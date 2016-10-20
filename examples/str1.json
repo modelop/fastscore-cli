@@ -1,0 +1,13 @@
+{
+  "Version": "1.2",
+  "Transport": {
+    "Type": "http",
+    "Url": "https://s3-us-west-1.amazonaws.com/fastscore-sample-data/avro1.dat"
+  },
+  "Envelope": {
+    "Type": "ocf-block",
+    "SyncMarker": "PU8Rvg6gYfSggTqU8LiOQA=="
+  },
+  "Encoding": "avro-binary",
+  "Schema": "long"
+}

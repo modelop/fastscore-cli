@@ -1,0 +1,9 @@
+{
+  "description": "Kafka output stream",
+  "type": "kafka",
+  "connect": {
+    "bootstrap-servers": "localhost:9092",
+    "topic": "client-output",
+    "commit": false
+  }
+}

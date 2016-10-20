@@ -1,6 +1,7 @@
 
 import sys
 import json
+import base64
 
 import service
 
@@ -59,12 +60,18 @@ def debug(args):
   out_desc = get_stream_desc(args["out-stream-name"]) \
                   if "out-stream-name" in args else discard_desc()
   code,body,ctype = service.get_with_ct("model-manage", "/1/model/%s" % model_name)
+  att = attachments(model_name)
   if code == 200:
     spec = {
       "input": in_desc,
       "output": out_desc,
       "type": ctype_to_type(ctype),
-      "model": body
+      "model": body,
+      "attachments": [{
+        "name": att_name,
+        "data": base64.b64encode(att_body),
+        "type": att_ctype_to_type(att_ctype)
+      } for (att_name,att_body,att_ctype) in att ]
     }
     debug1(json.dumps(spec))
   elif code == 404:
@@ -89,7 +96,7 @@ def get_stream_desc(name):
     raise Exception(body)
 
 def discard_desc():
-  return '{"type":"discard", "connect":{}}'
+  return '{"Transport":{"Type":"discard"}}'
 
 def scale(args):
   n = int(args["num-jets"])
@@ -117,6 +124,14 @@ def ctype_to_type(ctype):
     return "python"
   elif ctype == "application/x-r":
     return "r"
+  else:
+    raise Exception("%s not recognized" % ctype)
+
+def att_ctype_to_type(ctype):
+  if ctype == "application/zip":
+    return "zip"
+  elif ctype == "application/gzip":
+    return "tgz"
   else:
     raise Exception("%s not recognized" % ctype)
 

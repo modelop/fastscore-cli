@@ -50,10 +50,13 @@ def sample(args):
     raise Exception(body)
 
 def sample1(n, desc):
-  code,body = service.post("engine", "/1/stream/sample?n=%d" % n,
-                                ctype="application/json", data=desc)
+  code,body,ctype = service.post_with_ct("engine", "/1/stream/sample?n=%d" % n,
+                                         ctype="application/json", data=desc)
   if code == 200:
-    print json.dumps(json.loads(body), indent=2)
+    if ctype == "application/json":
+      print json.dumps(json.loads(body), indent=2)
+    else:
+      print body
   else:
     print code
     raise Exception(body)

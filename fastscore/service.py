@@ -49,6 +49,14 @@ def post(api, path, ctype=None, data=None):
                   headers=headers, data=data, verify=False)
   return r.status_code,r.content
 
+def post_with_ct(api, path, ctype=None, data=None):
+  _,host,port = lookup(api)
+  headers = {"content-type": ctype} if ctype != None else None
+  r = requests.post("https://%s:%d%s" % (host,port,path),
+                  headers=headers, data=data, verify=False)
+  ctype = r.headers["content-type"]
+  return r.status_code,r.content,ctype
+
 def delete(api, path):
   _,host,port = lookup(api)
   r = requests.delete("https://%s:%d%s" % (host,port,path), verify=False)
