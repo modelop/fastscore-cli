@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
   name = "fastscore-cli",
   description = "FastScore CLI",
-  version = "1.1",
+  version = "dev",
   packages = find_packages(),
   
   install_requires = [
