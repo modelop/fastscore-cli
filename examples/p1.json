@@ -1,5 +1,5 @@
 {
   "input": "int",
   "output": "int",
-  "action": [ 0 ]
+  "action": [ {"*": ["input","input"]} ]
 }

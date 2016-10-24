@@ -53,6 +53,9 @@ def main():
       service.options["verbose"] = 2
     elif x == '-vvv':
       service.options["verbose"] = 3
+    elif x[0] == '-' and ":" in x and x[1:].split(":")[0] in service.API_NAMES:
+      api,name = x[1:].split(":")
+      service.preferred[api] = name
     elif x[0] == '-':
       print "Unknown option '%s' ignored" % x
 
@@ -100,3 +103,4 @@ def usage():
   print "Usage:"
   for (_,spec) in command_specs:
     print "  fastscore", str.join(" ", spec)
+

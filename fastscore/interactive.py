@@ -19,7 +19,7 @@ def complete(text, state):
   return None
 
 def loop():
-  if "connect-prefix" in service.options:
+  if "proxy-prefix" in service.options:
     connect_notify()
     
   readline.set_completer(complete)
@@ -34,9 +34,9 @@ def loop():
     print
 
 def connect_notify():
-  prefix = service.options["connect-prefix"]
+  prefix = service.options["proxy-prefix"]
   def notify():
-    ws = create_connection(prefix.replace("https:", "wss:") + "/1/notify",
+    ws = create_connection(prefix.replace("https:", "wss:") + "/api/1/service/connect/1/notify",
                               sslopt={"cert_reqs": ssl.CERT_NONE})
     while True:
       x = json.loads(ws.recv())

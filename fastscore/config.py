@@ -2,10 +2,10 @@
 import os
 import requests
 
-from service import connect_prefix
+from service import proxy_prefix
 
 def show(args):
-  r = requests.get(connect_prefix() + "/1/config", verify=False)
+  r = requests.get(proxy_prefix() + "/api/1/service/connect/1/config", verify=False)
   if r.status_code == 200:
     print r.text,
   else:
@@ -18,7 +18,7 @@ def set(args):
   with open(resource) as f:
     data = f.read()
     headers = {"content-type": "application/x-yaml"}
-    r = requests.put(connect_prefix() + "/1/config",
+    r = requests.put(proxy_prefix() + "/api/1/service/connect/1/config",
           data=data, headers=headers, verify=False)
     if r.status_code == 201:
       print "Configuration set"
