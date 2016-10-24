@@ -5,7 +5,10 @@ fastscore:
       port: 8002
     - api: engine
       host: localhost
-      port: 8003
+      port: 8013
+    - api: engine
+      host: localhost
+      port: 8023
 
   db:
     type: mysql

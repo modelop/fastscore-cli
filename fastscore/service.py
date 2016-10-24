@@ -61,7 +61,7 @@ def lookup(api):
     return resolved[api]
   if api in preferred:
     name = preferred[api]
-    prefix = proxy_prefix() + "/api/1/service/%s" % name,
+    prefix = proxy_prefix() + "/api/1/service/%s" % name
     r = requests.get(prefix + "/1/health", verify=False)
     if r.status_code != 200:
       raise(Exception("%s is not healthy" % name))
