@@ -11,7 +11,6 @@ setup(
     "PyYAML==3.11",
     "requests==2.11.1",
     "tabulate==0.7.5",
-    "websocket==0.2.1",
     "websocket-client==0.37.0"
   ],
 
