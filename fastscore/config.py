@@ -2,7 +2,7 @@
 import os
 import requests
 
-from service import proxy_prefix
+from service import proxy_prefix, set_fleet
 
 def show(args):
   r = requests.get(proxy_prefix() + "/api/1/service/connect/1/config", verify=False)
@@ -26,4 +26,5 @@ def set(args):
       print "Configuration updated"
     else:
       raise(Exception(r.text))
+    set_fleet(data)
 

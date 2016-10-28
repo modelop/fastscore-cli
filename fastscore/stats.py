@@ -3,13 +3,14 @@ import json
 from tabulate import tabulate
 
 import service
+from service import engine_api_name
 
 def status(args):
   status = get_status()
   print json.dumps(status, indent=2)
 
 def get_status():
-  code,body = service.get("engine", "/1/job/status")
+  code,body = service.get(engine_api_name(), "/1/job/status")
   if code == 200:
     return json.loads(body)
   else:
@@ -35,7 +36,7 @@ def statistics(args):
     if e.message != 'jets':
         raise
     else:
-      code,body = service.get("engine", "/1/job/statistics")
+      code,body = service.get(engine_api_name(), "/1/job/statistics")
       if code == 200:
           print json.dumps(json.loads(body), indent=2)
       else:
@@ -63,7 +64,7 @@ def io_line(status, dir):
   return [dir,x["total_records"],b,unit]
 
 def statistics0(args):
-  code,body = service.delete("engine", "/1/job/statistics")
+  code,body = service.delete(engine_api_name(), "/1/job/statistics")
   if code == 204:
     print "Reset"
   else:

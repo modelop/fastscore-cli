@@ -3,6 +3,7 @@ import os
 import json
 
 import service
+from service import engine_api_name
 
 def list(args):
   code,body = service.get("model-manage", "/1/stream")
@@ -50,7 +51,7 @@ def sample(args):
     raise Exception(body)
 
 def sample1(n, desc):
-  code,body,ctype = service.post_with_ct("engine", "/1/stream/sample?n=%d" % n,
+  code,body,ctype = service.post_with_ct(engine_api_name(), "/1/stream/sample?n=%d" % n,
                                          ctype="application/json", data=desc)
   if code == 200:
     if ctype == "application/json":

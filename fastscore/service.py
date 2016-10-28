@@ -3,7 +3,7 @@ import os
 import yaml
 import requests
 
-API_NAMES = ["engine","model-manage"]
+API_NAMES = ["engine","model-manage","engine-x"]
 
 options = {}
 
@@ -80,4 +80,33 @@ def lookup(api):
         resolved[api] = prefix
         return prefix
     raise(Exception("No healthy instances found"))
+
+# This records the first occurance of the engine api
+# to .fastscore, which is what we will use by default. 
+def set_fleet(data):
+    config = yaml.load(data)
+    fleet = config['fastscore']['fleet']
+    with open('.fastscore', 'a') as f:
+        for ship in fleet:
+            if ship['api'] == 'engine-x':
+                f.write("engine-api: %s\n" % 'engine-x')
+                break
+            elif ship['api'] == 'engine':
+                f.write("engine-api: %s\n" % 'engine')
+                break
+
+# Added to resolve ambiguity between engine and engine-x.
+# engine-api is recorded in .fastscore.
+def engine_api_name():
+    if 'engine-x' in resolved:
+        return 'engine-x'
+    elif 'engine' in resolved:
+        return 'engine'
+    if 'engine-x' in preferred:
+        return 'engine-x'
+    elif 'engine' in preferred:
+        return 'engine'
+    if 'engine-api' in options:
+        return options['engine-api']
+    raise(Exception('No engine found'))
 

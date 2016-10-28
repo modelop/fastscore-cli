@@ -4,6 +4,7 @@ import json
 import base64
 
 import service
+from service import engine_api_name
 
 def run(args):
   model_name = args["model-name"]
@@ -36,19 +37,19 @@ def get_att(model_name, att_name):
 
 def run1(in_desc, out_desc, ctype, body, attachments=[]):
   if attachments == []:
-    code1,body1 = service.put("engine", "/1/job/model", ctype, body)
+    code1,body1 = service.put(engine_api_name(), "/1/job/model", ctype, body)
   else:
     parts = [ ('attachments',x) for x in attachments ]
     parts.append( ('model',('(source)',body,ctype)) )
-    code1,body1 = service.put_multi("engine", "/1/job/model", parts)
+    code1,body1 = service.put_multi(engine_api_name(), "/1/job/model", parts)
   if code1 != 204:
     raise Exception(body1)
   print "Model sent to engine"
-  code2,body2 = service.put("engine", "/1/job/stream/in", "application/json", in_desc) 
+  code2,body2 = service.put(engine_api_name(), "/1/job/stream/in", "application/json", in_desc)
   if code2 != 204:
     raise Exception(body2)
   print "Input stream set"
-  code3,body3 = service.put("engine", "/1/job/stream/out", "application/json", out_desc) 
+  code3,body3 = service.put(engine_api_name(), "/1/job/stream/out", "application/json", out_desc)
   if code3 != 204:
     raise Exception(body3)
   print "Output stream set"
@@ -80,7 +81,7 @@ def debug(args):
     raise Exception(body)
 
 def debug1(data):
-  code,report = service.post("engine", "/1/job/debug", ctype="application/json", data=data)
+  code,report = service.post(engine_api_name(), "/1/job/debug", ctype="application/json", data=data)
   if code == 200:
     print report
   else:
@@ -100,14 +101,14 @@ def discard_desc():
 
 def scale(args):
   n = int(args["num-jets"])
-  code,body = service.post("engine", "/1/job/scale?n=%d" % n)
+  code,body = service.post(engine_api_name(), "/1/job/scale?n=%d" % n)
   if code == 204:
     print "Model scaling successful"
   else:
     raise Exception(body)
 
 def stop(args):
-  code,body = service.delete("engine", "/1/job")
+  code,body = service.delete(engine_api_name(), "/1/job")
   if code == 204:
     print "Engine stopped"
   else:
