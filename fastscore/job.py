@@ -6,11 +6,16 @@ import base64
 import service
 from service import engine_api_name
 
+stream_shortcuts = {
+  "discard": '{"Transport":{"Type":"discard"}}',
+  "console": '{"Transport":{"Type":"console"}}'
+}
+
 def run(args):
   model_name = args["model-name"]
   in_desc = get_stream_desc(args["in-stream-name"])
   out_desc = get_stream_desc(args["out-stream-name"]) \
-                  if "out-stream-name" in args else discard_desc()
+                  if "out-stream-name" in args else stream_shortcuts["discard"]
   code,body,ctype = service.get_with_ct("model-manage", "/1/model/%s" % model_name)
   if code == 200:
     att = attachments(model_name)
@@ -59,7 +64,7 @@ def debug(args):
   model_name = args["model-name"]
   in_desc = get_stream_desc(args["in-stream-name"])
   out_desc = get_stream_desc(args["out-stream-name"]) \
-                  if "out-stream-name" in args else discard_desc()
+                  if "out-stream-name" in args else stream_shortcuts["discard"]
   code,body,ctype = service.get_with_ct("model-manage", "/1/model/%s" % model_name)
   att = attachments(model_name)
   if code == 200:
@@ -88,6 +93,8 @@ def debug1(data):
     raise Exception(report)
 
 def get_stream_desc(name):
+  if name in stream_shortcuts:
+    return stream_shortcuts[name]
   code,body = service.get("model-manage", "/1/stream/%s" % name)
   if code == 200:
     return body
@@ -95,9 +102,6 @@ def get_stream_desc(name):
     raise Exception("Stream '%s' not found" % name)
   else:
     raise Exception(body)
-
-def discard_desc():
-  return '{"Transport":{"Type":"discard"}}'
 
 def scale(args):
   n = int(args["num-jets"])

@@ -9,6 +9,8 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+is_interactive = False
+
 def help(args):
   usage()
 
@@ -45,6 +47,7 @@ command_specs = \
   (stats.memory,        ["job","memory"])]
 
 def main():
+  global is_interactive
   service.options["verbose"] = 0
   for x in sys.argv[1:]:
     if x == '-v':
@@ -66,10 +69,10 @@ def main():
                        for w in spec
                        if w[0] != '<' ]))
     interactive.words = w
+    is_interactive = True
     interactive.loop()
     return 0
   elif not run(words):
-    usage()
     return 1
 
   return 0 # exit status
@@ -81,12 +84,13 @@ def run(words):
       if args != None:
         try:
           command(args)
+          return True
         except Exception as e:
-          traceback.print_exc()   # Debug only
-          sys.exit(1) # Added to output correct exit code
-          #print e.message
-        return True
-  return False
+          #traceback.print_exc()   # Debug only
+          print e.message
+          return False
+  usage()
+  return True
 
 def match(acc, (t,s)):
   if acc == None:
@@ -99,8 +103,12 @@ def match(acc, (t,s)):
   return None
 
 def usage():
+  global is_interactive
   print "FastScore CLI v1.1"
   print "Usage:"
   for (_,spec) in command_specs:
-    print "  fastscore", str.join(" ", spec)
+    if not is_interactive:
+      print "  fastscore", str.join(" ", spec)
+    else:
+      print " ", str.join(" ", spec)
 

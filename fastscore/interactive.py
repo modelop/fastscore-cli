@@ -6,7 +6,10 @@ from websocket import create_connection
 import json
 
 import service
+from service import engine_api_name
 import dispatch
+
+from datetime import datetime
 
 words = []
 
@@ -18,7 +21,10 @@ def complete(text, state):
     return matches[state]
   return None
 
+console_stream_data_requested = False
+
 def loop():
+  global console_stream_data_requested
   if "proxy-prefix" in service.options:
     connect_notify()
     
@@ -26,12 +32,33 @@ def loop():
   readline.parse_and_bind("tab: complete")
   try:
     while True:
-      line = raw_input("> ")
-      if line != "":
-        if not dispatch.run(line.split()):
-          print "Invalid command - use 'help'"
+      if console_stream_data_requested:
+        user_input()
+        console_stream_data_requested = False
+      else:
+        line = raw_input("> ")
+        if line != "":
+          dispatch.run(line.split())
   except EOFError:
     print
+
+def user_input():
+  data = []
+  try:
+    prompt = "console-stream-input (Ctrl-D to EOF): "
+    data = [raw_input(prompt)]
+  except:
+    print
+  input_msg = {
+    "src": "user",
+    "timestamp": datetime.now().isoformat(),
+    "type": "console-stream-input",
+    "data": data
+  }
+  service.post(engine_api_name(),
+      "/1/pneumo",
+      ctype="application/json",
+      data=json.dumps(input_msg))
 
 def connect_notify():
   prefix = service.options["proxy-prefix"]
@@ -40,10 +67,11 @@ def connect_notify():
                               sslopt={"cert_reqs": ssl.CERT_NONE})
     while True:
       x = json.loads(ws.recv())
-      print_notify(x)
+      do_notify(x)
   thread.start_new_thread(notify, ())
 
-def print_notify(msg):
+def do_notify(msg):
+  global console_stream_data_requested
   src = msg["src"]
   timestamp = msg["timestamp"]
   type = msg["type"]
@@ -61,26 +89,37 @@ def print_notify(msg):
             time_only(timestamp),
             level_text(msg["level"]),
             msg["text"])
+
   elif type == "output-report":
     for x in msg["outputs"]:
-      print "[%s] output [%s] %s" % \
-           (src,
-            msg["model"],
-            json.dumps(x))
+      print "[%s] output [%s] %s" % (src,msg["model"],x)
     skipped = msg["skipped"]
     if skipped > 0:
       print "[%s] %d ouput(s) skipped" % (src,skipped)
+
   elif type == "jet-status-report":
-    m = [ j["memory"] for j in msg["jets"] ]
-    if len(m) == 1:
-      print "Mem: %s" % mb(m[0])
-    else:
-      print "Mem:",
-      for x in m:
-        print mb(x),
-      print "total %s" % mb(sum(m))
+    pass
+##    m = [ j["memory"] for j in msg["jets"] ]
+##    if len(m) == 1:
+##      print "Mem: %s" % mb(m[0])
+##    else:
+##      print "Mem:",
+##      for x in m:
+##        print mb(x),
+##      print "total %s" % mb(sum(m))
+
   elif type == "model-console":
     print "[%s] %s" % (src,msg["text"]),
+
+  elif type == "console-stream-more":
+    console_stream_data_requested = True
+
+  elif type == "console-stream-input":
+    pass  ## local Pneumo messages?
+
+  elif type == "console-stream-output":
+    for x in msg["data"]:
+       print "console-stream-output: %s" % x
 
   else:
     print json.dumps(msg, indent=2)
