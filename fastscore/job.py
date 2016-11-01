@@ -41,6 +41,14 @@ def get_att(model_name, att_name):
     raise Exception(body)
 
 def run1(in_desc, out_desc, ctype, body, attachments=[]):
+  code3,body3 = service.put(engine_api_name(), "/1/job/stream/out", "application/json", out_desc)
+  if code3 != 204:
+    raise Exception(body3)
+  print "Output stream set"
+  code2,body2 = service.put(engine_api_name(), "/1/job/stream/in", "application/json", in_desc)
+  if code2 != 204:
+    raise Exception(body2)
+  print "Input stream set"
   if attachments == []:
     code1,body1 = service.put(engine_api_name(), "/1/job/model", ctype, body)
   else:
@@ -50,14 +58,6 @@ def run1(in_desc, out_desc, ctype, body, attachments=[]):
   if code1 != 204:
     raise Exception(body1)
   print "Model sent to engine"
-  code2,body2 = service.put(engine_api_name(), "/1/job/stream/in", "application/json", in_desc)
-  if code2 != 204:
-    raise Exception(body2)
-  print "Input stream set"
-  code3,body3 = service.put(engine_api_name(), "/1/job/stream/out", "application/json", out_desc)
-  if code3 != 204:
-    raise Exception(body3)
-  print "Output stream set"
   print "The engine is running"
 
 def debug(args):
@@ -120,15 +120,15 @@ def stop(args):
 
 def ctype_to_type(ctype):
   if ctype == "application/vnd.pfa+json":
-    return "pfa"
+    return "PFA/json"
   elif ctype == "application/vnd.ppfa":
-    return "ppfa"
+    return "PrettyPFA"
   elif ctype == "application/x-yaml":
-    return "yaml"
+    return "PFA/yaml"
   elif ctype == "application/x-python":
     return "python"
   elif ctype == "application/x-r":
-    return "r"
+    return "R"
   else:
     raise Exception("%s not recognized" % ctype)
 
