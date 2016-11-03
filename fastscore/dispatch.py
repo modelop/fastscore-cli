@@ -86,8 +86,10 @@ def run(words):
           command(args)
           return True
         except Exception as e:
-          #traceback.print_exc()   # Debug only
-          print e.message
+          if e.message == "":
+            traceback.print_exc()   # Debug only
+          else:
+            print e.message
           return False
   usage()
   return True
