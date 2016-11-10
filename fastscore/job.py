@@ -13,13 +13,21 @@ stream_shortcuts = {
 
 def run(args):
   model_name = args["model-name"]
-  in_desc = get_stream_desc(args["in-stream-name"])
-  out_desc = get_stream_desc(args["out-stream-name"]) \
-                  if "out-stream-name" in args else stream_shortcuts["discard"]
+
+  in_name = args["in-stream-name"]
+  in_desc = get_stream_desc(in_name)
+
+  if "out-stream-name" in args:
+    out_name = args["out-stream-name"]
+    out_desc = get_stream_desc(out_name)
+  else:
+    out_name = "discard"
+    out_desc = stream_shortcuts["discard"]
+
   code,body,ctype = service.get_with_ct("model-manage", "/1/model/%s" % model_name)
   if code == 200:
     att = attachments(model_name)
-    run1(in_desc, out_desc, ctype, body, attachments=att)
+    run1(in_name, in_desc, out_name, out_desc, ctype, model_name, body, attachments=att)
   elif code == 404:
     print "Model '%s' not found" % model_name
   else:
@@ -40,20 +48,26 @@ def get_att(model_name, att_name):
   else:
     raise Exception(body)
 
-def run1(in_desc, out_desc, ctype, body, attachments=[]):
-  code3,body3 = service.put(engine_api_name(), "/1/job/stream/out", "application/json", out_desc)
+def run1(in_name, in_desc, out_name, out_desc, ctype, model_name, body, attachments=[]):
+  headers1 = {"content-type": "application/json",
+              "content-disposition": "x-stream; name=\"" + out_name + "\""}
+  code3,body3 = service.put_with_headers(engine_api_name(), "/1/job/stream/out", headers1, out_desc)
   if code3 != 204:
     raise Exception(body3)
   print "Output stream set"
-  code2,body2 = service.put(engine_api_name(), "/1/job/stream/in", "application/json", in_desc)
+  headers2 = {"content-type": "application/json",
+              "content-disposition": "x-stream; name=\"" + in_name + "\""}
+  code2,body2 = service.put_with_headers(engine_api_name(), "/1/job/stream/in", headers2, in_desc)
   if code2 != 204:
     raise Exception(body2)
   print "Input stream set"
   if attachments == []:
-    code1,body1 = service.put(engine_api_name(), "/1/job/model", ctype, body)
+    headers3 = {"content-type": ctype,
+                "content-disposition": "x-model; name=\"" + model_name + "\""}
+    code1,body1 = service.put_with_headers(engine_api_name(), "/1/job/model", headers3, body)
   else:
-    parts = [ ('attachments',x) for x in attachments ]
-    parts.append( ('model',('(source)',body,ctype)) )
+    parts = [ ("attachment",x) for x in attachments ]
+    parts.append( ("x-model",(model_name,body,ctype)) )
     code1,body1 = service.put_multi(engine_api_name(), "/1/job/model", parts)
   if code1 != 204:
     raise Exception(body1)

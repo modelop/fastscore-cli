@@ -37,6 +37,10 @@ def put(api, path, ctype, data):
   r = requests.put(lookup(api) + path, headers=headers, data=data, verify=False)
   return r.status_code,r.content
 
+def put_with_headers(api, path, headers, data):
+  r = requests.put(lookup(api) + path, headers=headers, data=data, verify=False)
+  return r.status_code,r.content
+
 def put_multi(api, path, parts):
   r = requests.put(lookup(api) + path, files=parts, verify=False)
   return r.status_code,r.content
