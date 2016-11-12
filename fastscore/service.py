@@ -19,6 +19,10 @@ def proxy_prefix():
     raise(Exception("Not connected - use 'fastscore connect <url-prefix>'"))
   return options["proxy-prefix"]
 
+def head(api, path):
+  r = requests.head(lookup(api) + path, verify=False)
+  return r.status_code,r.headers
+
 def get(api, path):
   r = requests.get(lookup(api) + path, verify=False)
   return r.status_code,r.content

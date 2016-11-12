@@ -6,6 +6,8 @@ import base64
 import service
 from service import engine_api_name
 
+MAX_INLINE_ATTACHMENT = 1024*1024
+
 stream_shortcuts = {
   "discard": '{"Transport":{"Type":"discard"}}',
   "console": '{"Transport":{"Type":"console"}}'
@@ -41,12 +43,41 @@ def attachments(model_name):
     raise Exception(body)
 
 def get_att(model_name, att_name):
-  code,body,ctype = service.get_with_ct("model-manage",
+  _,headers = service.head("model-manage",
                   "/1/model/%s/attachment/%s" % (model_name,att_name))
-  if code == 200:
-    return (att_name,body,ctype)
+  ctype = headers["content-type"]
+  size = int(headers["content-length"])
+  if size > MAX_INLINE_ATTACHMENT:
+
+    ## See https://opendatagoup.atlassian.net/wiki/display/FAS/Working+with+large+attachments
+    ##
+    ## An example of an externalized attachment:
+    ##
+    ## Content-Type: message/external-body; access-type=x-model-manage; name="att1.zip"
+    ##
+    ## Content-Type: application/zip
+    ## Content-Disposition: attachment; filename="att1.zip"
+    ## Content-Length: 1234
+    ##
+
+    ext_type = "message/external-body; " + \
+               "access-type=x-model-manage; " + \
+               "model=\"%s\"; name=\"%s\"" % (model_name,att_name)
+
+    body = "Content-Type: %s\r\n" % ctype + \
+           "Content-Disposition: attachment; filename=\"%s\"\r\n" % att_name + \
+           "Content-Length: %d\r\n" % size + \
+           "\r\n"
+
+    return (att_name,body,ext_type)
+
   else:
-    raise Exception(body)
+    code,body = service.get("model-manage",
+                    "/1/model/%s/attachment/%s" % (model_name,att_name))
+    if code == 200:
+      return (att_name,body,ctype)
+    else:
+      raise Exception(body)
 
 def run1(in_name, in_desc, out_name, out_desc, ctype, model_name, body, attachments=[]):
   headers1 = {"content-type": "application/json",
