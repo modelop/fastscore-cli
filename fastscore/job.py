@@ -62,7 +62,7 @@ def get_att(model_name, att_name):
 
     ext_type = "message/external-body; " + \
                "access-type=x-model-manage; " + \
-               "model=\"%s\"; name=\"%s\"" % (model_name,att_name)
+               "ref=\"urn:fastscore:attachment:%s:%s\"" % (model_name,att_name)
 
     body = "Content-Type: %s\r\n" % ctype + \
            "Content-Disposition: attachment; filename=\"%s\"\r\n" % att_name + \
