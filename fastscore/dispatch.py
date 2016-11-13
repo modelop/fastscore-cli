@@ -2,7 +2,8 @@
 import sys
 import traceback
 
-from fastscore import service, connect, config, fleet, model, attachment, stream, job, stats
+from fastscore import service, connect, config, fleet, model, attachment
+from fastscore import stream, schema, job, stats
 from fastscore import interactive
 
 import requests
@@ -34,6 +35,10 @@ command_specs = \
   (stream.sample,       ["stream","sample","<stream-name>"]),
   (stream.sample,       ["stream","sample","<stream-name>","<num-items>"]),
   (stream.remove,       ["stream","remove","<stream-name>"]),
+  (schema.list,         ["schema","list"]),
+  (schema.add,          ["schema","add","<schema-name>","<schema-file>"]),
+  (schema.show,         ["schema","show","<schema-name>"]),
+  (schema.remove,       ["schema","remove","<schema-name>"]),
   (job.run,             ["job","run","<model-name>","<in-stream-name>","<out-stream-name>"]),
   (job.run,             ["job","run","<model-name>","<in-stream-name>"]),
   (job.scale,           ["job","scale","<num-jets>"]),
@@ -106,7 +111,7 @@ def match(acc, (t,s)):
 
 def usage():
   global is_interactive
-  print "FastScore CLI v1.1"
+  print "FastScore CLI v1.3"
   print "Usage:"
   for (_,spec) in command_specs:
     if not is_interactive:
