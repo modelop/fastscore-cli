@@ -5,6 +5,8 @@ import json
 import service
 from service import engine_api_name
 
+from tabulate import tabulate
+
 def list(args):
   code,body = service.get("model-manage", "/1/stream")
   if code == 200:
@@ -59,7 +61,25 @@ def sample1(n, desc):
     else:
       print body
   else:
-    print code
+    raise Exception(body)
+
+def rate(args):
+  name = args["stream-name"]
+  code,body = service.get("model-manage", "/1/stream/%s" % name)
+  if code == 200:
+    rate1(body)
+  elif code == 404:
+    print "Stream '%s' not found" % name
+  else:
+    raise Exception(body)
+
+def rate1(desc):
+  code,body = service.post(engine_api_name(), "/1/stream/rate",
+                           ctype="application/json", data=desc)
+  if code == 200:
+    t = [ [n+1,x["rps"]/1000,x["mbps"]] for n,x in enumerate(json.loads(body)) ]
+    print tabulate(t, headers=["#","Krec/s","MB/s"])
+  else:
     raise Exception(body)
 
 def remove(args):

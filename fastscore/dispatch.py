@@ -34,6 +34,7 @@ command_specs = \
   (stream.show,         ["stream","show","<stream-name>"]),
   (stream.sample,       ["stream","sample","<stream-name>"]),
   (stream.sample,       ["stream","sample","<stream-name>","<num-items>"]),
+  (stream.rate,         ["stream","rate","<stream-name>"]),
   (stream.remove,       ["stream","remove","<stream-name>"]),
   (schema.list,         ["schema","list"]),
   (schema.add,          ["schema","add","<schema-name>","<schema-file>"]),

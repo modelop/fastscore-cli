@@ -1,0 +1,8 @@
+{
+  "type": "record",
+  "name": "A",
+  "fields": [
+    { "name": "f1", "type": "int" },
+    { "name": "f2", "type": { "$ref": "b1" } }
+  ]
+}
