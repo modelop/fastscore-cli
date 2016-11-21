@@ -6,6 +6,9 @@ import base64
 import service
 from service import engine_api_name
 
+from tabulate import tabulate
+from stats import human_fmt
+
 MAX_INLINE_ATTACHMENT = 1024*1024
 
 stream_shortcuts = {
@@ -155,6 +158,56 @@ def scale(args):
     print "Model scaling successful"
   else:
     raise Exception(body)
+
+def cpu_utilization(args):
+  path = "/1/job/sample/cpu"
+  if "duration" in args:
+    path += "?duration=" + args["duration"]
+  code,body = service.post(engine_api_name(), path)
+  if code == 200:
+    x = json.loads(body)
+    if "error" in x:
+      print "Cannot collect CPU utilization info: " + x["error"]
+    else:
+      report = x["cpu-utilization"]
+      report_cpu_util(report)
+  else:
+    raise Exception(body)
+
+def report_cpu_util(report):
+  t = [["Duration, s",report["duration"]],
+       ["Input",rb(report["input_bytes"], report["input_records"])],
+       ["Output",rb(report["output_bytes"], report["output_records"])],
+       ["CPU time (streams), s",ct(report["user_time"], report["kernel_time"])]]
+  print tabulate(t)
+  op_times = report["op_times"]
+  op_names = ["unwrap_envelope",
+              "wrap_envelope",
+              "decode_input_record",
+              "decode_output_record",
+              "type_check_input",
+              "type_check_output"]
+  t = [ [name,tc(op_times[name], op_times[name + "_n"])] for name in op_names ]
+  print tabulate(t, headers=["Operation","Time, s (user+kernel)"])
+  print
+  jets = report["jets"]
+  for i in range(len(jets)):
+    jets[i]["id"] = i+1
+  t = [ [x["id"],
+         x["input_records"],
+         x["output_records"],
+         ct(x["user_time"], x["kernel_time"])] for x in jets ]
+  print tabulate(t, headers=["Instance","Input","Output","CPU time, s"])
+
+def ct(ut, kt):
+  return "%.3f (%.3f user + %.3f kernel)" % (ut + kt,ut,kt)
+
+def rb(bytes, records):
+  (v,u) = human_fmt(bytes)
+  return "%d record(s) (%.1f%s)" % (records,v,u)
+
+def tc(tm, cnt):
+  return "%.3f (%d)" % (tm,cnt)
 
 def stop(args):
   code,body = service.delete(engine_api_name(), "/1/job")

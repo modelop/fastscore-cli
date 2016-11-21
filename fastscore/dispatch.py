@@ -45,6 +45,8 @@ command_specs = \
   (job.scale,           ["job","scale","<num-jets>"]),
   (job.debug,           ["job","debug","<model-name>","<in-stream-name>","<out-stream-name>"]),
   (job.debug,           ["job","debug","<model-name>","<in-stream-name>"]),
+  (job.cpu_utilization, ["job","cpu-utilization"]),
+  (job.cpu_utilization, ["job","cpu-utilization","<duration>"]),
   (job.stop,            ["job","stop"]),
   (stats.status,        ["job","status"]),
   (stats.statistics,    ["job","statistics"]),
