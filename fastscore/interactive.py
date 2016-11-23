@@ -121,6 +121,9 @@ def do_notify(msg):
     for x in msg["data"]:
        print "console-stream-output: %s" % x
 
+  elif type == "x-jet-info":
+    pass # internal profiler messages
+
   else:
     print json.dumps(msg, indent=2)
 

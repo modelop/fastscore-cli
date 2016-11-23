@@ -196,8 +196,13 @@ def report_cpu_util(report):
   t = [ [x["id"],
          x["input_records"],
          x["output_records"],
-         ct(x["user_time"], x["kernel_time"])] for x in jets ]
-  print tabulate(t, headers=["Instance","Input","Output","CPU time, s"])
+         ct(x["user_time"], x["kernel_time"]),
+         x["model_time"]] for x in jets ]
+  print tabulate(t, headers=["Instance",
+                             "Input",
+                             "Output",
+                             "CPU time, s",
+                             "Model time, s"])
 
 def ct(ut, kt):
   return "%.3f (%.3f user + %.3f kernel)" % (ut + kt,ut,kt)
