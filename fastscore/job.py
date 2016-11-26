@@ -214,6 +214,18 @@ def rb(bytes, records):
 def tc(tm, cnt):
   return "%.3f (%d)" % (tm,cnt)
 
+def input(args):
+  data = sys.stdin.read()
+  if data == "":
+    return
+  code,body = service.post(engine_api_name(), "/1/job/input", data=data)
+  if code == 200:
+    if sys.stdin.isatty() and sys.stdout.isatty():
+      print "-------- model output --------"
+    print body
+  else:
+    raise Exception(body)
+
 def stop(args):
   code,body = service.delete(engine_api_name(), "/1/job")
   if code == 204:

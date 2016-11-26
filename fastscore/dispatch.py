@@ -47,6 +47,7 @@ command_specs = \
   (job.debug,           ["job","debug","<model-name>","<in-stream-name>"]),
   (job.cpu_utilization, ["job","cpu-utilization"]),
   (job.cpu_utilization, ["job","cpu-utilization","<duration>"]),
+  (job.input,           ["job","input"]),
   (job.stop,            ["job","stop"]),
   (stats.status,        ["job","status"]),
   (stats.statistics,    ["job","statistics"]),
