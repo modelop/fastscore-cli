@@ -21,10 +21,7 @@ def complete(text, state):
     return matches[state]
   return None
 
-console_stream_data_requested = False
-
 def loop():
-  global console_stream_data_requested
   if "proxy-prefix" in service.options:
     connect_notify()
     
@@ -32,33 +29,11 @@ def loop():
   readline.parse_and_bind("tab: complete")
   try:
     while True:
-      if console_stream_data_requested:
-        user_input()
-        console_stream_data_requested = False
-      else:
-        line = raw_input("> ")
-        if line != "":
-          dispatch.run(line.split())
+      line = raw_input("> ")
+      if line != "":
+        dispatch.run(line.split())
   except EOFError:
     print
-
-def user_input():
-  data = []
-  try:
-    prompt = "console-stream-input (Ctrl-D to EOF): "
-    data = [raw_input(prompt)]
-  except:
-    print
-  input_msg = {
-    "src": "user",
-    "timestamp": datetime.now().isoformat(),
-    "type": "console-stream-input",
-    "data": data
-  }
-  service.post(engine_api_name(),
-      "/1/pneumo",
-      ctype="application/json",
-      data=json.dumps(input_msg))
 
 def connect_notify():
   prefix = service.options["proxy-prefix"]
@@ -71,7 +46,6 @@ def connect_notify():
   thread.start_new_thread(notify, ())
 
 def do_notify(msg):
-  global console_stream_data_requested
   src = msg["src"]
   timestamp = msg["timestamp"]
   type = msg["type"]
@@ -110,16 +84,6 @@ def do_notify(msg):
 
   elif type == "model-console":
     print "[%s] %s" % (src,msg["text"]),
-
-  elif type == "console-stream-more":
-    console_stream_data_requested = True
-
-  elif type == "console-stream-input":
-    pass  ## local Pneumo messages?
-
-  elif type == "console-stream-output":
-    for x in msg["data"]:
-       print "console-stream-output: %s" % x
 
   elif type == "x-jet-info":
     pass # internal profiler messages

@@ -12,8 +12,7 @@ from stats import human_fmt
 MAX_INLINE_ATTACHMENT = 1024*1024
 
 stream_shortcuts = {
-  "discard": '{"Transport":{"Type":"discard"}}',
-  "console": '{"Transport":{"Type":"console"}}'
+  "discard": '{"Transport":"discard"}'
 }
 
 def run(args):
