@@ -1,5 +1,6 @@
 
 import os
+import sys
 import json
 
 import service
@@ -17,19 +18,22 @@ def list(args):
 
 def add(args):
   name = args["stream-name"]
-  resource = args["desc-file"]
-  if not os.path.exists(resource):
-    raise Exception("%s not found" % resource)
-  with open(resource) as f:
-    desc = f.read()
-    ctype = "application/json"
-    code,body = service.put("model-manage", "/1/stream/%s" % name, ctype, desc)
-    if code == 201:
-      print "Stream '%s' added" % name
-    elif code == 204:
-      print "Stream '%s' updated" %  name
-    else:
-      raise Exception(body)
+  if "desc-file" in args:
+    resource = args["desc-file"]
+    if not os.path.exists(resource):
+      raise Exception("%s not found" % resource)
+    with open(resource) as f:
+      desc = f.read()
+  else:
+    desc = sys.stdin.read()
+  ctype = "application/json"
+  code,body = service.put("model-manage", "/1/stream/%s" % name, ctype, desc)
+  if code == 201:
+    print "Stream '%s' added" % name
+  elif code == 204:
+    print "Stream '%s' updated" %  name
+  else:
+    raise Exception(body)
 
 def show(args):
   name = args["stream-name"]

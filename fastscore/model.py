@@ -1,6 +1,8 @@
 
 import os
+import sys
 import json
+import re
 from tabulate import tabulate
 
 import service
@@ -15,19 +17,23 @@ def list(args):
 
 def add(args):
   name = args["model-name"]
-  resource = args["source-file"]
-  if not os.path.exists(resource):
-    raise Exception("%s not found" % resource)
-  ctype = guess_ctype(resource)
-  with open(resource) as f:
-    model = f.read()
-    code,body = service.put("model-manage", "/1/model/%s" % name, ctype, model)
-    if code == 201:
-      print "Model '%s' added" % name
-    elif code == 204:
-      print "Model '%s' updated" %  name
-    else:
-      raise Exception(body)
+  if "source-file" in args:
+    resource = args["source-file"]
+    if not os.path.exists(resource):
+      raise Exception("%s not found" % resource)
+    with open(resource) as f:
+      model = f.read()
+    ctype = guess_file_ctype(resource)
+  else:
+    model = sys.stdin.read()
+    ctype = guess_model_ctype(model)
+  code,body = service.put("model-manage", "/1/model/%s" % name, ctype, model)
+  if code == 201:
+    print "Model '%s' added" % name
+  elif code == 204:
+    print "Model '%s' updated" %  name
+  else:
+    raise Exception(body)
 
 def show(args):
   name = args["model-name"]
@@ -49,7 +55,7 @@ def remove(args):
   else:
     raise Exception(body)
 
-def guess_ctype(resource):
+def guess_file_ctype(resource):
   _,ext = os.path.splitext(resource)
   if ext == ".pfa":
     return "application/vnd.pfa+json"
@@ -65,4 +71,12 @@ def guess_ctype(resource):
     return "application/x-r"
   else:
     raise Exception("%s must have a proper extension (.pfa, .ppfa, .yaml, .py, or .R)" % resource)
+
+def guess_model_ctype(model):
+  if re.search("def\\s+action\(", model, flags=re.MULTILINE) != None:
+    return "application/x-python"
+  if re.search("action\\s+<-\\s+function\(", model, flags=re.MULTILINE) != None:
+    return "application/x-r"
+  else:
+    raise Exception("Error: cannot guess the type of the model")
 
