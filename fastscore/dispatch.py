@@ -3,7 +3,7 @@ import sys
 import traceback
 
 from fastscore import service, connect, config, fleet, model, attachment
-from fastscore import stream, schema, job, stats
+from fastscore import stream, schema, job, pneumo, stats
 from fastscore import interactive
 
 import requests
@@ -56,6 +56,10 @@ command_specs = \
   (stats.statistics,    ["job","statistics"]),
   (stats.statistics_io, ["job","statistics","io"]),
   (stats.statistics0,   ["job","statistics","reset"]),
+  (pneumo.watch,        ["pneumo"]),
+  (pneumo.flush,        ["pneumo","flush"]),
+  (pneumo.list,         ["pneumo","wait"]),
+  (pneumo.wait,         ["pneumo","wait","<message-type>"]),
   (stats.memory,        ["job","memory"])]
 
 def main():
