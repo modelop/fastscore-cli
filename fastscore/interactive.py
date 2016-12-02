@@ -2,8 +2,8 @@
 import readline
 import thread
 
-import service
-import dispatch
+import service, dispatch, pneumo
+import json
 
 words = []
 

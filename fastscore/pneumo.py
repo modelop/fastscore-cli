@@ -26,11 +26,15 @@ def flush(args):
   flushed = 0
   try:
     while True:
-      ws.recv()
+      if service.options["verbose"] > 0:
+        x = json.loads(ws.recv())
+        print_message(x)
+      else:
+        ws.recv()
       flushed += 1
   except WebSocketTimeoutException:
     pass
-  if flushed > 0:
+  if flushed > 0 and service.options["verbose"] == 0:
     print "%d message(s) flushed" % flushed
   ws.close
 
