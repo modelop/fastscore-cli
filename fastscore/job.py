@@ -37,19 +37,19 @@ def run(args):
   else:
     raise Exception(body)
 
-def attachments(model_name):
+def attachments(model_name, force_inline=False):
   code,body = service.get("model-manage", "/1/model/%s/attachment" % model_name)
   if code == 200:
-    return [ get_att(model_name, att_name) for att_name in json.loads(body) ]
+    return [ get_att(model_name, att_name, force_inline) for att_name in json.loads(body) ]
   else:
     raise Exception(body)
 
-def get_att(model_name, att_name):
+def get_att(model_name, att_name, force_inline):
   _,headers = service.head("model-manage",
                   "/1/model/%s/attachment/%s" % (model_name,att_name))
   ctype = headers["content-type"]
   size = int(headers["content-length"])
-  if size > MAX_INLINE_ATTACHMENT:
+  if size > MAX_INLINE_ATTACHMENT and not force_inline:
 
     ## See https://opendatagoup.atlassian.net/wiki/display/FAS/Working+with+large+attachments
     ##
@@ -113,7 +113,7 @@ def debug(args):
   out_desc = get_stream_desc(args["out-stream-name"]) \
                   if "out-stream-name" in args else stream_shortcuts["discard"]
   code,body,ctype = service.get_with_ct("model-manage", "/1/model/%s" % model_name)
-  att = attachments(model_name)
+  att = attachments(model_name, force_inline=True)
   if code == 200:
     spec = {
       "input": in_desc,
