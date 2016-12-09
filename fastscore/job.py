@@ -118,7 +118,7 @@ def debug(args):
     spec = {
       "input": in_desc,
       "output": out_desc,
-      "type": ctype_to_type(ctype),
+      "type": model.ctype_to_type(ctype),
       "model": body,
       "attachments": [{
         "name": att_name,
@@ -231,20 +231,6 @@ def stop(args):
     print "Engine stopped"
   else:
     raise Exception(body)
-
-def ctype_to_type(ctype):
-  if ctype == "application/vnd.pfa+json":
-    return "PFA/json"
-  elif ctype == "application/vnd.ppfa":
-    return "PrettyPFA"
-  elif ctype == "application/x-yaml":
-    return "PFA/yaml"
-  elif ctype == "application/x-python":
-    return "python"
-  elif ctype == "application/x-r":
-    return "R"
-  else:
-    raise Exception("%s not recognized" % ctype)
 
 def att_ctype_to_type(ctype):
   if ctype == "application/zip":

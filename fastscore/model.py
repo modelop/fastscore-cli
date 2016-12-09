@@ -45,6 +45,10 @@ KNOWN_EXTENSIONS = {
   ".R":    "r"
 }
 
+def ctype_to_type(ctype):
+  global MEDIA_TYPES
+  return MEDIA_TYPES[ctype]
+
 def lookup_ctype(type):
   global MEDIA_TYPES
   for ctype in MEDIA_TYPES:
