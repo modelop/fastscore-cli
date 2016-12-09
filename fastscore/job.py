@@ -9,6 +9,8 @@ from service import engine_api_name
 from tabulate import tabulate
 from stats import human_fmt
 
+import model
+
 MAX_INLINE_ATTACHMENT = 1024*1024
 
 stream_shortcuts = {
