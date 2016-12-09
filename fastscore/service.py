@@ -5,7 +5,9 @@ import requests
 
 API_NAMES = ["engine","model-manage","engine-x"]
 
-options = {}
+options = {
+  "verbose": 0
+}
 
 preferred = {}    # preferred API instance names (set with -<api>:<name>)
 resolved = {}     # API instance prefixes

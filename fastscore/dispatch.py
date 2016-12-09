@@ -15,8 +15,22 @@ is_interactive = False
 def help(args):
   usage()
 
+def explain_options(args):
+  print "FastScore CLI v1.3"
+  print "Options:"
+  print "  -v                   Verbose (-vv, -vvv)"
+  print "  -<api>:<name>        Choose API instance (e.g. -engine:engine-1)"
+  print "  -type:<model-type>   Set model type (ignore file extension)"
+  print "  -type:pfa-json       --- PFA (json)"
+  print "  -type:pfa-pretty     --- PrettyPFA"
+  print "  -type:pfa-yaml       --- PFA (yaml)"
+  print "  -type:python         --- Python"
+  print "  -type:python3        --- Python 3"
+  print "  -type:r              --- R"
+
 command_specs = \
  [(help,                ["help"]),
+  (explain_options,     ["help","options"]),
   (connect.main,        ["connect","<url-prefix>"]),
   (config.set,          ["config","set","<config-file>"]),
   (config.show,         ["config","show"]),
@@ -62,23 +76,27 @@ command_specs = \
   (pneumo.wait,         ["pneumo","wait","<message-type>"]),
   (stats.memory,        ["job","memory"])]
 
-def main():
-  global is_interactive
-  service.options["verbose"] = 0
-  for x in sys.argv[1:]:
+def interpret_options(words):
+  for x in words:
     if x == '-v':
       service.options["verbose"] = 1
     elif x == '-vv':
       service.options["verbose"] = 2
     elif x == '-vvv':
       service.options["verbose"] = 3
+    elif x.startswith("-type:") and x.split(":")[1] in model.MODEL_TYPES:
+      model.requested_type = x.split(":")[1]
     elif x[0] == '-' and ":" in x and x[1:].split(":")[0] in service.API_NAMES:
       api,name = x[1:].split(":")
       service.preferred[api] = name
     elif x[0] == '-':
       print "Unknown option '%s' ignored" % x
 
-  words = [ x for x in sys.argv[1:] if x[0] != '-' ]
+  return [ x for x in words if x[0] != '-' ]
+
+def main():
+  global is_interactive
+  words = interpret_options(sys.argv[1:])
   if words == []:
     # for auto-complete
     w = sorted(set([ w for _,spec in command_specs

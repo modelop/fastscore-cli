@@ -25,7 +25,8 @@ def loop():
     while True:
       line = raw_input("> ")
       if line != "":
-        dispatch.run(line.split())
+        words = dispatch.interpret_options(line.split())
+        dispatch.run(words)
   except EOFError:
     print
 
