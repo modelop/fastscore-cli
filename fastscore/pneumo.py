@@ -6,7 +6,7 @@ from websocket import create_connection, WebSocketTimeoutException
 import json
 
 def connect():
-  prefix = service.options["proxy-prefix"]
+  prefix = service.proxy_prefix()
   ws = create_connection(prefix.replace("https:", "wss:") + "/api/1/service/connect/1/notify",
                          sslopt={"cert_reqs": ssl.CERT_NONE})
   return ws

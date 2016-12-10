@@ -18,7 +18,7 @@ if os.path.exists(".fastscore"):
 
 def proxy_prefix():
   if not "proxy-prefix" in options:
-    raise(Exception("Not connected - use 'fastscore connect <url-prefix>'"))
+    raise(Exception("Not connected - use 'fastscore connect <proxy-prefix>'"))
   return options["proxy-prefix"]
 
 def head(api, path):
