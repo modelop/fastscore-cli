@@ -3,7 +3,7 @@ import sys
 import traceback
 
 from fastscore import service, connect, config, fleet, model, attachment
-from fastscore import stream, schema, job, pneumo, stats
+from fastscore import stream, sensor, schema, job, pneumo, stats
 from fastscore import interactive
 
 import requests
@@ -52,6 +52,11 @@ command_specs = \
   (stream.sample,       ["stream","sample","<stream-name>","<num-items>"]),
   (stream.rate,         ["stream","rate","<stream-name>"]),
   (stream.remove,       ["stream","remove","<stream-name>"]),
+  (sensor.list,         ["sensor","list"]),
+  (sensor.add,          ["sensor","add","<sensor-name>"]),
+  (sensor.add,          ["sensor","add","<sensor-name>","<sensor-file>"]),
+  (sensor.show,         ["sensor","show","<sensor-name>"]),
+  (sensor.remove,       ["sensor","remove","<sensor-name>"]),
   (schema.list,         ["schema","list"]),
   (schema.add,          ["schema","add","<schema-name>"]),
   (schema.add,          ["schema","add","<schema-name>","<schema-file>"]),
