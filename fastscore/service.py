@@ -18,7 +18,7 @@ if os.path.exists(".fastscore"):
 
 def proxy_prefix():
   if not "proxy-prefix" in options:
-    raise(Exception("Not connected - use 'fastscore connect <proxy-prefix>'"))
+    raise Exception("Not connected - use 'fastscore connect <proxy-prefix>'")
   return options["proxy-prefix"]
 
 def head(api, path):
@@ -69,27 +69,36 @@ def delete(api, path):
 def lookup(api):
   if api in resolved:
     return resolved[api]
+
   if api in preferred:
     name = preferred[api]
-    prefix = proxy_prefix() + "/api/1/service/%s" % name
-    r = requests.get(prefix + "/1/health", verify=False)
+    r = requests.get(proxy_prefix() + "/api/1/service/connect/1/connect?name=%s" % name,
+                      verify=False)
     if r.status_code != 200:
-      raise(Exception("%s is not healthy" % name))
-    resolved[api] = prefix
-    return prefix
+      raise Exception(r.text)
+    fleet = r.json()
+    if len(fleet) == 0:
+      raise Exception("%s not configured (use 'fastscore config show')" % name)
+    x = fleet[0]
+    if x["health"] == "ok":
+      prefix = proxy_prefix() + "/api/1/service/%s" % name
+      resolved[api] = prefix
+    else:
+      raise Exception("%s is not healthy" % name)
+
   else:
     r = requests.get(proxy_prefix() + "/api/1/service/connect/1/connect?api=%s" % api, verify=False)
     if r.status_code != 200:
-      raise(Exception(r.text))
+      raise Exception(r.text)
     fleet = r.json()
     if len(fleet) == 0:
-      raise(Exception("%s not found" % api))
+      raise Exception("No instances of '%s' configured (use 'fastscore config show')" % api)
     for x in fleet:
       if x["health"] == "ok":
         prefix = proxy_prefix() + "/api/1/service/%s" % x["name"]
         resolved[api] = prefix
         return prefix
-    raise(Exception("No healthy instances found"))
+    raise Exception("No healthy instances of '%s' found (use 'fastscore fleet')" % api)
 
 # This records the first occurance of the engine api
 # to .fastscore, which is what we will use by default. 
@@ -118,5 +127,5 @@ def engine_api_name():
         return 'engine'
     if 'engine-api' in options:
         return options['engine-api']
-    raise(Exception('No engine found'))
+    raise Exception("Unable to resolve Engine API (add 'engine-api' option to .fastscore)")
 
