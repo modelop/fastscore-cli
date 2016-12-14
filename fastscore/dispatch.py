@@ -35,6 +35,7 @@ command_specs = \
   (config.set,          ["config","set","<config-file>"]),
   (config.show,         ["config","show"]),
   (fleet.main,          ["fleet"]),
+  (fleet.version,       ["fleet","version"]),
   (model.list,          ["model","list"]),
   (model.add,           ["model","add","<model-name>"]),
   (model.add,           ["model","add","<model-name>","<source-file>"]),

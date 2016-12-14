@@ -15,3 +15,14 @@ def main(args):
   else:
     raise Exception(r.text)
 
+def version(args):
+  r = requests.get(proxy_prefix() + "/api/1/service/connect/1/connect", verify=False)
+  if r.status_code == 403:
+    print "Connect not configured"
+  elif r.status_code == 200:
+    print r.json()
+    t = [ [x["name"],x["api"],x["release"],x["built_on"]] for x in r.json() ]
+    print tabulate(t, headers=["Name","API","Release","Built On"])
+  else:
+    raise Exception(r.text)
+
