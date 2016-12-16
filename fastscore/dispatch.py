@@ -129,6 +129,8 @@ def run(words):
           if e.message == "":
             traceback.print_exc()   # Debug only
           else:
+            if service.options["verbose"] == 3:
+              traceback.print_exc()
             print e.message
           return False
   usage()

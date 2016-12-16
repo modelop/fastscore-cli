@@ -14,7 +14,8 @@ resolved = {}     # API instance prefixes
 
 if os.path.exists(".fastscore"):
   with open(".fastscore", "r") as f:
-    options = yaml.load(f)
+    more = yaml.load(f)
+    options.update(more)
 
 def proxy_prefix():
   if not "proxy-prefix" in options:
@@ -83,6 +84,7 @@ def lookup(api):
     if x["health"] == "ok":
       prefix = proxy_prefix() + "/api/1/service/%s" % name
       resolved[api] = prefix
+      return prefix
     else:
       raise Exception("%s is not healthy" % name)
 
