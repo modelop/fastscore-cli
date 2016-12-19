@@ -12,25 +12,36 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 is_interactive = False
 
-def help(args):
-  usage()
+command_desc = \
+ {"help":         "Explain commands and options",
+  "connect":      "Establish FastScore connection",
+  "config":       "Configure FastScore",
+  "fleet":        "Check FastScore status",
+  "model":        "Add/remove models",
+  "attachment":   "Add/remove model attachments",
+  "stream":       "Adds/remove stream descriptors",
+  "sensor":       "Add/remove sensor descriptors",
+  "schema":       "Add/remove Avro schemas",
+  "job":          "Run/debug models",
+  "pneumo":       "Listen for notifications",
+  "tap":          "Install/remove sensors"}
 
-def explain_options(args):
+def help_me(args):
+  if "command" in args:
+    cmd = args["command"]
+    if cmd == "options":
+      explain_options()
+    else:
+      explain_command(cmd)
+  else:
+    overview_commands()
+
+def help_header():
   print "FastScore CLI v1.3"
-  print "Options:"
-  print "  -v                   Verbose (-vv, -vvv)"
-  print "  -<api>:<name>        Choose API instance (e.g. -engine:engine-1)"
-  print "  -type:<model-type>   Set model type (ignore file extension)"
-  print "  -type:pfa-json       --- PFA (json)"
-  print "  -type:pfa-pretty     --- PrettyPFA"
-  print "  -type:pfa-yaml       --- PFA (yaml)"
-  print "  -type:python         --- Python"
-  print "  -type:python3        --- Python 3"
-  print "  -type:r              --- R"
 
 command_specs = \
- [(help,                ["help"]),
-  (explain_options,     ["help","options"]),
+ [(help_me,             ["help"]),
+  (help_me,             ["help","<command>"]),
   (connect.main,        ["connect","<url-prefix>"]),
   (config.set,          ["config","set","<config-file>"]),
   (config.show,         ["config","show"]),
@@ -81,6 +92,43 @@ command_specs = \
   (pneumo.list,         ["pneumo","wait"]),
   (pneumo.wait,         ["pneumo","wait","<message-type>"]),
   (stats.memory,        ["job","memory"])]
+
+def explain_command(cmd):
+  global is_interactive
+  if not cmd in command_desc:
+    print "Command '%s' not available (use 'help')" % cmd
+  else:
+    print command_desc[cmd]
+    for (_,spec) in command_specs:
+      if spec[0] == cmd:
+        if not is_interactive:
+          print "  fastscore", str.join(" ", spec)
+        else:
+          print " ", str.join(" ", spec)
+
+def overview_commands():
+  global is_interactive
+  help_header()
+  print "Available commands ('help <command>' for more info):"
+  for cmd in sorted(command_desc.keys()):
+    if not is_interactive:
+      print "  fastscore %-16s" % cmd, command_desc[cmd]
+    else:
+      print "  %-16s" % cmd, command_desc[cmd]
+  print "Use 'help options' to list available options"
+
+def explain_options():
+  help_header()
+  print "Options:"
+  print "  -v                   Verbose (-vv, -vvv)"
+  print "  -<api>:<name>        Choose API instance (e.g. -engine:engine-1)"
+  print "  -type:<model-type>   Set model type (ignore file extension)"
+  print "  -type:pfa-json       --- PFA (json)"
+  print "  -type:pfa-pretty     --- PrettyPFA"
+  print "  -type:pfa-yaml       --- PFA (yaml)"
+  print "  -type:python         --- Python"
+  print "  -type:python3        --- Python 3"
+  print "  -type:r              --- R"
 
 def interpret_options(words):
   for x in words:
@@ -148,11 +196,8 @@ def match(acc, (t,s)):
 
 def usage():
   global is_interactive
-  print "FastScore CLI v1.3"
-  print "Usage:"
-  for (_,spec) in command_specs:
-    if not is_interactive:
-      print "  fastscore", str.join(" ", spec)
-    else:
-      print " ", str.join(" ", spec)
+  if is_interactive:
+    print "Use 'help' or 'help <command>'"
+  else:
+    print "Use 'fastscor help' or 'fasctscore help <command>'"
 
