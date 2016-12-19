@@ -22,52 +22,58 @@ def proxy_prefix():
     raise Exception("Not connected - use 'fastscore connect <proxy-prefix>'")
   return options["proxy-prefix"]
 
-def head(api, path):
-  r = requests.head(lookup(api) + path, verify=False)
+def head(name, path, generic=True):
+  r = requests.head(lookup(name, generic) + path, verify=False)
   return r.status_code,r.headers
 
-def get(api, path):
-  r = requests.get(lookup(api) + path, verify=False)
+def get(name, path, generic=True):
+  r = requests.get(lookup(name, generic) + path, verify=False)
   return r.status_code,r.content
 
-def get_str(api, path):
-  r = requests.get(lookup(api) + path, verify=False)
+def get_str(name, path, generic=True):
+  r = requests.get(lookup(name, generic) + path, verify=False)
   return r.status_code,r.content
 
-def get_with_ct(api, path):
-  r = requests.get(lookup(api) + path, verify=False)
+def get_with_ct(name, path, generic=True):
+  r = requests.get(lookup(name, generic) + path, verify=False)
   ctype = r.headers["content-type"]
   return r.status_code,r.content,ctype
 
-def put(api, path, ctype, data):
+def put(name, path, ctype, data, generic=True):
   headers = {"content-type": ctype}
-  r = requests.put(lookup(api) + path, headers=headers, data=data, verify=False)
+  r = requests.put(lookup(name, generic) + path, headers=headers, data=data, verify=False)
   return r.status_code,r.content
 
-def put_with_headers(api, path, headers, data):
-  r = requests.put(lookup(api) + path, headers=headers, data=data, verify=False)
+def put_with_headers(name, path, headers, data, generic=True):
+  r = requests.put(lookup(name) + path, headers=headers, data=data, verify=False)
   return r.status_code,r.content
 
-def put_multi(api, path, parts):
-  r = requests.put(lookup(api) + path, files=parts, verify=False)
+def put_multi(name, path, parts, generic=True):
+  r = requests.put(lookup(name, generic) + path, files=parts, verify=False)
   return r.status_code,r.content
 
-def post(api, path, ctype=None, data=None):
+def post(name, path, ctype=None, data=None, generic=True):
   headers = {"content-type": ctype} if ctype != None else None
-  r = requests.post(lookup(api) + path, headers=headers, data=data, verify=False)
+  r = requests.post(lookup(name, generic) + path, headers=headers, data=data, verify=False)
   return r.status_code,r.content
 
-def post_with_ct(api, path, ctype=None, data=None):
+def post_with_ct(name, path, ctype=None, data=None, generic=True):
   headers = {"content-type": ctype} if ctype != None else None
-  r = requests.post(lookup(api) + path, headers=headers, data=data, verify=False)
+  r = requests.post(lookup(name, generic) + path, headers=headers, data=data, verify=False)
   ctype = r.headers["content-type"]
   return r.status_code,r.content,ctype
 
-def delete(api, path):
-  r = requests.delete(lookup(api) + path, verify=False)
+def delete(name, path, generic=True):
+  r = requests.delete(lookup(name, generic) + path, verify=False)
   return r.status_code,r.content
 
-def lookup(api):
+def lookup(name, generic):
+  if generic:
+    return lookup_api(name)
+  else:
+    return proxy_prefix() + "/api/1/service/%s" % name
+
+def lookup_api(api):
   if api in resolved:
     return resolved[api]
 

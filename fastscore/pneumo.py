@@ -107,6 +107,10 @@ def print_message(msg):
   elif type == "x-jet-info":
     pass # internal profiler messages
 
+  elif type == "sensor-report":
+    data = json.dumps(msg["data"])
+    print "[%s] %s %s [%d] %s" % (src,time_only(timestamp),msg["tap"],msg["id"],data)
+
   else:
     print json.dumps(msg, indent=2)
 

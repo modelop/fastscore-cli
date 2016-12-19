@@ -3,7 +3,7 @@ import sys
 import traceback
 
 from fastscore import service, connect, config, fleet, model, attachment
-from fastscore import stream, sensor, schema, job, pneumo, stats
+from fastscore import stream, sensor, tap, schema, job, pneumo, stats
 from fastscore import interactive
 
 import requests
@@ -69,6 +69,11 @@ command_specs = \
   (sensor.add,          ["sensor","add","<sensor-name>","<sensor-file>"]),
   (sensor.show,         ["sensor","show","<sensor-name>"]),
   (sensor.remove,       ["sensor","remove","<sensor-name>"]),
+  (tap.install,         ["tap","install","<instance-name>","<sensor-name>"]),
+  (tap.inspect,         ["tap","inspect","<instance-name>","<tap-id>"]),
+  (tap.uninstall,       ["tap","uninstall","<instance-name>","<tap-id>"]),
+  (tap.list,            ["tap","list","<instance-name>"]),
+  (tap.available,       ["tap","available","<instance-name>"]),
   (schema.list,         ["schema","list"]),
   (schema.add,          ["schema","add","<schema-name>"]),
   (schema.add,          ["schema","add","<schema-name>","<schema-file>"]),
@@ -94,27 +99,19 @@ command_specs = \
   (stats.memory,        ["job","memory"])]
 
 def explain_command(cmd):
-  global is_interactive
   if not cmd in command_desc:
     print "Command '%s' not available (use 'help')" % cmd
   else:
     print command_desc[cmd]
     for (_,spec) in command_specs:
       if spec[0] == cmd:
-        if not is_interactive:
-          print "  fastscore", str.join(" ", spec)
-        else:
-          print " ", str.join(" ", spec)
+        print " ", str.join(" ", spec)
 
 def overview_commands():
-  global is_interactive
   help_header()
   print "Available commands ('help <command>' for more info):"
   for cmd in sorted(command_desc.keys()):
-    if not is_interactive:
-      print "  fastscore %-16s" % cmd, command_desc[cmd]
-    else:
-      print "  %-16s" % cmd, command_desc[cmd]
+    print "  %-16s" % cmd, command_desc[cmd]
   print "Use 'help options' to list available options"
 
 def explain_options():
@@ -199,5 +196,5 @@ def usage():
   if is_interactive:
     print "Use 'help' or 'help <command>'"
   else:
-    print "Use 'fastscor help' or 'fasctscore help <command>'"
+    print "Use 'fastscore help' or 'fasctscore help <command>'"
 
