@@ -45,7 +45,7 @@ def put(name, path, ctype, data, generic=True):
   return r.status_code,r.content
 
 def put_with_headers(name, path, headers, data, generic=True):
-  r = requests.put(lookup(name) + path, headers=headers, data=data, verify=False)
+  r = requests.put(lookup(name, generic) + path, headers=headers, data=data, verify=False)
   return r.status_code,r.content
 
 def put_multi(name, path, parts, generic=True):
