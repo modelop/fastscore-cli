@@ -44,7 +44,7 @@ def available(args):
   code,body = service.get(inst_name, "/1/control/sensor/available", generic=False)
   if code == 200:
     for point in json.loads(body):
-      if not point.startswith("sys.test."):
+      if not point.startswith("sys.test.") or service.options["verbose"] > 0:
         print point
   else:
     raise Exception(body)
