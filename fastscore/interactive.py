@@ -32,9 +32,12 @@ def loop():
 
 def start_pneumo_feed():
   def notify():
-    ws = pneumo.connect()
-    while True:
-      x = json.loads(ws.recv())
-      pneumo.print_message(x)
+    try:
+      ws = pneumo.connect()
+      while True:
+        x = json.loads(ws.recv())
+        pneumo.print_message(x)
+    except:
+      print "[Pneumo feed not available]"
   thread.start_new_thread(notify, ())
 
