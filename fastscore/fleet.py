@@ -1,8 +1,10 @@
 
 import requests
 
-from service import proxy_prefix
+from service import proxy_prefix, RELEASE
 from tabulate import tabulate
+
+from version import BUILD_DATE
 
 def main(args):
   r = requests.get(proxy_prefix() + "/api/1/service/connect/1/connect", verify=False)
@@ -16,13 +18,30 @@ def main(args):
     raise Exception(r.text)
 
 def version(args):
+  uv = [["CLI","UI","ok",RELEASE,BUILD_DATE]]
+  cv = connect_ver()
+  sv = service_ver()
+  t = uv + cv
+  if sv != None:
+    t += sv
+  print tabulate(t, headers=["Name","API","Health","Release","Built On"])
+  if sv == None:
+    print "Other services not configured"
+
+def connect_ver():
+  r = requests.get(proxy_prefix() + "/api/1/service/connect/1/health", verify=False)
+  if r.status_code == 200:
+    x = r.json()
+    return [["connect","connect","ok",x["release"],x["built_on"]]]
+  else:
+    raise Exception(r.text)
+
+def service_ver():
   r = requests.get(proxy_prefix() + "/api/1/service/connect/1/connect", verify=False)
   if r.status_code == 403:
-    print "Connect not configured"
+    return None
   elif r.status_code == 200:
-    print r.json()
-    t = [ [x["name"],x["api"],x["release"],x["built_on"]] for x in r.json() ]
-    print tabulate(t, headers=["Name","API","Release","Built On"])
+    return [ [x["name"],x["api"],x["health"],x["release"],x["built_on"]] for x in r.json() ]
   else:
     raise Exception(r.text)
 

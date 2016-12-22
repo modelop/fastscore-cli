@@ -3,6 +3,8 @@ import os
 import yaml
 import requests
 
+RELEASE = "1.3"
+
 API_NAMES = ["engine","model-manage","engine-x"]
 
 options = {

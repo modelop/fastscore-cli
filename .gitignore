@@ -7,3 +7,5 @@ dist/
 
 .fastscore
 
+fastscore/version.py
+
