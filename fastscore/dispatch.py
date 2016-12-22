@@ -66,7 +66,7 @@ command_specs = \
   (stream.remove,       ["stream","remove","<stream-name>"]),
   (sensor.list,         ["sensor","list"]),
   (sensor.add,          ["sensor","add","<sensor-name>"]),
-  (sensor.add,          ["sensor","add","<sensor-name>","<sensor-file>"]),
+  (sensor.add,          ["sensor","add","<sensor-name>","<desc-file>"]),
   (sensor.show,         ["sensor","show","<sensor-name>"]),
   (sensor.remove,       ["sensor","remove","<sensor-name>"]),
   (tap.install,         ["tap","install","<instance-name>","<sensor-name>"]),

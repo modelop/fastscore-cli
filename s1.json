@@ -1,0 +1,14 @@
+{
+  "Tap": "sys.test.int",
+  "Activate": {
+    "Type": "random",
+    "Intensity": 0.3
+  },
+  "Filter": {
+    "Type": ">=",
+    "Threshold": 100
+  },
+  "Report": {
+    "Interval": 5.0
+  }
+}
