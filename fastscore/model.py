@@ -12,7 +12,7 @@ requested_type = None
 
 MODEL_TYPES = ["pfa-json","pfa-pretty","pfa-yaml",
                "python","python3","r",
-               "java","scala","erlang"]
+               "c","java","scala","erlang"]
 
 MEDIA_TYPES = {
   "application/vnd.fastscore.model-pfa+json":   "pfa-json",
@@ -23,6 +23,7 @@ MEDIA_TYPES = {
   "application/vnd.fastscore.model-python2":    "python",
   "application/vnd.fastscore.model-python3":    "python3",
   "application/vnd.fastscore.model-r":          "r",
+  "application/vnd.fastscore.model-c":          "c",
   "application/vnd.fastscore.model-java":       "java",
   "application/vnd.fastscore.model-scala":      "scala",
   "application/vnd.fastscore.model-erlang":     "erlang",
@@ -42,7 +43,8 @@ KNOWN_EXTENSIONS = {
   ".yaml": "pfa-yaml",
   ".py":   "python",
   ".py3":  "python3",
-  ".R":    "r"
+  ".R":    "r",
+  ".c":    "c"
 }
 
 def ctype_to_type(ctype):
