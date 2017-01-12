@@ -10,6 +10,7 @@ from tabulate import tabulate
 from stats import human_fmt
 
 import model
+import pneumo
 
 MAX_INLINE_ATTACHMENT = 1024*1024
 
@@ -96,18 +97,36 @@ def run1(in_name, in_desc, out_name, out_desc, ctype, model_name, body, attachme
   if code2 != 204:
     raise Exception(body2)
   print "Input stream set"
-  if attachments == []:
-    headers3 = {"content-type": ctype,
-                "content-disposition": "x-model; name=\"" + model_name + "\""}
-    code1,body1 = service.put_with_headers(engine_api_name(), "/1/job/model", headers3, body)
-  else:
-    parts = [ ("attachment",x) for x in attachments ]
-    parts.append( ("x-model",(model_name,body,ctype)) )
-    code1,body1 = service.put_multi(engine_api_name(), "/1/job/model", parts)
-  if code1 != 204:
-    raise Exception(body1)
-  print "Model sent to engine"
-  print "The engine is running"
+
+  ws = None
+  try:
+    if service.options["wait"]:
+      ws = pneumo.connect()
+
+    if attachments == []:
+      headers3 = {"content-type": ctype,
+                  "content-disposition": "x-model; name=\"" + model_name + "\""}
+      code1,body1 = service.put_with_headers(engine_api_name(), "/1/job/model", headers3, body)
+    else:
+      parts = [ ("attachment",x) for x in attachments ]
+      parts.append( ("x-model",(model_name,body,ctype)) )
+      code1,body1 = service.put_multi(engine_api_name(), "/1/job/model", parts)
+    if code1 != 204:
+      raise Exception(body1)
+    print "Model sent to engine"
+    print "The engine is running"
+
+    if ws != None:
+      print "Waiting for the model run to complete...",
+      while True:
+        x = json.loads(ws.recv())
+        if x["type"] == "output-eof":
+          print "done"
+          break
+
+  finally:
+    if ws != None:
+      ws.close()
 
 def debug(args):
   model_name = args["model-name"]

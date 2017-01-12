@@ -8,7 +8,8 @@ RELEASE = "1.3"
 API_NAMES = ["engine","model-manage","engine-x"]
 
 options = {
-  "verbose": 0
+  "verbose": 0,
+  "wait": False
 }
 
 preferred = {}    # preferred API instance names (set with -<api>:<name>)
@@ -62,7 +63,7 @@ def post(name, path, ctype=None, data=None, generic=True):
 def post_with_ct(name, path, ctype=None, data=None, generic=True):
   headers = {"content-type": ctype} if ctype != None else None
   r = requests.post(lookup(name, generic) + path, headers=headers, data=data, verify=False)
-  ctype = r.headers["content-type"]
+  ctype = r.headers["content-type"] if "content-type" in r.headers else "text/plain"
   return r.status_code,r.content,ctype
 
 def delete(name, path, generic=True):

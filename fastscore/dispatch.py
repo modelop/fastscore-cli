@@ -126,8 +126,10 @@ def explain_options():
   print "  -type:python         --- Python"
   print "  -type:python3        --- Python 3"
   print "  -type:r              --- R"
+  print "  -wait                Wait for a job to complete"
 
 def interpret_options(words):
+  global is_interactive
   for x in words:
     if x == '-v':
       service.options["verbose"] = 1
@@ -135,6 +137,11 @@ def interpret_options(words):
       service.options["verbose"] = 2
     elif x == '-vvv':
       service.options["verbose"] = 3
+    elif x == '-wait':
+      if is_interactive:
+        print "Option -wait ignored for interactive sessions"
+      else:
+        service.options["wait"] = True
     elif x.startswith("-type:") and x.split(":")[1] in model.MODEL_TYPES:
       model.requested_type = x.split(":")[1]
     elif x[0] == '-' and ":" in x and x[1:].split(":")[0] in service.API_NAMES:
