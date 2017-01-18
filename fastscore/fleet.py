@@ -1,14 +1,30 @@
 
+import sys
+from time import sleep
+
 import requests
 
-from service import proxy_prefix, RELEASE
+from service import options, proxy_prefix, RELEASE
 from tabulate import tabulate
 
 from version import BUILD_DATE
 
 def main(args):
-  r = requests.get(proxy_prefix() + "/api/1/service/connect/1/connect", verify=False)
-  ## Somehow, the proxy does not return 'host' and 'port' elements
+  fleet_path = proxy_prefix() + "/api/1/service/connect/1/connect"
+  if options["wait"]:
+    sys.stdout.write("Waiting...")
+    sys.stdout.flush()
+    while True:
+      r = requests.get(fleet_path, verify=False)
+      if r.status_code == 200:
+        print " done"
+        break
+    sys.stdout.write(".")
+    sys.stdout.flush()
+    sleep(0.5)
+  else:
+    r = requests.get(fleet_path, verify=False)
+
   if r.status_code == 403:
     print "Connect not configured"
   elif r.status_code == 200:
