@@ -19,9 +19,9 @@ def main(args):
       if r.status_code == 200:
         print " done"
         break
-    sys.stdout.write(".")
-    sys.stdout.flush()
-    sleep(0.5)
+      sys.stdout.write(".")
+      sys.stdout.flush()
+      sleep(0.5)
   else:
     r = requests.get(fleet_path, verify=False)
 
