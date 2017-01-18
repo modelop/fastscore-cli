@@ -48,6 +48,7 @@ def list(args):
   print "output-report        | data produced by a model"
   print "rejected-data-report | data rejected by a stream"
   print "output-eof           | data processing finished"
+  print "sensor-report        | a sensor generated outputs"
 
 def wait(args):
   type = args["message-type"]
