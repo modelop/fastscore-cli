@@ -1,8 +1,87 @@
+get_model_list() {
+	ml="$( fastscore model list )"
+	case $ml in
+		"Not connected - use 'fastscore connect <proxy-prefix>'")
+			echo ""
+		;;
+		"Error: Connect is not configured yet")
+			echo ""
+		;;
+		"------  Name    Type")
+			echo ""
+		;;
+		*)
+			echo $( fastscore model list | sed -e '1,2d' | awk {'print $1'} )
+		;;
+	esac
+}
+
+get_schema_list() {
+	sl="$( fastscore schema list )"
+	case $sl in
+		"Not connected - use 'fastscore connect <proxy-prefix>'")
+			echo ""
+		;;
+		"Error: Connect is not configured yet")
+			echo ""
+		;;
+		*)
+			echo $sl
+		;;
+	esac
+}
+
+get_sensor_list() {
+	sl="$( fastscore sensor list )"
+	case $sl in
+		"Not connected - use 'fastscore connect <proxy-prefix>'")
+			echo ""
+		;;
+		"Error: Connect is not configured yet")
+			echo ""
+		;;
+		*)
+			echo $sl
+		;;
+	esac
+}
+
+get_stream_list() {
+	sl="$( fastscore stream list )"
+	case $sl in
+		"Not connected - use 'fastscore connect <proxy-prefix>'")
+			echo ""
+		;;
+		"Error: Connect is not configured yet")
+			echo ""
+		;;
+		*)
+			echo $sl
+		;;
+	esac
+}
+
+get_fleet_ids() {
+	fl="$( fastscore fleet )"
+	case $fl in
+		"Not connected - use 'fastscore connect <proxy-prefix>'")
+			echo ""
+		;;
+		"Error: Connect is not configured yet")
+			echo ""
+		;;
+		*)
+			echo $( fastscore fleet | sed -e '1,2d' | awk {'print $1'})
+		;;
+	esac
+}
+
 _fastscore() {
 	local cur_word prev_word type_list
 
 	cur_word="${COMP_WORDS[COMP_CWORD]}"
 	prev_word="${COMP_WORDS[COMP_CWORD-1]}"
+	preprev_word="${COMP_WORDS[COMP_CWORD-2]}"
 
 	command_list=""
 
@@ -14,6 +93,98 @@ _fastscore() {
 		fi
 	elif [ $COMP_CWORD -eq 2 ]; then
 		command_list="$( fastscore help $prev_word | sed -e '1,1d' | awk {'print $2'} )"
+	elif [ $COMP_CWORD -eq 3 ]; then
+		case $prev_word in
+			list)
+				case $preprev_word in
+					attachment)
+						command_list="$( get_model_list )"
+					;;
+					tap)
+						command_list="$( get_fleet_ids )"
+					;;
+					*)
+					;;
+				esac
+			;;
+			upload)
+				command_list="$( get_model_list )"
+			;;
+			download)
+				command_list="$( get_model_list )"
+			;;
+			remove)
+				case $preprev_word in
+					attachment)
+						command_list="$( get_model_list )"
+					;;
+					model)
+						command_list="$( get_model_list )"
+					;;
+					schema)
+						command_list="$( get_schema_list )"
+					;;
+					sensor)
+						command_list="$( get_sensor_list )"
+					;;
+					stream)
+						command_list="$( get_stream_list )"
+					;;
+					*)
+					;;
+				esac
+			;;
+			set)
+				command_list="$( ls | grep 'yaml\|yml' )"
+			;;
+			run)
+				command_list="$( get_model_list )"
+			;;
+			debug)
+				command_list="$( get_model_list )"
+			;;
+			show)
+				case $preprev_word in
+					model)
+						command_list="$( get_model_list )"
+					;;
+					schema)
+						command_list="$( get_schema_list )"
+					;;
+					sensor)
+						command_list="$( get_sensor_list )"
+					;;
+					stream)
+						command_list="$( get_stream_list )"
+					;;
+					*)
+					;;
+				esac
+			;;
+			wait)
+				command_list=" health model-run output-report output-eof rejected-data-report jet-status-report log model-console x-jet-info sensor-report"
+			;;
+			sample)
+				command_list="$( get_stream_list )"
+			;;
+			rate)
+				command_list="$( get_stream_list )"
+			;;
+			install)
+				command_list="$( get_fleet_ids )"
+			;;
+			inspect)
+				command_list="$( get_fleet_ids )"
+			;;
+			uninstall)
+				command_list="$( get_fleet_ids )"
+			;;
+			available)
+				command_list="$( get_fleet_ids )"
+			;;
+			*)
+			;;
+		esac
 	fi
 
 	COMPREPLY=( $(compgen -W "${command_list}" -- ${cur_word}) )
