@@ -182,6 +182,9 @@ _fastscore() {
 			available)
 				command_list="$( get_fleet_ids )"
 			;;
+			statistics)
+				command_list="io reset"
+			;;
 			*)
 			;;
 		esac
