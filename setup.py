@@ -5,7 +5,7 @@ setup(
   description = "FastScore CLI",
   version = "dev",
   packages = find_packages(),
-  
+
   install_requires = [
     "iso8601==0.1.11",
     "PyYAML==3.11",
@@ -16,6 +16,10 @@ setup(
 
   entry_points = {
     "console_scripts": [ "fastscore=fastscore.dispatch:main" ]
-  }
+  },
+
+  data_files = [
+    ('/etc/bash_completion.d/', ['extra/fastscore']),
+  ]
 )
 

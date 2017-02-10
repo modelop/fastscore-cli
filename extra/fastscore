@@ -1,0 +1,23 @@
+_fastscore() {
+	local cur_word prev_word type_list
+
+	cur_word="${COMP_WORDS[COMP_CWORD]}"
+	prev_word="${COMP_WORDS[COMP_CWORD-1]}"
+
+	command_list=""
+
+	if [ $COMP_CWORD -eq 1 ]; then
+		if [ "${COMP_LINE:$length:1}" == " " ]; then
+			command_list="$( fastscore help $cur_word | sed -e '1,1d' | awk {'print $2'} )"
+		else
+			command_list="$( fastscore help | sed -e '1,2d' | sed '$d' | awk {'print $1'} )"
+		fi
+	elif [ $COMP_CWORD -eq 2 ]; then
+		command_list="$( fastscore help $prev_word | sed -e '1,1d' | awk {'print $2'} )"
+	fi
+
+	COMPREPLY=( $(compgen -W "${command_list}" -- ${cur_word}) )
+	return 0
+}
+
+complete -F _fastscore fastscore
