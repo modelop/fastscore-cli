@@ -76,12 +76,43 @@ get_fleet_ids() {
 	esac
 }
 
+get_attachment_list() {
+	al="$( fastscore attachment list $1 )"
+	case $al in
+		"Not connected - use 'fastscore connect <proxy-prefix>'")
+			echo ""
+		;;
+		"Error: Connect is not configured yet")
+			echo ""
+		;;
+		*)
+			echo $al;
+		;;
+	esac
+}
+
+get_tap_list() {
+	tl="$( fastscore tap list $1 )"
+	case $tl in
+		"Not connected - use 'fastscore connect <proxy-prefix>'")
+			echo ""
+		;;
+		"Error: Connect is not configured yet")
+			echo ""
+		;;
+		*)
+			echo $tl;
+		;;
+	esac
+}
+
 _fastscore() {
 	local cur_word prev_word type_list
 
 	cur_word="${COMP_WORDS[COMP_CWORD]}"
 	prev_word="${COMP_WORDS[COMP_CWORD-1]}"
 	preprev_word="${COMP_WORDS[COMP_CWORD-2]}"
+	second_word="${COMP_WORDS[1]}"
 
 	command_list=""
 
@@ -184,6 +215,53 @@ _fastscore() {
 			;;
 			statistics)
 				command_list="io reset"
+			;;
+			*)
+			;;
+		esac
+	elif [ $COMP_CWORD -eq 4 ]; then
+		case $preprev_word in
+			upload)
+				command_list="$( ls | grep 'zip\|gz' )"
+			;;
+			download)
+				command_list="$( get_attachment_list $prev_word )"
+			;;
+			remove)
+				command_list="$( get_attachment_list $prev_word )"
+			;;
+			run)
+				command_list="$( get_stream_list )"
+			;;
+			debug)
+				command_list="$( get_stream_list )"
+			;;
+			add)
+				case $second_word in
+					model)
+						command_list="$( ls | grep -E 'pfa|ppfa|r|py|c' )"
+					;;
+					schema)
+						command_list="$( ls | grep avsc )"
+					;;
+					sensor)
+						command_list="$( ls | grep json )"
+					;;
+					stream)
+						command_list="$( ls | json )"
+					;;
+					*)
+					;;
+				esac
+			;;
+			install)
+				command_list="$( get_sensor_list )"
+			;;
+			inspect)
+				command_list="$( get_tap_list $prev_word )"
+			;;
+			uninstall)
+				command_list="$( get_tap_list $prev_word )"
 			;;
 			*)
 			;;
