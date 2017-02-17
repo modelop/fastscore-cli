@@ -12,9 +12,9 @@ def status(args):
 def get_status():
   code,body = service.get(engine_api_name(), "/1/job/status")
   if code == 200:
-    return json.loads(body)
+    return json.loads(body.decode('utf-8'))
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def statistics(args):
   status = get_status()
@@ -38,9 +38,9 @@ def statistics(args):
     else:
       code,body = service.get(engine_api_name(), "/1/job/statistics")
       if code == 200:
-          print json.dumps(json.loads(body), indent=2)
+          print json.dumps(json.loads(body.decode('utf-8')), indent=2)
       else:
-          raise Exception(body)
+          raise Exception(body.decode('utf-8'))
 
 def stat_line(x):
 	secs = x["run_time"]
@@ -68,7 +68,7 @@ def statistics0(args):
   if code == 204:
     print "Reset"
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def memory(args):
   status = get_status()

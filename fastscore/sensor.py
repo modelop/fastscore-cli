@@ -8,10 +8,10 @@ import service
 def list(args):
   code,body = service.get("model-manage", "/1/sensor")
   if code == 200:
-    for x in json.loads(body):
+    for x in json.loads(body.decode('utf-8')):
       print x
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def add(args):
   name = args["sensor-name"]
@@ -30,17 +30,17 @@ def add(args):
   elif code == 204:
     print "Sensor '%s' updated" %  name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def show(args):
   name = args["sensor-name"]
   code,body = service.get("model-manage", "/1/sensor/%s" % name)
   if code == 200:
-    print body,
+    print body.decode('utf-8'),
   elif code == 404:
     print "Sensor '%s' not found" % name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def remove(args):
   name = args["sensor-name"]
@@ -50,5 +50,5 @@ def remove(args):
   elif code == 204:
     print "Sensor '%s' removed" % name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 

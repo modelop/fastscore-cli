@@ -8,10 +8,10 @@ import service
 def list(args):
   code,body = service.get("model-manage", "/1/schema")
   if code == 200:
-    for x in json.loads(body):
+    for x in json.loads(body.decode('utf-8')):
       print x
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def add(args):
   name = args["schema-name"]
@@ -30,17 +30,17 @@ def add(args):
   elif code == 204:
     print "Schema '%s' updated" %  name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def show(args):
   name = args["schema-name"]
   code,body = service.get("model-manage", "/1/schema/%s" % name)
   if code == 200:
-    print body,
+    print body.decode('utf-8'),
   elif code == 404:
     print "Schema '%s' not found" % name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def remove(args):
   name = args["schema-name"]
@@ -50,5 +50,5 @@ def remove(args):
   elif code == 204:
     print "Schema '%s' removed" % name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 

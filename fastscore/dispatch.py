@@ -178,12 +178,14 @@ def run(words):
           command(args)
           return True
         except Exception as e:
-          if e.message == "":
+          if hasattr(e, 'message'):
+            e = e.message
+          if e == "":
             traceback.print_exc()   # Debug only
           else:
             if service.options["verbose"] == 3:
               traceback.print_exc()
-            print e.message
+            print e
           return False
   usage()
   return True

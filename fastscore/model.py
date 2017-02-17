@@ -60,10 +60,10 @@ def lookup_ctype(type):
 def list(args):
   code,body = service.get("model-manage", "/1/model?return=type")
   if code == 200:
-    t = [ [x["name"],x["type"]] for x in json.loads(body) ]
+    t = [ [x["name"],x["type"]] for x in json.loads(body.decode('utf-8')) ]
     print tabulate(t, headers=["Name","Type"])
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def add(args):
   name = args["model-name"]
@@ -83,17 +83,17 @@ def add(args):
   elif code == 204:
     print "Model '%s' updated" %  name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def show(args):
   name = args["model-name"]
   code,body = service.get("model-manage", "/1/model/%s" % name)
   if code == 200:
-    print body,
+    print body.decode('utf-8'),
   elif code == 404:
     print "Model '%s' not found" % name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def remove(args):
   name = args["model-name"]
@@ -103,7 +103,7 @@ def remove(args):
   elif code == 204:
     print "Model '%s' removed" % name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def guess_file_type(resource):
   global requested_type, KNOWN_EXTENSIONS

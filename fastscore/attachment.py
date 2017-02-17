@@ -8,10 +8,10 @@ def list(args):
   model_name = args["model-name"]
   code,body = service.get("model-manage", "/1/model/%s/attachment" % model_name)
   if code == 200:
-    for x in json.loads(body):
+    for x in json.loads(body.decode('utf-8')):
       print x
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def upload(args):
   model_name = args["model-name"]
@@ -29,7 +29,7 @@ def upload(args):
     elif code == 204:
       print "Attachment '%s' updated" % att_name
     else:
-      raise Exception(body)
+      raise Exception(body.decode('utf-8'))
 
 def download(args):
   model_name = args["model-name"]
@@ -38,7 +38,7 @@ def download(args):
                     "/1/model/%s/attachment/%s" % (model_name,att_name))
   if code == 200:
     with open(att_name, "w") as f:
-      f.write(str)
+      f.write(str.decode('utf-8'))
     print "Attachment written to %s" % att_name
   elif code == 404:
     print "Attachment '%s' not found" % att_name
@@ -55,7 +55,7 @@ def remove(args):
   elif code == 404:
     print "Attachment '%s' not found" % att_name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def guess_att_ctype(resource):
   _,ext = os.path.splitext(resource)

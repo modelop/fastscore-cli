@@ -38,14 +38,14 @@ def run(args):
   elif code == 404:
     print "Model '%s' not found" % model_name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def attachments(model_name, force_inline=False):
   code,body = service.get("model-manage", "/1/model/%s/attachment" % model_name)
   if code == 200:
-    return [ get_att(model_name, att_name, force_inline) for att_name in json.loads(body) ]
+    return [ get_att(model_name, att_name, force_inline) for att_name in json.loads(body.decode('utf-8')) ]
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def get_att(model_name, att_name, force_inline):
   _,headers = service.head("model-manage",
@@ -82,20 +82,20 @@ def get_att(model_name, att_name, force_inline):
     if code == 200:
       return (att_name,body,ctype)
     else:
-      raise Exception(body)
+      raise Exception(body.decode('utf-8'))
 
 def run1(in_name, in_desc, out_name, out_desc, ctype, model_name, body, attachments=[]):
   headers1 = {"content-type": "application/json",
               "content-disposition": "x-stream; name=\"" + out_name + "\""}
   code3,body3 = service.put_with_headers(engine_api_name(), "/1/job/stream/out", headers1, out_desc)
   if code3 != 204:
-    raise Exception(body3)
+    raise Exception(body3.decode('utf-8'))
   print "Output stream set"
   headers2 = {"content-type": "application/json",
               "content-disposition": "x-stream; name=\"" + in_name + "\""}
   code2,body2 = service.put_with_headers(engine_api_name(), "/1/job/stream/in", headers2, in_desc)
   if code2 != 204:
-    raise Exception(body2)
+    raise Exception(body2.decode('utf-8'))
   print "Input stream set"
 
   ws = None
@@ -112,7 +112,7 @@ def run1(in_name, in_desc, out_name, out_desc, ctype, model_name, body, attachme
       parts.append( ("x-model",(model_name,body,ctype)) )
       code1,body1 = service.put_multi(engine_api_name(), "/1/job/model", parts)
     if code1 != 204:
-      raise Exception(body1)
+      raise Exception(body1.decode('utf-8'))
     print "Model sent to engine"
     print "The engine is running"
 
@@ -151,7 +151,7 @@ def debug(args):
   elif code == 404:
     print "Model '%s' not found" % model_name
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def debug1(data):
   code,report = service.post(engine_api_name(), "/1/job/debug", ctype="application/json", data=data)
@@ -169,7 +169,7 @@ def get_stream_desc(name):
   elif code == 404:
     raise Exception("Stream '%s' not found" % name)
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def scale(args):
   n = int(args["num-jets"])
@@ -177,7 +177,7 @@ def scale(args):
   if code == 204:
     print "Model scaling successful"
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def cpu_utilization(args):
   path = "/1/job/sample/cpu"
@@ -185,14 +185,14 @@ def cpu_utilization(args):
     path += "?duration=" + args["duration"]
   code,body = service.post(engine_api_name(), path)
   if code == 200:
-    x = json.loads(body)
+    x = json.loads(body.decode('utf-8'))
     if "error" in x:
       print "Cannot collect CPU utilization info: " + x["error"]
     else:
       report = x["cpu-utilization"]
       report_cpu_util(report)
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def report_cpu_util(report):
   t = [["Duration, s",report["duration"]],
@@ -242,16 +242,16 @@ def input(args):
   if code == 200:
     if sys.stdin.isatty() and sys.stdout.isatty():
       print "-------- model output --------"
-    print body
+    print body.decode('utf-8')
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def stop(args):
   code,body = service.delete(engine_api_name(), "/1/job")
   if code == 204:
     print "Engine stopped"
   else:
-    raise Exception(body)
+    raise Exception(body.decode('utf-8'))
 
 def att_ctype_to_type(ctype):
   if ctype == "application/zip":

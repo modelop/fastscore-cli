@@ -5,6 +5,7 @@ setup(
   description = "FastScore CLI",
   version = "dev",
   packages = find_packages(),
+  use_2to3=True,
 
   install_requires = [
     "iso8601==0.1.11",
