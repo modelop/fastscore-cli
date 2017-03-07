@@ -37,12 +37,13 @@ def help_me(args):
     overview_commands()
 
 def help_header():
-  print "FastScore CLI v1.3"
+  print "FastScore CLI v1.4"
 
 command_specs = \
  [(help_me,             ["help"]),
   (help_me,             ["help","<command>"]),
   (connect.main,        ["connect","<url-prefix>"]),
+  (connect.main,        ["connect","<url-prefix>","<sec-creds>"]),
   (config.set,          ["config","set","<config-file>"]),
   (config.show,         ["config","show"]),
   (fleet.main,          ["fleet"]),

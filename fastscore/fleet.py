@@ -4,7 +4,7 @@ from time import sleep
 
 import requests
 
-from service import options, proxy_prefix, RELEASE
+from service import options, proxy_prefix, cookies, RELEASE
 from tabulate import tabulate
 
 from version import BUILD_DATE
@@ -15,7 +15,7 @@ def main(args):
     sys.stdout.write("Waiting...")
     sys.stdout.flush()
     while True:
-      r = requests.get(fleet_path, verify=False)
+      r = requests.get(fleet_path, cookies=cookies(), verify=False)
       if r.status_code == 200:
         print " done"
         break
@@ -23,7 +23,7 @@ def main(args):
       sys.stdout.flush()
       sleep(0.5)
   else:
-    r = requests.get(fleet_path, verify=False)
+    r = requests.get(fleet_path, cookies=cookies(), verify=False)
 
   if r.status_code == 403:
     print "Connect not configured"
@@ -45,7 +45,8 @@ def version(args):
     print "Other services not configured"
 
 def connect_ver():
-  r = requests.get(proxy_prefix() + "/api/1/service/connect/1/health", verify=False)
+  r = requests.get(proxy_prefix() + "/api/1/service/connect/1/health",
+                      cookies=cookies(), verify=False)
   if r.status_code == 200:
     x = r.json()
     return [["connect","connect","ok",x["release"],x["built_on"]]]
@@ -53,7 +54,8 @@ def connect_ver():
     raise Exception(r.text)
 
 def service_ver():
-  r = requests.get(proxy_prefix() + "/api/1/service/connect/1/connect", verify=False)
+  r = requests.get(proxy_prefix() + "/api/1/service/connect/1/connect",
+                      cookies=cookies(), verify=False)
   if r.status_code == 403:
     return None
   elif r.status_code == 200:
