@@ -266,11 +266,10 @@ def input(args):
         if rec == pig:
           pig_received = True
           break
-        else:
+        elif rec != "": # an artifact of delimited framing
           print rec.decode('utf-8')
       else:
         chip = x[0]
-        print repr(chip), repr(pig)
         if chip == pig:
           pig_received = True
         break
