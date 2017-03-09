@@ -238,13 +238,42 @@ def input(args):
   data = sys.stdin.read()
   if data == "":
     return
+
+  ## Add a 'pig' control record to the stream.
+  ## This implies the JSON encoding and 'delimited' framing scheme.
+  pig = '{"$fastscore":"pig"}'
+  data += pig + "\n"
+
   code,body = service.post(engine_api_name(), "/1/job/input", data=data)
-  if code == 200:
-    if sys.stdin.isatty() and sys.stdout.isatty():
-      print "-------- model output --------"
-    print body.decode('utf-8')
-  else:
+  if code != 204:
     raise Exception(body.decode('utf-8'))
+
+  if sys.stdin.isatty() and sys.stdout.isatty():
+    print "-------- model output --------"
+  ## Output stream may contain multiple chunks.
+  chip = ""
+  pig_received = False
+  while not pig_received:
+    code,body = service.get(engine_api_name(), "/1/job/output")
+    if code != 200:
+      raise Exception(body.decode('utf-8'))
+    chunk = chip + body
+    while True:
+      x = chunk.split("\n", 1)
+      if len(x) > 1:
+        rec = x[0]
+        chunk = x[1]
+        if rec == pig:
+          pig_received = True
+          break
+        else:
+          print rec.decode('utf-8')
+      else:
+        chip = x[0]
+        print repr(chip), repr(pig)
+        if chip == pig:
+          pig_received = True
+        break
 
 def stop(args):
   code,body = service.delete(engine_api_name(), "/1/job")

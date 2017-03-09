@@ -29,7 +29,7 @@ def main(args):
         username = raw_input("Username: ")
       if ask_password:
         password = getpass.getpass()
-      login_url = prefix + "/login"
+      login_url = prefix + "/1/login"
       data = "username=%s&password=%s" % (username,password)
       headers = {"Content-Type": "application/x-www-form-urlencoded"}
       r = requests.post(login_url, headers=headers, data=data, verify=False)
