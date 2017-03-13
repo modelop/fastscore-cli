@@ -222,7 +222,7 @@ _fastscore() {
 	elif [ $COMP_CWORD -eq 4 ]; then
 		case $preprev_word in
 			upload)
-				command_list="$( ls | grep 'zip\|gz' )"
+				command_list="$( ls | grep -e '.*\.zip$' -e '.*\.gz$' )"
 			;;
 			download)
 				command_list="$( get_attachment_list $prev_word )"
@@ -239,16 +239,16 @@ _fastscore() {
 			add)
 				case $second_word in
 					model)
-						command_list="$( ls | grep -E 'pfa|ppfa|r|py|c' )"
+						command_list="$( ls | grep -e '.*\.pfa$' -e '.*\.ppfa$' -e '.*\.py$' -e '.*\.R$' -e '.*\.r$' -e '.*\.c$' )"
 					;;
 					schema)
-						command_list="$( ls | grep avsc )"
+						command_list="$( ls | grep -e '.*\.avsc$' )"
 					;;
 					sensor)
-						command_list="$( ls | grep json )"
+						command_list="$( ls | grep -e '.*\.json$' )"
 					;;
 					stream)
-						command_list="$( ls | json )"
+						command_list="$( ls | grep -e '.*\.json$' )"
 					;;
 					*)
 					;;
