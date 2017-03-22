@@ -206,5 +206,5 @@ def usage():
   if is_interactive:
     print "Use 'help' or 'help <command>'"
   else:
-    print "Use 'fastscore help' or 'fasctscore help <command>'"
+    print "Use 'fastscore help' or 'fastscore help <command>'"
 
