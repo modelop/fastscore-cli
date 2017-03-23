@@ -16,7 +16,7 @@ def main(args):
     sys.stdout.flush()
     while True:
       r = requests.get(fleet_path, cookies=cookies(), verify=False)
-      if r.status_code == 200:
+      if r.status_code == 200 and all([ x["health"] == "ok" for x in r.json() ]):
         print " done"
         break
       sys.stdout.write(".")
