@@ -65,6 +65,8 @@ command_specs = \
   (stream.sample,       ["stream","sample","<stream-name>","<num-items>"]),
   (stream.rate,         ["stream","rate","<stream-name>"]),
   (stream.remove,       ["stream","remove","<stream-name>"]),
+  (stream.attach,       ["stream","attach","<stream-name>","<slot>"]),
+  (stream.detach,       ["stream","detach","<slot>"]),
   (sensor.list,         ["sensor","list"]),
   (sensor.add,          ["sensor","add","<sensor-name>"]),
   (sensor.add,          ["sensor","add","<sensor-name>","<desc-file>"]),

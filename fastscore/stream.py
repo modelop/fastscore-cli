@@ -8,6 +8,10 @@ from service import engine_api_name
 
 from tabulate import tabulate
 
+shortcuts = {
+  "discard": '{"Transport":"discard"}'
+}
+
 def list(args):
   code,body = service.get("model-manage", "/1/stream")
   if code == 200:
@@ -37,26 +41,13 @@ def add(args):
 
 def show(args):
   name = args["stream-name"]
-  code,body = service.get("model-manage", "/1/stream/%s" % name)
-  if code == 200:
-    print body.decode('utf-8'),
-  elif code == 404:
-    print "Stream '%s' not found" % name
-  else:
-    raise Exception(body.decode('utf-8'))
+  desc = get_desc(name)
+  print desc
 
 def sample(args):
   name = args["stream-name"]
   n = int(args["num-items"]) if "num-items" in args else 10
-  code,body = service.get("model-manage", "/1/stream/%s" % name)
-  if code == 200:
-    sample1(n, body)
-  elif code == 404:
-    print "Stream '%s' not found" % name
-  else:
-    raise Exception(body.decode('utf-8'))
-
-def sample1(n, desc):
+  desc = get_desc(name)
   code,body,ctype = service.post_with_ct(engine_api_name(), "/1/stream/sample?n=%d" % n,
                                          ctype="application/json", data=desc)
   if code == 200:
@@ -69,15 +60,7 @@ def sample1(n, desc):
 
 def rate(args):
   name = args["stream-name"]
-  code,body = service.get("model-manage", "/1/stream/%s" % name)
-  if code == 200:
-    rate1(body)
-  elif code == 404:
-    print "Stream '%s' not found" % name
-  else:
-    raise Exception(body.decode('utf-8'))
-
-def rate1(desc):
+  desc = get_desc(name)
   code,body = service.post(engine_api_name(), "/1/stream/rate",
                            ctype="application/json", data=desc)
   if code == 200:
@@ -93,6 +76,45 @@ def remove(args):
     raise Exception("Stream '%s' not found" % name)
   elif code == 204:
     print "Stream '%s' removed" % name
+  else:
+    raise Exception(body.decode('utf-8'))
+
+def attach(args):
+  name = args["stream-name"]
+  slot = args["slot"]
+  io = slot_dir(slot)
+  desc = get_desc(name)
+  headers = {
+    "content-type": "application/json",
+    "content-disposition": "x-stream; name=\"%s\"" % name
+  }
+  code,body = service.put_with_headers(engine_api_name(),
+                        "/1/job/stream/" + io, headers, desc)
+  if code != 204:
+    raise Exception(body.decode('utf-8'))
+  print "Stream attached"
+
+def detach(args):
+  slot = args["slot"]
+  io = slot_dir(slot)
+  print "Stream detach is NOT implemented"
+
+def slot_dir(slot):
+  if "input".startswith(slot):
+    return "in"
+  elif "output".startswith(slot):
+    return "out"
+  else:
+    raise Exception("Slot must be (a prefix of) either 'input' or 'output'")
+
+def get_desc(name):
+  if name in shortcuts:
+    return shortcuts[name]
+  code,body = service.get("model-manage", "/1/stream/%s" % name)
+  if code == 200:
+    return body.decode('utf-8')
+  elif code == 404:
+    raise Exception("Stream '%s' not found" % name)
   else:
     raise Exception(body.decode('utf-8'))
 

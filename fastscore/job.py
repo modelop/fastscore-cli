@@ -9,27 +9,23 @@ from service import engine_api_name
 from tabulate import tabulate
 from stats import human_fmt
 
-import model
+import model, stream
 import pneumo
 
 MAX_INLINE_ATTACHMENT = 1024*1024
-
-stream_shortcuts = {
-  "discard": '{"Transport":"discard"}'
-}
 
 def run(args):
   model_name = args["model-name"]
 
   in_name = args["in-stream-name"]
-  in_desc = get_stream_desc(in_name)
+  in_desc = stream.get_desc(in_name)
 
   if "out-stream-name" in args:
     out_name = args["out-stream-name"]
-    out_desc = get_stream_desc(out_name)
+    out_desc = stream.get_desc(out_name)
   else:
     out_name = "discard"
-    out_desc = stream_shortcuts["discard"]
+    out_desc = stream.shortcuts["discard"]
 
   code,body,ctype = service.get_with_ct("model-manage", "/1/model/%s" % model_name)
   if code == 200:
@@ -130,9 +126,9 @@ def run1(in_name, in_desc, out_name, out_desc, ctype, model_name, body, attachme
 
 def debug(args):
   model_name = args["model-name"]
-  in_desc = get_stream_desc(args["in-stream-name"])
-  out_desc = get_stream_desc(args["out-stream-name"]) \
-                  if "out-stream-name" in args else stream_shortcuts["discard"]
+  in_desc = stream.get_desc(args["in-stream-name"])
+  out_desc = stream.get_desc(args["out-stream-name"]) \
+                  if "out-stream-name" in args else stream.shortcuts["discard"]
   code,body,ctype = service.get_with_ct("model-manage", "/1/model/%s" % model_name)
   att = attachments(model_name, force_inline=True)
   if code == 200:
@@ -159,17 +155,6 @@ def debug1(data):
     print report
   else:
     raise Exception(report)
-
-def get_stream_desc(name):
-  if name in stream_shortcuts:
-    return stream_shortcuts[name]
-  code,body = service.get("model-manage", "/1/stream/%s" % name)
-  if code == 200:
-    return body
-  elif code == 404:
-    raise Exception("Stream '%s' not found" % name)
-  else:
-    raise Exception(body.decode('utf-8'))
 
 def scale(args):
   n = int(args["num-jets"])
