@@ -18,7 +18,7 @@ def upload(args):
   resource = args["att-file"]
   if not os.path.exists(resource):
     raise Exception("%s not found" % resource)
-  with open(resource, "r") as f:
+  with open(resource, "rb") as f:
     data = f.read()
     att_name = os.path.basename(resource)
     code,body = service.put("model-manage",
