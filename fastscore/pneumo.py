@@ -109,8 +109,20 @@ def print_message(msg):
     pass # internal profiler messages
 
   elif type == "sensor-report":
-    data = json.dumps(msg["data"])
-    print "[%s] %s %s [%d] %s" % (src,time_only(timestamp),msg["tap"],msg["id"],data)
+    id = msg["id"]
+    tap = msg["tap"]
+    data = msg["data"]
+    if tap == "manifold.deadlock" and data[0] != "ok":
+      print "[%s] %s %s [%d] DEADLOCK:" % (src,time_only(timestamp),tap,id)
+      for x in data[0]["deadlock"]:
+        j1 = x["waits-for"]
+        item = x["item"]
+        item_desc = "cell '%s'" % item["cell"] if "cell" in item \
+               else "pool slot '%s.%s'" % (item["pool"],item["key"])
+        j2 = x["held-by"]
+        print "   * jet %d waits for %s locked by jet %d" % (j1,item_desc,j2)
+    else:
+      print "[%s] %s %s [%d] %s" % (src,time_only(timestamp),tap,id,json.dumps(data))
 
   else:
     print json.dumps(msg, indent=2)
