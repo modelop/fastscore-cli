@@ -3,12 +3,14 @@ import sys
 import traceback
 
 from fastscore import service, connect, config, fleet, model, attachment
-from fastscore import stream, sensor, tap, schema, job, pneumo, stats
+from fastscore import snapshot, stream, sensor, tap, schema, job, pneumo, stats
 from fastscore import interactive
 
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+import iso8601
 
 is_interactive = False
 
@@ -19,6 +21,7 @@ command_desc = \
   "fleet":        "Check FastScore status",
   "model":        "Add/remove models",
   "attachment":   "Add/remove model attachments",
+  "snapshot":     "List/restore/remove model snapshots",
   "stream":       "Adds/remove stream descriptors",
   "sensor":       "Add/remove sensor descriptors",
   "schema":       "Add/remove Avro schemas",
@@ -57,6 +60,11 @@ command_specs = \
   (attachment.upload,   ["attachment","upload","<model-name>","<att-file>"]),
   (attachment.download, ["attachment","download","<model-name>","<att-name>"]),
   (attachment.remove,   ["attachment","remove","<model-name>","<att-name>"]),
+  (snapshot.list,       ["snapshot","list","<model-name>"]),
+  (snapshot.describe,   ["snapshot","describe","<model-name>","<snap-id>"]),
+  (snapshot.restore,    ["snapshot","restore","<model-name>","<snap-id>"]),
+  (snapshot.restore,    ["snapshot","restore","<model-name>"]),
+  (snapshot.remove,     ["snapshot","remove","<model-name>","<snap-id>"]),
   (stream.list,         ["stream","list"]),
   (stream.add,          ["stream","add","<stream-name>"]),
   (stream.add,          ["stream","add","<stream-name>","<desc-file>"]),
@@ -129,6 +137,9 @@ def explain_options():
   print "  -type:python         --- Python"
   print "  -type:python3        --- Python 3"
   print "  -type:r              --- R"
+  print "  -count:NNN           list no more than NNN items"
+  print "  -since:DATE          show items created after DATETIME (iso8601)"
+  print "  -until:DATE          show items created before DATETIME (iso8601)"
   print "  -wait                Wait for a job to complete"
 
 def interpret_options(words):
@@ -145,6 +156,21 @@ def interpret_options(words):
         print "Option -wait ignored for interactive sessions"
       else:
         service.options["wait"] = True
+    elif x.startswith("-count:"):
+      try:
+        service.options["count"] = int(x.split(":")[1])
+      except ValueError:
+        print "Option '%s' ignored" % x
+    elif x.startswith("-since:"):
+      try:
+        service.options["since"] = iso8601.parse_date(x.split(":")[1])
+      except:
+        print "Option '%s' ignored" % x
+    elif x.startswith("-until:"):
+      try:
+        service.options["until"] = iso8601.parse_date(x.split(":")[1])
+      except:
+        print "Option '%s' ignored" % x
     elif x.startswith("-type:") and x.split(":")[1] in model.MODEL_TYPES:
       model.requested_type = x.split(":")[1]
     elif x[0] == '-' and ":" in x and x[1:].split(":")[0] in service.API_NAMES:
