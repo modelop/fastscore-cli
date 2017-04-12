@@ -124,38 +124,6 @@ def run1(in_name, in_desc, out_name, out_desc, ctype, model_name, body, attachme
     if ws != None:
       ws.close()
 
-def debug(args):
-  model_name = args["model-name"]
-  in_desc = stream.get_desc(args["in-stream-name"])
-  out_desc = stream.get_desc(args["out-stream-name"]) \
-                  if "out-stream-name" in args else stream.shortcuts["discard"]
-  code,body,ctype = service.get_with_ct("model-manage", "/1/model/%s" % model_name)
-  att = attachments(model_name, force_inline=True)
-  if code == 200:
-    spec = {
-      "input": in_desc,
-      "output": out_desc,
-      "type": model.ctype_to_type(ctype),
-      "model": body,
-      "attachments": [{
-        "name": att_name,
-        "data": base64.b64encode(att_body),
-        "type": att_ctype_to_type(att_ctype)
-      } for (att_name,att_body,att_ctype) in att ]
-    }
-    debug1(json.dumps(spec))
-  elif code == 404:
-    print "Model '%s' not found" % model_name
-  else:
-    raise Exception(body.decode('utf-8'))
-
-def debug1(data):
-  code,report = service.post(engine_api_name(), "/1/job/debug", ctype="application/json", data=data)
-  if code == 200:
-    print report
-  else:
-    raise Exception(report)
-
 def scale(args):
   n = int(args["num-jets"])
   code,body = service.post(engine_api_name(), "/1/job/scale?n=%d" % n)

@@ -25,7 +25,7 @@ command_desc = \
   "stream":       "Adds/remove stream descriptors",
   "sensor":       "Add/remove sensor descriptors",
   "schema":       "Add/remove Avro schemas",
-  "job":          "Run/debug models",
+  "job":          "Run models",
   "pneumo":       "Listen for notifications",
   "tap":          "Install/remove sensors"}
 
@@ -93,8 +93,6 @@ command_specs = \
   (job.run,             ["job","run","<model-name>","<in-stream-name>","<out-stream-name>"]),
   (job.run,             ["job","run","<model-name>","<in-stream-name>"]),
   (job.scale,           ["job","scale","<num-jets>"]),
-  (job.debug,           ["job","debug","<model-name>","<in-stream-name>","<out-stream-name>"]),
-  (job.debug,           ["job","debug","<model-name>","<in-stream-name>"]),
   (job.cpu_utilization, ["job","cpu-utilization"]),
   (job.cpu_utilization, ["job","cpu-utilization","<duration>"]),
   (job.input,           ["job","input","json"]),
