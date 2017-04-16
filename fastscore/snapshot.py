@@ -1,6 +1,7 @@
 
 from service import options
-from service import get, delete
+from service import get, put, delete
+from service import engine_api_name
 
 import json
 from urllib import quote
@@ -45,7 +46,34 @@ def describe(args):
     raise Exception(body)
 
 def restore(args):
-  print "Not implemented"
+  model_name = args["model-name"]
+  snap_id = args["snap-id"] if "snap-id" in args else last_snap_id(model_name)
+  code,body = get("model-manage", "/1/model/%s/snapshot/%s/contents" % (model_name,snap_id))
+  if code == 200:
+    restore1(body)
+  elif code == 300:
+    print "Snapshot id '%s' is ambiguous" % snap_id
+  elif code == 404:
+    print "Snapshot not found"
+  else:
+    raise Exception(body)
+
+def restore1(state):
+  code,body = put(engine_api_name(), "/1/job/state", "application/octet-stream", state)
+  if code == 204:
+    print "Model state restored"
+  else:
+    raise Exception(body)
+
+def last_snap_id(model_name):
+  code,body = get("model-manage", "/1/model/%s/snapshot?count=1" % model_name)
+  if code == 200:
+    ss = json.loads(body)
+    if len(ss) == 0:
+      raise Exception("No snapsnots found")
+    return ss[0]["id"]
+  else:
+    raise Exception(body)
 
 def remove(args):
   model_name = args["model-name"]
