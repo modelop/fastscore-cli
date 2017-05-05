@@ -3,10 +3,10 @@ from os.path import exists
 
 import yaml
 
-def set(co, config_file, **kwargs):
+def set(connect, config_file, **kwargs):
     try:
         with open(config_file) as f:
-            reconf = co.configure(yaml.load(f))
+            reconf = connect.configure(yaml.load(f))
             if reconf:
                 print "(Re)configured"
             else:
@@ -14,8 +14,8 @@ def set(co, config_file, **kwargs):
     except Exception as e:
         raise FastScoreError("Unable to configure FastScore", caused_by=e)
 
-def show(co, **kwargs):
-    config = co.get_config()
+def show(connect, **kwargs):
+    config = connect.get_config()
     if config:
         print config
     else:
