@@ -95,6 +95,7 @@ def main():
                 return 0
             except FastScoreError as e:
                 print e
+                print
                 return 1
     print "Use 'fastscore help' or 'fastscore help <command>'"
     return 0
