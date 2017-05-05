@@ -1,4 +1,0 @@
-{
-  "type": "array",
-  "items": { "$ref": "urn:fastscore:schema:c1" }
-}

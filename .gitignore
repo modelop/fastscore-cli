@@ -5,5 +5,5 @@ dist/
 
 *.pyc
 
-.fastscore
-
+fastscore
+fastscore_

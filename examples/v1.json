@@ -1,7 +1,0 @@
-{
-  "type": "file",
-  "schema": "float",
-  "connect": {
-    "path": "data/numbersInput.jsons"
-  }
-}

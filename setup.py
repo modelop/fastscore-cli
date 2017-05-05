@@ -10,13 +10,12 @@ setup(
   install_requires = [
     "iso8601==0.1.11",
     "PyYAML==3.11",
-    "requests==2.11.1",
     "tabulate==0.7.5",
     "websocket-client==0.37.0"
   ],
 
   entry_points = {
-    "console_scripts": [ "fastscore=fastscore.dispatch:main" ]
+    "console_scripts": [ "fastscore=cli.dispatch:main" ]
   },
 
   data_files = [

@@ -1,4 +1,6 @@
 
+OBSOLETE - NEEDS A REVIEW
+
 # FastScore CLI
 
 This is the command line interface (CLI) to FastScore.
