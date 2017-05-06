@@ -3,14 +3,15 @@ from os.path import exists
 
 import yaml
 
-def set(connect, config_file, **kwargs):
+def set(connect, config_file, verbose=False, **kwargs):
     try:
         with open(config_file) as f:
             reconf = connect.configure(yaml.load(f))
-            if reconf:
-                print "(Re)configured"
-            else:
-                print "Configured"
+            if verbose:
+                if reconf:
+                    print "Configuration updated"
+                else:
+                    print "Configuration set"
     except Exception as e:
         raise FastScoreError("Unable to configure FastScore", caused_by=e)
 

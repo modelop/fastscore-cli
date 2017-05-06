@@ -8,25 +8,29 @@ from . import RELEASE
 
 from tabulate import tabulate
 
-def connect(proxy_prefix, **kwargs):
+def connect(proxy_prefix, verbose=False, **kwargs):
     co = Connect(proxy_prefix)
     savefile = expanduser('~/.fastscore')
     co.dump(savefile)
-    print "Connected"
+    if verbose:
+        print "Connected to FastScore proxy at %s" % proxy_prefix
 
 def fleet(connect, verbose=False, wait=False, **kwargs):
     if wait:
-        sys.stdout.write("Waiting...")
-        sys.stdout.flush()
+        if verbose:
+            sys.stdout.write("Waiting...")
+            sys.stdout.flush()
         while True:
             try:
                 xx = connect.fleet()
                 if all([ x.health == 'ok' for x in xx ]):
                     print "done"
                     break
-                sys.stdout.write(':')
+                if verbose:
+                    sys.stdout.write(':')
             except:
-                sys.stdout.write('.')
+                if verbose:
+                    sys.stdout.write('.')
             sleep(0.5)
     else:
         xx = connect.fleet()
@@ -40,6 +44,10 @@ def fleet(connect, verbose=False, wait=False, **kwargs):
         t = [ [x.name,x.api,x.health] for x in xx ]
         print tabulate(t, headers=["Name","API","Health"])
 
-def use(connect, name, **kwargs):
-    pass
+def use(connect, name, verbose=False, **kwargs):
+    x = connect.get(name)
+    connect.target = x
+    if verbose:
+        print "'%s' set as a preferred instance of '%s'" % (name,x.api)
+        print "Subsequent commands to target '%s'" % name
 

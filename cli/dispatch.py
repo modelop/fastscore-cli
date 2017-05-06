@@ -7,7 +7,8 @@ import iso8601
 from fastscore.suite import Connect
 from fastscore.errors import FastScoreError
 
-import connect, config
+import cli.connect, cli.config
+import cli.model
 
 COMMAND_HELP = [
   ("help",       "Explain commands and options"),
@@ -45,7 +46,8 @@ def explain_options(**kwargs):
     print "  -type:pfa-yaml       --- PFA (yaml)"
     print "  -type:python         --- Python"
     print "  -type:python3        --- Python 3"
-    print "  -type:r              --- R"
+    print "  -type:R              --- R"
+    print "  -type:c              --- C"
     print "  -count:NNN           list no more than NNN items"
     print "  -since:DATETIME      show items created after DATETIME (iso8601)"
     print "  -until:DATETIME      show items created before DATETIME (iso8601)"
@@ -55,15 +57,25 @@ def explain_command(cmd, **kwargs):
     explain_command1(cmd)
 
 COMMAND_PATTERNS = [
-    (overview_commands, []),
-    (overview_commands, ["help"]),
-    (explain_options,   ["help","options"]),
-    (explain_command,   ["help","<cmd>"]),
-    (connect.connect,   ["connect","<proxy_prefix>"]),
-    (config.set,        ["config","set","<config_file>"]),
-    (config.show,       ["config","show"]),
-    (connect.fleet,     ["fleet"]),
-    (connect.use,       ["use","<instance_name>"])
+    (overview_commands,   []),
+    (overview_commands,   ["help"]),
+    (explain_options,     ["help","options"]),
+    (explain_command,     ["help","<cmd>"]),
+    (cli.connect.connect, ["connect","<proxy_prefix>"]),
+    (cli.config.set,      ["config","set","<config_file>"]),
+    (cli.config.show,     ["config","show"]),
+    (cli.connect.fleet,   ["fleet"]),
+    (cli.connect.use,     ["use","<instance_name>"]),
+    (cli.model.add,       ["model","add","<model_name>","<src_file>"]),
+    (cli.model.add,       ["model","add","<model_name>"]),
+    (cli.model.show,      ["model","show","<model_name>"]),
+    (cli.model.roster,    ["model","list"]),
+    (cli.model.remove,    ["model","remove","<model_name>"]),
+    (cli.model.load,      ["model","load","<model_name>"]),
+    (cli.model.inspect,   ["model","inspect"]),
+    (cli.model.unload,    ["model","unload"]),
+    (cli.model.scale,     ["model","scale","<count>"]),
+    (cli.model.input,     ["model","input"])
 ]
 
 def explain_command1(cmd):
@@ -107,23 +119,29 @@ def parse_opts(args):
             opts['verbose'] = True
         elif x == '-wait':
             opts['wait'] = True
+        elif x.startswith("-type:"):
+            mtype = x.split(':')[1]
+            if mtype in Model.TYPES:
+                opts['mtype'] = mtype
+            else:
+                print "Model type '%s' is unknown" % mtype
         elif x.startswith("-count:"):
-          try:
-            opts['count'] = int(x.split(':')[1])
-          except ValueError:
-            print "Option '%s' ignored" % x
+            try:
+                opts['count'] = int(x.split(':')[1])
+            except ValueError:
+                print "Option '%s' ignored" % x
         elif x.startswith("-since:"):
-          try:
-            opts['since'] = iso8601.parse_date(x.split(':')[1])
-          except:
-            print "Option '%s' ignored" % x
+            try:
+                opts['since'] = iso8601.parse_date(x.split(':')[1])
+            except:
+                print "Option '%s' ignored" % x
         elif x.startswith('-until:'):
-          try:
-            opts['until'] = iso8601.parse_date(x.split(':')[1])
-          except:
-            print "Option '%s' ignored" % x
+            try:
+                opts['until'] = iso8601.parse_date(x.split(':')[1])
+            except:
+                print "Option '%s' ignored" % x
         elif x[0] == '-':
-          print "Unknown option '%s' ignored" % x
+            print "Unknown option '%s' ignored" % x
     words = [ x for x in args if x[0] != '-' ]
     return (words,opts)
 
