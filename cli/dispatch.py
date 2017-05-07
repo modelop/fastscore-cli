@@ -8,7 +8,7 @@ from fastscore.suite import Connect
 from fastscore.errors import FastScoreError
 
 import cli.connect, cli.config
-import cli.model
+import cli.model, cli.attachment, cli.snapshot
 
 COMMAND_HELP = [
   ("help",       "Explain commands and options"),
@@ -57,25 +57,29 @@ def explain_command(cmd, **kwargs):
     explain_command1(cmd)
 
 COMMAND_PATTERNS = [
-    (overview_commands,   []),
-    (overview_commands,   ["help"]),
-    (explain_options,     ["help","options"]),
-    (explain_command,     ["help","<cmd>"]),
-    (cli.connect.connect, ["connect","<proxy_prefix>"]),
-    (cli.config.set,      ["config","set","<config_file>"]),
-    (cli.config.show,     ["config","show"]),
-    (cli.connect.fleet,   ["fleet"]),
-    (cli.connect.use,     ["use","<instance_name>"]),
-    (cli.model.add,       ["model","add","<model_name>","<src_file>"]),
-    (cli.model.add,       ["model","add","<model_name>"]),
-    (cli.model.show,      ["model","show","<model_name>"]),
-    (cli.model.roster,    ["model","list"]),
-    (cli.model.remove,    ["model","remove","<model_name>"]),
-    (cli.model.load,      ["model","load","<model_name>"]),
-    (cli.model.inspect,   ["model","inspect"]),
-    (cli.model.unload,    ["model","unload"]),
-    (cli.model.scale,     ["model","scale","<count>"]),
-    (cli.model.input,     ["model","input"])
+    (overview_commands,       []),
+    (overview_commands,       ["help"]),
+    (explain_options,         ["help","options"]),
+    (explain_command,         ["help","<cmd>"]),
+    (cli.connect.connect,     ["connect","<proxy_prefix>"]),
+    (cli.config.set,          ["config","set","<config_file>"]),
+    (cli.config.show,         ["config","show"]),
+    (cli.connect.fleet,       ["fleet"]),
+    (cli.connect.use,         ["use","<instance_name>"]),
+    (cli.model.add,           ["model","add","<model_name>","<src_file>"]),
+    (cli.model.add,           ["model","add","<model_name>"]),
+    (cli.model.show,          ["model","show","<model_name>"]),
+    (cli.model.roster,        ["model","list"]),
+    (cli.model.remove,        ["model","remove","<model_name>"]),
+    (cli.model.load,          ["model","load","<model_name>"]),
+    (cli.model.inspect,       ["model","inspect"]),
+    (cli.model.unload,        ["model","unload"]),
+    (cli.model.scale,         ["model","scale","<count>"]),
+    (cli.model.input,         ["model","input"]),
+    (cli.attachment.roster,   ["attachment","list","<model_name>"]),
+    (cli.attachment.upload,   ["attachment","upload","<model_name>","<file_to_upload>"]),
+    (cli.attachment.download, ["attachment","download","<model_name>","<att_name>"]),
+    (cli.attachment.remove,   ["attachment","remove","<model_name>","<att_name>"])
 ]
 
 def explain_command1(cmd):

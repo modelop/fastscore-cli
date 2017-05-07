@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 from fastscore import Model, FastScoreError
 
-KNOWN_EXTENSIONS = {
+KNOWN_MODEL_EXTENSIONS = {
   '.pfa':  'pfa-json',
   '.ppfa': 'pfa-pretty',
   '.json': 'pfa-json',
@@ -62,7 +62,10 @@ def remove(connect, name, verbose=False, **kwargs):
         print "Model '%s' removed" % name
 
 def load(connect, name, **kwargs):
-    pass
+    mm = connect.lookup('model-manage')
+    engine = connect.lookup('engine')
+    model = mm.models[name]
+    engine.load(model)
 
 def inspect(connect, **kwargs):
     pass
@@ -78,8 +81,8 @@ def input(connect, **kwargs):
 
 def model_type_from_file(srcfile):
     _,ext = splitext(srcfile)
-    if not ext in KNOWN_EXTENSIONS:
-        known = ", ".join(KNOWN_EXTENSIONS.keys())
+    if not ext in KNOWN_MODEL_EXTENSIONS:
+        known = ", ".join(KNOWN_MODEL_EXTENSIONS.keys())
         raise FastScoreError("%s must have a proper extension (%s)" % (srcfile,known))
     return KNOWN_EXTENSION[ext]
 
