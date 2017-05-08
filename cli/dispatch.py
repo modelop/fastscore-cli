@@ -93,7 +93,7 @@ COMMAND_PATTERNS = [
     (cli.stream.roster,       ["stream","list"]),
     (cli.stream.sample,       ["stream","sample","<stream_name>"]),
     (cli.stream.attach,       ["stream","attach","<stream_name>","<slot>"]),
-    (cli.stream.detach,       ["stream","detach","<stream_name>","<slot>"])
+    (cli.stream.detach,       ["stream","detach","<slot>"])
 ]
 
 def explain_command1(cmd):

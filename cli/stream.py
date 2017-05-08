@@ -4,6 +4,7 @@ import json
 from base64 import b64decode
 from string import printable
 from binascii import b2a_hex
+from re import match
 
 from fastscore import Stream
 from fastscore import FastScoreError
@@ -78,17 +79,40 @@ def str_pane(s):
     return "".join(x)
 
 def attach(connect, name, slot, verbose=False, **kwargs):
+    try:
+        (d,n) = parse_slot(slot)
+    except Exception as e:
+        print e
+        raise FastScoreError("Malformed slot (use 'in:1' or 'input' or 'o:3' or 'out')")
     mm = connect.lookup('model-manage')
     stream = mm.streams[name]
     engine = connect.lookup('engine')
+    if d:
+        engine.inputs[n] = stream
+    else:
+        engine.outputs[n] = stream
+    if verbose:
+        print "Stream attached"
 
-    ##TODO
-    ##TODO
-    ##TODO
+def detach(connect, slot, verbose=False, **kwargs):
+    try:
+        (d,n) = parse_slot(slot)
+    except:
+        raise FastScoreError("Malformed slot (use 'in:1' or 'input' or 'o:3' or 'out')")
+    mm = connect.lookup('model-manage')
+    engine = connect.lookup('engine')
+    if d:
+        del engine.inputs[n]
+    else:
+        del engine.outputs[n]
+    if verbose:
+        print "Stream detached"
 
-    ## engine.inputs[1] = stream
-    ## engine.attach(s, slot=n, dir='input')
-
-def detach(connect, name, slot, verbose=False, **kwargs):
-    pass
-
+def parse_slot(slot):
+    (g0,_,g2) = match('([a-z]+)(:([0-9]+))?$', slot).groups()
+    n = int(g2) if g2 else 1
+    if 'input'.startswith(g0):
+        return (True,n)
+    assert 'output'.startswith(g0)
+    return (False,n)
+ 
