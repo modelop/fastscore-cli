@@ -67,6 +67,7 @@ COMMAND_PATTERNS = [
     (cli.config.show,         ["config","show"]),
     (cli.connect.fleet,       ["fleet"]),
     (cli.connect.use,         ["use","<instance_name>"]),
+    (cli.connect.use,         ["use"]),
     (cli.model.add,           ["model","add","<model_name>","<src_file>"]),
     (cli.model.add,           ["model","add","<model_name>"]),
     (cli.model.show,          ["model","show","<model_name>"]),

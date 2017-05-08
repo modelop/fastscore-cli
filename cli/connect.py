@@ -44,10 +44,20 @@ def fleet(connect, verbose=False, wait=False, **kwargs):
         t = [ [x.name,x.api,x.health] for x in xx ]
         print tabulate(t, headers=["Name","API","Health"])
 
-def use(connect, name, verbose=False, **kwargs):
-    x = connect.get(name)
-    connect.target = x
-    if verbose:
-        print "'%s' set as a preferred instance of '%s'" % (name,x.api)
-        print "Subsequent commands to target '%s'" % name
+def use(connect, name=None, verbose=False, **kwargs):
+    if name:
+        x = connect.get(name)
+        connect.target = x
+        if verbose:
+            print "'%s' set as a preferred instance of '%s'" % (name,x.api)
+            print "Subsequent commands to target '%s'" % name
+    else:
+        if verbose:
+            if connect.target:
+                print "Current target instance is '%s'" % connect.target.name
+            else:
+                print "Target instance not selected"
+        else:
+            if connect.target:
+                print connect.target.name
 

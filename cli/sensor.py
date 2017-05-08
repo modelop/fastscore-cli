@@ -2,6 +2,8 @@
 import sys
 import json
 
+from tabulate import tabulate
+
 from fastscore import Sensor
 from fastscore import FastScoreError
 
@@ -37,14 +39,43 @@ def roster(connect, verbose=False, **kwargs):
         print x
 
 def install(connect, name, verbose=False, **kwargs):
-    pass
+    if not connect.target:
+        raise FastScoreError("Target not selected (see 'fastscore use')")
+    mm = connect.lookup('model-manage')
+    sensor = mm.sensors[name]
+    reply = sensor.install(connect.target)
+    if verbose:
+        print "Sensor installed [%s]" % reply.id
+    else:
+        print reply.id
 
 def uninstall(connect, tapid, verbose=False, **kwargs):
-    pass
+    if not connect.target:
+        raise FastScoreError("Target not selected (see 'fastscore use')")
+    mm = connect.lookup('model-manage')
+    connect.target.uninstall_sensor(tapid)
+    if verbose:
+        print "Sensor uninstalled"
 
-def inspect(connect, tapid=None, **kwargs):
-    pass
+def inspect(connect, tapid=None, verbose=False, **kwargs):
+    if not connect.target:
+        raise FastScoreError("Target not selected (see 'fastscore use')")
+    if tapid:
+        reply = connect.target.active_sensors[tapid]
+        print "Sensor %s attached to '%s'" % (reply.id,reply.tap)
+        if reply.permanent:
+            print "Sensor is permanently active"
+    else:
+        if verbose:
+            t = [ [x.id,x.tap,x.active] for x in connect.target.active_sensors ]
+            print tabulate(t, headers = ["Id","Tap","Active"])
+        else:
+            for x in connect.target.active_sensors:
+                print x.id
 
 def points(connect, **kwargs):
-    pass
+    if not connect.target:
+        raise FastScoreError("Target not selected (see 'fastscore use')")
+    for x in connect.target.tapping_points:
+        print x
 
