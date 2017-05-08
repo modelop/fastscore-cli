@@ -9,6 +9,7 @@ from fastscore.errors import FastScoreError
 
 import cli.connect, cli.config
 import cli.model, cli.attachment, cli.snapshot
+import cli.schema, cli.stream, cli.sensor
 
 COMMAND_HELP = [
   ("help",       "Explain commands and options"),
@@ -79,7 +80,18 @@ COMMAND_PATTERNS = [
     (cli.attachment.roster,   ["attachment","list","<model_name>"]),
     (cli.attachment.upload,   ["attachment","upload","<model_name>","<file_to_upload>"]),
     (cli.attachment.download, ["attachment","download","<model_name>","<att_name>"]),
-    (cli.attachment.remove,   ["attachment","remove","<model_name>","<att_name>"])
+    (cli.attachment.remove,   ["attachment","remove","<model_name>","<att_name>"]),
+    (cli.schema.add,          ["schema","add","<schema_name>","<schema_file>"]),
+    (cli.schema.add,          ["schema","add","<schema_name>"]),
+    (cli.schema.show,         ["schema","show","<schema_name>"]),
+    (cli.schema.remove,       ["schema","remove","<schema_name>"]),
+    (cli.schema.roster,       ["schema","list"]),
+    (cli.stream.add,          ["stream","add","<stream_name>","<desc_file>"]),
+    (cli.stream.show,         ["stream","show","<stream_name>"]),
+    (cli.stream.remove,       ["stream","remove","<stream_name>"]),
+    (cli.stream.roster,       ["stream","list"]),
+    (cli.stream.attach,       ["stream","attach","<stream_name>","<slot>"]),
+    (cli.stream.detach,       ["stream","detach","<stream_name>","<slot>"])
 ]
 
 def explain_command1(cmd):

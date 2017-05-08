@@ -39,10 +39,7 @@ def add(connect, name, srcfile=None, mtype=None, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
     updated = model.update(mm)
     if verbose:
-        if updated:
-            print "Model '%s' updated" % name
-        else:
-            print "Model '%s' created" % name
+        print "Model updated" if updated else "Model created"
 
 def show(connect, name, **kwargs):
     mm = connect.lookup('model-manage')
@@ -61,20 +58,29 @@ def remove(connect, name, verbose=False, **kwargs):
     if verbose:
         print "Model '%s' removed" % name
 
-def load(connect, name, **kwargs):
+def load(connect, name, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
     model = mm.models[name]
-    engine.load(model)
+    engine.load_model(model)
+    if verbose:
+        print "Model loaded"
 
 def inspect(connect, **kwargs):
-    pass
+    raise FastScoreError("Not implemented")
 
-def unload(connect, **kwargs):
-    pass
+def unload(connect, verbose=False, **kwargs):
+    engine = connect.lookup('engine')
+    engine.unload_model()
+    if verbose:
+        print "Model unloaded"
 
-def scale(connect, count, **kwargs):
-    pass
+def scale(connect, count, verbose=False, **kwargs):
+    engine = connect.lookup('engine')
+    n = int(count)
+    engine.scale(n)
+    if verbose:
+        print "Scaling complete"
 
 def input(connect, **kwargs):
     pass
