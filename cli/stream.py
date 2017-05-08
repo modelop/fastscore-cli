@@ -64,7 +64,7 @@ def sample(connect, name, count=None, **kwargs):
             else:
                 print "%4d: %s  %s" % (i,hex_pane(chunks[0]),str_pane(chunks[0]))
                 for y in chunks[1:]:
-                    print "      %s  %s" % (i,hex_pane(y),str_pane(y))
+                    print "      %s  %s" % (hex_pane(y),str_pane(y))
 
 def istext(s):
     return all([ x in printable for x in s ])
@@ -77,9 +77,18 @@ def str_pane(s):
     x = [ s[i] if i < len(s) and s[i] in printable else '.' for i in range(16) ]
     return "".join(x)
 
-def attach(connect, slot, verbose=False, **kwargs):
-    pass
+def attach(connect, name, slot, verbose=False, **kwargs):
+    mm = connect.lookup('model-manage')
+    stream = mm.streams[name]
+    engine = connect.lookup('engine')
 
-def detach(connect, slot, verbose=False, **kwargs):
+    ##TODO
+    ##TODO
+    ##TODO
+
+    ## engine.inputs[1] = stream
+    ## engine.attach(s, slot=n, dir='input')
+
+def detach(connect, name, slot, verbose=False, **kwargs):
     pass
 
