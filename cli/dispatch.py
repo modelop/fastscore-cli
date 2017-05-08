@@ -87,9 +87,11 @@ COMMAND_PATTERNS = [
     (cli.schema.remove,       ["schema","remove","<schema_name>"]),
     (cli.schema.roster,       ["schema","list"]),
     (cli.stream.add,          ["stream","add","<stream_name>","<desc_file>"]),
+    (cli.stream.add,          ["stream","add","<stream_name>"]),
     (cli.stream.show,         ["stream","show","<stream_name>"]),
     (cli.stream.remove,       ["stream","remove","<stream_name>"]),
     (cli.stream.roster,       ["stream","list"]),
+    (cli.stream.sample,       ["stream","sample","<stream_name>"]),
     (cli.stream.attach,       ["stream","attach","<stream_name>","<slot>"]),
     (cli.stream.detach,       ["stream","detach","<stream_name>","<slot>"])
 ]

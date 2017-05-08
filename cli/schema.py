@@ -1,5 +1,6 @@
 
 import sys
+import json
 
 from tabulate import tabulate
 
@@ -13,9 +14,9 @@ def add(connect, name, schema_file=None, verbose=False, **kwargs):
                 source = f.read()
         else:
             source = sys.stdin.read()
+        schema = Schema(name, json.loads(source))
     except Exception as e:
         raise FastScoreError("Unable to add schema '%s'" % name, caused_by=e)
-    schema = Schema(name, source)
     mm = connect.lookup('model-manage')
     updated = schema.update(mm)
     if verbose:
@@ -24,8 +25,7 @@ def add(connect, name, schema_file=None, verbose=False, **kwargs):
 def show(connect, name, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
     schema = mm.schemata[name]
-    sys.stdout.write(schema.source)
-    sys.stdout.flush()
+    print json.dumps(schema.source, indent=2)
 
 def remove(connect, name, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
