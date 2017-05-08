@@ -93,7 +93,17 @@ COMMAND_PATTERNS = [
     (cli.stream.roster,       ["stream","list"]),
     (cli.stream.sample,       ["stream","sample","<stream_name>"]),
     (cli.stream.attach,       ["stream","attach","<stream_name>","<slot>"]),
-    (cli.stream.detach,       ["stream","detach","<slot>"])
+    (cli.stream.detach,       ["stream","detach","<slot>"]),
+    (cli.sensor.add,          ["sensor","add","<sensor_name>","<desc_file>"]),
+    (cli.sensor.add,          ["sensor","add","<sensor_name>"]),
+    (cli.sensor.show,         ["sensor","show","<sensor_name>"]),
+    (cli.sensor.remove,       ["sensor","remove","<sensor_name>"]),
+    (cli.sensor.roster,       ["sensor","list"]),
+    (cli.sensor.install,      ["sensor","install","<sensor_name>"]),
+    (cli.sensor.uninstall,    ["sensor","uninstall","<tap_id>"]),
+    (cli.sensor.inspect,      ["sensor","inspect","<tap_id>"]),
+    (cli.sensor.inspect,      ["sensor","inspect"]),
+    (cli.sensor.points,       ["sensor","points"])
 ]
 
 def explain_command1(cmd):

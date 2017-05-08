@@ -27,8 +27,7 @@ def add(connect, name, descfile=None, verbose=False, **kwargs):
 def show(connect, name, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
     stream = mm.streams[name]
-    sys.stdout.write(json.dumps(stream.desc, indent=2))
-    sys.stdout.flush()
+    print json.dumps(stream.desc, indent=2)
 
 def remove(connect, name, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
