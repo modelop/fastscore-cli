@@ -7,7 +7,7 @@ import iso8601
 from fastscore.suite import Connect
 from fastscore.errors import FastScoreError
 
-import cli.connect, cli.config
+import cli.connect, cli.config, cli.pneumo
 import cli.model, cli.attachment, cli.snapshot
 import cli.schema, cli.stream, cli.sensor
 
@@ -104,7 +104,11 @@ COMMAND_PATTERNS = [
     (cli.sensor.uninstall,    ["sensor","uninstall","<tap_id>"]),
     (cli.sensor.inspect,      ["sensor","inspect","<tap_id>"]),
     (cli.sensor.inspect,      ["sensor","inspect"]),
-    (cli.sensor.points,       ["sensor","points"])
+    (cli.sensor.points,       ["sensor","points"]),
+    (cli.pneumo.watch,        ["pneumo"]),
+    (cli.pneumo.flush,        ["pneumo","flush"]),
+    (cli.pneumo.wait,         ["pneumo","wait","<msgr_type>"]),
+    (cli.pneumo.wait,         ["pneumo","wait"])
 ]
 
 def explain_command1(cmd):
