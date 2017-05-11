@@ -4,7 +4,7 @@ import time
 import yaml
 import requests
 
-RELEASE = "1.4"
+RELEASE = "1.5"
 
 API_NAMES = ["engine","model-manage","engine-x"]
 

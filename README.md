@@ -5,9 +5,9 @@ This is the command line interface (CLI) to FastScore.
 
 ## How to install
 ```
-wget https://s3-us-west-1.amazonaws.com/fastscore-cli/fastscore-cli-1.4.tar.gz
-tar xzf fastscore-cli-1.4.tar.gz
-cd fastscore-cli-1.4
+wget https://s3-us-west-1.amazonaws.com/fastscore-cli/fastscore-cli-1.5.tar.gz
+tar xzf fastscore-cli-1.5.tar.gz
+cd fastscore-cli-1.5
 python setup.py install
 ```
 

@@ -40,7 +40,7 @@ def help_me(args):
     overview_commands()
 
 def help_header():
-  print "FastScore CLI v1.4"
+  print "FastScore CLI v1.5"
 
 command_specs = \
  [(help_me,             ["help"]),
