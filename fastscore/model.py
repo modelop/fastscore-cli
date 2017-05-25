@@ -11,6 +11,7 @@ import service
 requested_type = None
 
 MODEL_TYPES = ["pfa-json","pfa-pretty","pfa-yaml",
+               "h2o-java",
                "python","python3","r",
                "c","java","scala","erlang"]
 
@@ -19,6 +20,7 @@ MEDIA_TYPES = {
   "application/vnd.fastscore.model-pfa-json":   "pfa-json",
   "application/vnd.fastscore.model-pfa-yaml":   "pfa-yaml",
   "application/vnd.fastscore.model-pfa-pretty": "pfa-pretty",
+  "application/vnd.fastscore.model-h2o-java":   "h2o-java",
   "application/vnd.fastscore.model-python":     "python",
   "application/vnd.fastscore.model-python2":    "python",
   "application/vnd.fastscore.model-python3":    "python3",
@@ -44,6 +46,7 @@ KNOWN_EXTENSIONS = {
   ".py":   "python",
   ".py3":  "python3",
   ".R":    "r",
+  ".java": "java",
   ".c":    "c"
 }
 
