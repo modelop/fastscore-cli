@@ -1,7 +1,8 @@
 
 from os import rename
 
-from fastscore import Attachment, FastScoreError
+from fastscore.model import Attachment
+from fastscore import FastScoreError
 
 from tabulate import tabulate
 
@@ -29,7 +30,7 @@ def upload(connect, model_name, file_to_upload, verbose=False, **kwargs):
     model = mm.models[model_name]
     aname = file_to_upload
     atype = guess_attachment_type(file_to_upload)
-    att = Attachment(aname, atype, file_to_upload, model)
+    att = Attachment(aname, atype=atype, datafile=file_to_upload, model=model)
     att.upload()
     if verbose:
         print "Attachment uploaded"
