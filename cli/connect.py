@@ -1,10 +1,12 @@
 
 import sys
 from os.path import expanduser
+from time import sleep
 
 from fastscore.suite import Connect
 from .version import BUILD_DATE
 from . import RELEASE
+from .colors import tcol
 
 from tabulate import tabulate
 
@@ -34,14 +36,17 @@ def fleet(connect, verbose=False, wait=False, **kwargs):
             sleep(0.5)
     else:
         xx = connect.fleet()
+    def paintok(x):
+        return tcol.OKGREEN + x + tcol.ENDC if x == 'ok' \
+          else tcol.FAIL + x + tcol.ENDC
     if verbose:
         y = connect.check_health()
-        t = [["CLI","UI","ok",RELEASE,BUILD_DATE],
-             ["connect","connect","ok",y.release,y.built_on]]
-        t += [ [x.name,x.api,x.health,x.release,x.built_on] for x in xx ]
+        t = [["CLI","UI",paintok("ok"),RELEASE,BUILD_DATE],
+             ["connect","connect",paintok("ok"),y.release,y.built_on]]
+        t += [ [x.name,x.api,paintok(x.health),x.release,x.built_on] for x in xx ]
         print tabulate(t, headers=["Name","API","Health","Release","Built On"])
     else:
-        t = [ [x.name,x.api,x.health] for x in xx ]
+        t = [ [x.name,x.api,paintok(x.health)] for x in xx ]
         print tabulate(t, headers=["Name","API","Health"])
 
 def use(connect, name=None, verbose=False, **kwargs):

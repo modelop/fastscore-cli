@@ -11,23 +11,29 @@ import cli.connect, cli.config, cli.pneumo
 import cli.model, cli.attachment, cli.snapshot
 import cli.schema, cli.stream, cli.sensor
 
+import logging
+import urllib3
+logging.getLogger(urllib3.__package__).setLevel(logging.ERROR)
+
+from cli.colors import tcol
+
 COMMAND_HELP = [
   ("help",       "Explain commands and options"),
   ("connect",    "Establish a FastScore connection"),
-  ("config",     "Configure FastScore fleet"),
-  ("fleet",      "Examine status of FastScore fleet"),
-  ("use",        "Select a target instance"),
+  ("config",     "Configure the FastScore fleet"),
+  ("fleet",      "Examine status of the FastScore fleet"),
+  ("use",        "Select the target instance"),
   ("model",      "Manage analytic models"),
   ("attachment", "Manage model attachments"),
   ("snapshot",   "Manage model snapshots"),
   ("stream",     "Manage streams/stream descriptors"),
   ("sensor",     "Manage sensors/sensor descriptors"),
-  ("stats",      "Show various statistics"),
+  ("stats",      "Show assorted statistics"),
   ("pneumo",     "Listen for Pneumo messages")
 ]
 
 def help_header():
-    print "FastScore CLI v1.5"
+    print tcol.BOLD + "FastScore CLI v1.6" + tcol.ENDC
 
 def overview_commands(**kwargs):
     help_header()
@@ -35,7 +41,8 @@ def overview_commands(**kwargs):
     print "Available commands:"
     for cmd,desc in COMMAND_HELP:
         print "  %-16s" % cmd, desc
-    print "Use 'help <command>' to get more details on a <command> usage"
+    print "Run 'fastscore help <command>' to get more " \
+                    "details on <command> usage"
 
 def explain_options(**kwargs):
     help_header()
@@ -52,7 +59,8 @@ def explain_options(**kwargs):
     print "  -count:NNN           list no more than NNN items"
     print "  -since:DATETIME      show items created after DATETIME (iso8601)"
     print "  -until:DATETIME      show items created before DATETIME (iso8601)"
-    print "  -wait                wait for an operation to complete"
+    print "  -e                   open item for editing"
+    print "  -wait                wait for operation to complete"
 
 def explain_command(cmd, **kwargs):
     explain_command1(cmd)
@@ -73,6 +81,7 @@ COMMAND_PATTERNS = [
     (cli.model.show,          ["model","show","<model_name>"]),
     (cli.model.roster,        ["model","list"]),
     (cli.model.remove,        ["model","remove","<model_name>"]),
+    (cli.model.verify,        ["model","verify","<model_name>"]),
     (cli.model.load,          ["model","load","<model_name>"]),
     (cli.model.inspect,       ["model","inspect"]),
     (cli.model.unload,        ["model","unload"]),
@@ -116,10 +125,11 @@ def explain_command1(cmd):
     if x == []:
       print "Command '%s' not available (use 'help')" % cmd
     else:
-        print "%s:" % x[0]
+        print x[0]
+        print
         for _,pat in COMMAND_PATTERNS:
           if len(pat) > 0 and pat[0] == cmd:
-            print " ", str.join(" ", pat)
+            print "  fastscore " + str.join(" ", pat)
 
 def main():
     (words,opts) = parse_opts(sys.argv[1:])
@@ -139,8 +149,7 @@ def main():
                         raise FastScoreError("Not connected (use 'fastscore connect')")
                 return 0
             except FastScoreError as e:
-                print e
-                print
+                print tcol.FAIL + str(e) + tcol.ENDC
                 return 1
     print "Use 'fastscore help' or 'fastscore help <command>'"
     return 0
@@ -148,7 +157,7 @@ def main():
 def parse_opts(args):
     opts = {}
     for x in args:
-        if x == "-v":
+        if x == '-v':
             opts['verbose'] = True
         elif x == '-wait':
             opts['wait'] = True
@@ -173,6 +182,8 @@ def parse_opts(args):
                 opts['until'] = iso8601.parse_date(x.split(':')[1])
             except:
                 print "Option '%s' ignored" % x
+        elif x == '-e':
+            opts['edit'] = True
         elif x[0] == '-':
             print "Unknown option '%s' ignored" % x
     words = [ x for x in args if x[0] != '-' ]
