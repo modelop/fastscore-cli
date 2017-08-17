@@ -73,50 +73,51 @@ def remove(connect, name, verbose=False, **kwargs):
     if verbose:
         print "Model '%s' removed" % name
 
-def verify(connect, name, verbose=False, **kwargs):
+def verify(connect, name, verbose=False, embedded_schemas={}, **kwargs):
     mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
     model = mm.models[name]
     try:
-        info = engine.load_model(model, dry_run=True)
-        sloc = model.source.count('\n')
-        t = [[model.name,model.mtype,sloc]]
-        print tabulate(t, headers=["Name","Type","SLOC"])
-        print
+        info = engine.load_model(model, embedded_schemas=embedded_schemas, dry_run=True)
+        if verbose:
+            sloc = model.source.count('\n')
+            t = [[model.name,model.mtype,sloc]]
+            print tabulate(t, headers=["Name","Type","SLOC"])
+            print
 
-        def stars(schema):
-            if schema == None:
-                return "-"
-            s = json.dumps(schema)
-            return s if len(s) <= 10 else "*****"
+            def stars(schema):
+                if schema == None:
+                    return "-"
+                s = json.dumps(schema)
+                return s if len(s) <= 10 else "*****"
 
-        def yesno(flag):
-            return "Yes" if flag else "No"
+            def yesno(flag):
+                return "Yes" if flag else "No"
 
-        def glue(a, b):
-            if len(a) > len(b):
-                b += [[None] * 3] * (len(a) - len(b))
-            elif len(a) < len(b):
-                a += [[None] * 4] * (len(b) - len(a))
-            return [ x + [None] + y for x,y in zip(a, b) ]
+            def glue(a, b):
+                if len(a) > len(b):
+                    b += [[None] * 3] * (len(a) - len(b))
+                elif len(a) < len(b):
+                    a += [[None] * 4] * (len(b) - len(a))
+                return [ x + [None] + y for x,y in zip(a, b) ]
 
-        left = [ [x.slot,stars(x.schema),x.action,yesno(x.recordsets)]
-                    for x in info.slots if x.slot % 2 == 0 ]
-        right = [ [x.slot,stars(x.schema),yesno(x.recordsets)]
-                    for x in info.slots if x.slot % 2 == 1 ]
-        headers = ["Slot","Schema","Action","Recordsets","","Slot","Schema","Recordsets"]
-        print tabulate(glue(left, right), headers=headers)
-        print
+            left = [ [x.slot,stars(x.schema),x.action,yesno(x.recordsets)]
+                        for x in info.slots if x.slot % 2 == 0 ]
+            right = [ [x.slot,stars(x.schema),yesno(x.recordsets)]
+                        for x in info.slots if x.slot % 2 == 1 ]
+            headers = ["Slot","Schema","Action","Recordsets","","Slot","Schema","Recordsets"]
+            print tabulate(glue(left, right), headers=headers)
+            print
 
-        if info.install_libs != []:
-            print "These libraries will be installed: %s." % ", ".join(info.install_libs)
-        if info.warn_libs != []:
-            print "WARNING: the model imports %s." % ", ".join(info.warn_libs)
-        if info.attach_libs != []:
-            print "Libraries to be found in attachment(s): %s." % ", ".join(info.attach_libs)
-        if info.snapshots != 'none':
-            print "The model snapshots mode is '%s'" % info.snapshots
-        
+            if info.install_libs != []:
+                print "These libraries will be installed: %s." % ", ".join(info.install_libs)
+            if info.warn_libs != []:
+                print "WARNING: the model imports %s." % ", ".join(info.warn_libs)
+            if info.attach_libs != []:
+                print "Libraries to be found in attachment(s): %s." % ", ".join(info.attach_libs)
+            if info.snapshots != 'none':
+                print "The model snapshots mode is '%s'" % info.snapshots
+            
         print tcol.OKGREEN + "The model contains no errors" + tcol.ENDC
 
     except FastScoreError as e:
@@ -126,11 +127,11 @@ def verify(connect, name, verbose=False, **kwargs):
         else:
             raise e
 
-def load(connect, name, verbose=False, **kwargs):
+def load(connect, name, verbose=False, embedded_schemas={}, **kwargs):
     mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
     model = mm.models[name]
-    engine.load_model(model)
+    engine.load_model(model, embedded_schemas=embedded_schemas)
     if verbose:
         print "Model loaded"
 

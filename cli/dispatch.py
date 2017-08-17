@@ -47,20 +47,21 @@ def overview_commands(**kwargs):
 def explain_options(**kwargs):
     help_header()
     print "Options:"
-    print "  -v                   be verbose"
-    print "  -type:<model-type>   set model type (ignore file extension)"
-    print "  -type:pfa-json       --- PFA (json)"
-    print "  -type:pfa-pretty     --- PrettyPFA"
-    print "  -type:pfa-yaml       --- PFA (yaml)"
-    print "  -type:python         --- Python"
-    print "  -type:python3        --- Python 3"
-    print "  -type:R              --- R"
-    print "  -type:c              --- C"
-    print "  -count:NNN           list no more than NNN items"
-    print "  -since:DATETIME      show items created after DATETIME (iso8601)"
-    print "  -until:DATETIME      show items created before DATETIME (iso8601)"
-    print "  -e                   open item for editing"
-    print "  -wait                wait for operation to complete"
+    print "  -v                      be verbose"
+    print "  -type:<model-type>      set model type (ignore file extension)"
+    print "  -type:pfa-json          --- PFA (json)"
+    print "  -type:pfa-pretty        --- PrettyPFA"
+    print "  -type:pfa-yaml          --- PFA (yaml)"
+    print "  -type:python            --- Python"
+    print "  -type:python3           --- Python 3"
+    print "  -type:R                 --- R"
+    print "  -type:c                 --- C"
+    print "  -count:NNN              list no more than NNN items"
+    print "  -since:DATETIME         show items created after DATETIME (iso8601)"
+    print "  -until:DATETIME         show items created before DATETIME (iso8601)"
+    print "  -schema:<name>:<schema> embed schema when loading a model"
+    print "  -e                      open item for editing"
+    print "  -wait                   wait for operation to complete"
 
 def explain_command(cmd, **kwargs):
     explain_command1(cmd)
@@ -155,7 +156,7 @@ def main():
     return 0
 
 def parse_opts(args):
-    opts = {}
+    opts = {'embedded_schemas': {}}
     for x in args:
         if x == '-v':
             opts['verbose'] = True
@@ -180,6 +181,16 @@ def parse_opts(args):
         elif x.startswith('-until:'):
             try:
                 opts['until'] = iso8601.parse_date(x.split(':')[1])
+            except:
+                print "Option '%s' ignored" % x
+        elif x.startswith('-schema:'):
+            try:
+                _,name,what = x.split(':')
+                try:
+                    data = open(what).read()
+                except:
+                    data = what
+                opts['embedded_schemas'][name] = data
             except:
                 print "Option '%s' ignored" % x
         elif x == '-e':
