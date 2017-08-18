@@ -152,7 +152,7 @@ def scale(connect, count, verbose=False, **kwargs):
         print "Scaling complete"
 
 def input(connect, **kwargs):
-    pass
+    raise FastScoreError("Not implemented")
 
 def model_type_from_file(srcfile):
     _,ext = splitext(srcfile)

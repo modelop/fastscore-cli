@@ -4,12 +4,14 @@ from os.path import exists, expanduser
 import yaml
 import iso8601
 
+from cli import RELEASE
+
 from fastscore.suite import Connect
 from fastscore.errors import FastScoreError
 
 import cli.connect, cli.config, cli.pneumo
 import cli.model, cli.attachment, cli.snapshot
-import cli.schema, cli.stream, cli.sensor
+import cli.schema, cli.stream, cli.engine, cli.sensor
 
 import logging
 import urllib3
@@ -27,13 +29,14 @@ COMMAND_HELP = [
   ("attachment", "Manage model attachments"),
   ("snapshot",   "Manage model snapshots"),
   ("stream",     "Manage streams/stream descriptors"),
+  ("engine",     "Manage engine state"),
   ("sensor",     "Manage sensors/sensor descriptors"),
   ("stats",      "Show assorted statistics"),
   ("pneumo",     "Listen for Pneumo messages")
 ]
 
 def help_header():
-    print tcol.BOLD + "FastScore CLI v1.6" + tcol.ENDC
+    print tcol.BOLD + "FastScore CLI v%s" % RELEASE + tcol.ENDC
 
 def overview_commands(**kwargs):
     help_header()
@@ -105,6 +108,9 @@ COMMAND_PATTERNS = [
     (cli.stream.sample,       ["stream","sample","<stream_name>"]),
     (cli.stream.attach,       ["stream","attach","<stream_name>","<slot>"]),
     (cli.stream.detach,       ["stream","detach","<slot>"]),
+    (cli.engine.pause,        ["engine","pause"]),
+    (cli.engine.unpause,      ["engine","unpause"]),
+    (cli.engine.reset,        ["engine","reset"]),
     (cli.sensor.add,          ["sensor","add","<sensor_name>","<desc_file>"]),
     (cli.sensor.add,          ["sensor","add","<sensor_name>"]),
     (cli.sensor.show,         ["sensor","show","<sensor_name>"]),

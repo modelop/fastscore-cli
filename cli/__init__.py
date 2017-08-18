@@ -1,3 +1,3 @@
 
-RELEASE = "1.5"
+RELEASE = "1.6"
 
