@@ -2,6 +2,7 @@
 import sys
 from os.path import exists, expanduser
 import yaml
+import json
 import iso8601
 
 from cli import RELEASE
@@ -63,6 +64,7 @@ def explain_options(**kwargs):
     print "  -since:DATETIME         show items created after DATETIME (iso8601)"
     print "  -until:DATETIME         show items created before DATETIME (iso8601)"
     print "  -schema:<name>:<schema> embed schema when loading a model"
+    print "  -json                   output as JSON (handy for scripts)"
     print "  -e                      open item for editing"
     print "  -wait                   wait for operation to complete"
 
@@ -146,26 +148,32 @@ def main():
             try:
                 if len(words) == 0 or words[0] == 'help' or words[0] == 'connect':
                     cmd(*args, **opts)
+                    return 0
                 else:
                     savefile = expanduser("~/.fastscore")
                     if exists(savefile):
                         co = Connect.load(savefile)
                         cmd(co, *args, **opts)
                         co.dump(savefile)
+                        return 0
                     else:
                         raise FastScoreError("Not connected (use 'fastscore connect')")
-                return 0
             except FastScoreError as e:
-                print tcol.FAIL + str(e) + tcol.ENDC
+                if opts['asjson']:
+                    print json.dumps({'error': str(e)}, indent=2)
+                else:
+                    print tcol.FAIL + str(e) + tcol.ENDC
                 return 1
     print "Use 'fastscore help' or 'fastscore help <command>'"
     return 0
 
 def parse_opts(args):
-    opts = {'embedded_schemas': {}}
+    opts = { 'asjson': False, 'embedded_schemas': {} }
     for x in args:
         if x == '-v':
             opts['verbose'] = True
+        elif x == '-json':
+            opts['asjson'] = True
         elif x == '-wait':
             opts['wait'] = True
         elif x.startswith("-type:"):

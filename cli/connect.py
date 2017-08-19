@@ -1,5 +1,6 @@
 
 import sys
+import json
 from os.path import expanduser
 from time import sleep
 
@@ -17,21 +18,22 @@ def connect(proxy_prefix, verbose=False, **kwargs):
     if verbose:
         print "Connected to FastScore proxy at %s" % proxy_prefix
 
-def fleet(connect, verbose=False, wait=False, **kwargs):
+def fleet(connect, verbose=False, asjson=False, wait=False, **kwargs):
     if wait:
-        if verbose:
+        if verbose and not asjson:
             sys.stdout.write("Waiting...")
             sys.stdout.flush()
         while True:
             try:
                 xx = connect.fleet()
                 if all([ x.health == 'ok' for x in xx ]):
-                    print "done"
+                    if verbose and not asjson:
+                        print "done"
                     break
-                if verbose:
+                if verbose and not asjson:
                     sys.stdout.write(':')
             except:
-                if verbose:
+                if verbose and not asjson:
                     sys.stdout.write('.')
             sleep(0.5)
     else:
@@ -41,13 +43,30 @@ def fleet(connect, verbose=False, wait=False, **kwargs):
           else tcol.FAIL + x + tcol.ENDC
     if verbose:
         y = connect.check_health()
-        t = [["CLI","UI",paintok("ok"),RELEASE,BUILD_DATE],
-             ["connect","connect",paintok("ok"),y.release,y.built_on]]
-        t += [ [x.name,x.api,paintok(x.health),x.release,x.built_on] for x in xx ]
-        print tabulate(t, headers=["Name","API","Health","Release","Built On"])
+        if asjson:
+            doc = [{'name': 'CLI',
+                    'api': 'UI',
+                    'health': 'ok',
+                    'release': RELEASE,
+                    'built_on': BUILD_DATE},
+                   {'name': 'connect',
+                    'api': 'connect',
+                    'health': 'ok',
+                    'release': y.release,
+                    'built_on': y.built_on}] + map(lambda x: x.to_dict(), xx)
+            print json.dumps(doc, indent=2)
+        else:
+            t = [["CLI","UI",paintok("ok"),RELEASE,BUILD_DATE],
+                 ["connect","connect",paintok("ok"),y.release,y.built_on]]
+            t += [ [x.name,x.api,paintok(x.health),x.release,x.built_on] for x in xx ]
+            print tabulate(t, headers=["Name","API","Health","Release","Built On"])
     else:
-        t = [ [x.name,x.api,paintok(x.health)] for x in xx ]
-        print tabulate(t, headers=["Name","API","Health"])
+        if asjson:
+            doc = map(lambda x: x.to_dict(), xx)
+            print json.dumps(doc, indent=2)
+        else:
+            t = [ [x.name,x.api,paintok(x.health)] for x in xx ]
+            print tabulate(t, headers=["Name","API","Health"])
 
 def use(connect, name=None, verbose=False, **kwargs):
     if name:
