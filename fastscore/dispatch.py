@@ -138,6 +138,7 @@ def explain_options():
   print "  -type:r              --- R"
   print "  -type:java           --- Java"
   print "  -type:c              --- C"
+  print "  -type:octave         --- Octave"
   print "  -count:NNN           list no more than NNN items"
   print "  -since:DATE          show items created after DATETIME (iso8601)"
   print "  -until:DATE          show items created before DATETIME (iso8601)"
