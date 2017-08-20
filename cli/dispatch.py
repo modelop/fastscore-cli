@@ -114,6 +114,7 @@ COMMAND_PATTERNS = [
     (cli.stream.detach,       ["stream","detach","<slot>"]),
     (cli.engine.pause,        ["engine","pause"]),
     (cli.engine.unpause,      ["engine","unpause"]),
+    (cli.engine.inspect,      ["engine","inspect"]),
     (cli.engine.reset,        ["engine","reset"]),
     (cli.sensor.add,          ["sensor","add","<sensor_name>","<desc_file>"]),
     (cli.sensor.add,          ["sensor","add","<sensor_name>"]),
