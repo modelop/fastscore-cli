@@ -138,8 +138,8 @@ def inspect(connect, verbose=False, asjson=False, **kwargs):
         if asjson:
             print json.dumps(x.to_dict(), indent=2)
         else:
-            t = [[x.name,x.mtype,sloc]]
-            print tabulate(t, headers=["Name","Type","SLOC"])
+            t = [[x.name,x.mtype,sloc,x.snapshots]]
+            print tabulate(t, headers=["Name","Type","SLOC","Snapshots"])
             print
 
             print_slot_map(x.slots)

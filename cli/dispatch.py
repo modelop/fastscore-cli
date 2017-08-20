@@ -108,6 +108,8 @@ COMMAND_PATTERNS = [
     (cli.stream.remove,       ["stream","remove","<stream_name>"]),
     (cli.stream.roster,       ["stream","list"]),
     (cli.stream.sample,       ["stream","sample","<stream_name>"]),
+    (cli.stream.inspect,      ["stream","inspect"]),
+    (cli.stream.inspect,      ["stream","inspect","<slot>"]),
     (cli.stream.attach,       ["stream","attach","<stream_name>","<slot>"]),
     (cli.stream.detach,       ["stream","detach","<slot>"]),
     (cli.engine.pause,        ["engine","pause"]),

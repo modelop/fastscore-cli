@@ -1,6 +1,8 @@
 
 import sys
 import json
+from tabulate import tabulate
+
 from base64 import b64decode
 from string import printable
 from binascii import b2a_hex
@@ -35,11 +37,14 @@ def remove(connect, name, verbose=False, **kwargs):
     if verbose:
         print "Stream removed"
 
-def roster(connect, verbose=False, **kwargs):
+def roster(connect, verbose=False, asjson=False, **kwargs):
     ##TODO: verbose output - add transport type    
     mm = connect.lookup('model-manage')
-    for x in mm.streams.names():
-        print x
+    if asjson:
+        print json.dumps(mm.streams.names(), indent=2)
+    else:
+        for x in mm.streams.names():
+            print x
 
 def sample(connect, name, count=None, **kwargs):
     mm = connect.lookup('model-manage')
@@ -77,41 +82,60 @@ def str_pane(s):
     x = [ s[i] if i < len(s) and s[i] in printable else '.' for i in range(16) ]
     return "".join(x)
 
-def attach(connect, name, slot, verbose=False, **kwargs):
-    try:
-        (d,n) = parse_slot(slot)
-    except Exception as e:
-        print e
-        raise FastScoreError("Malformed slot (use 'in:1' or 'input' or 'o:3' or 'out')")
-    mm = connect.lookup('model-manage')
-    stream = mm.streams[name]
+def inspect(connect, slot=None, verbose=False, asjson=False, **kwargs):
+    n = parse_slot(slot)
     engine = connect.lookup('engine')
-    if d:
-        engine.inputs[n] = stream
+    if slot == None:
+        if asjson:
+            doc = map(lambda x: x.to_dict(), engine.active_streams.values())
+            print json.dumps(doc, indent=2)
+        else:
+            t = [ [x.slot,transport(x.descriptor),str(x.eof)]
+                        for x in engine.active_streams.values() ]
+            print tabulate(t, headers=["Slot","Transport","EOF"])
+    elif n in engine.active_streams:
+        info = engine.active_streams[n]
+        if asjson:
+            print json.dumps(info.to_dict(), indent=2)
+        else:
+            t = [[info.slot,transport(info.descriptor),str(info.eof)]]
+            print tabulate(t, headers=["Slot","Transport","EOF"])
     else:
-        engine.outputs[n] = stream
+        if asjson:
+            print "null"
+        else:
+            print "No stream attached to slot %s" % slot
+
+def transport(desc):
+    transport = desc['Transport']
+    return transport['Type'] if isinstance(transport, dict) else transport
+
+def attach(connect, name, slot, verbose=False, **kwargs):
+    n = parse_slot(slot)
+    mm = connect.lookup('model-manage')
+    engine = connect.lookup('engine')
+    stream = mm.streams[name]
+    stream.attach(engine, n)
     if verbose:
         print "Stream attached"
 
 def detach(connect, slot, verbose=False, **kwargs):
-    try:
-        (d,n) = parse_slot(slot)
-    except:
-        raise FastScoreError("Malformed slot (use 'in:1' or 'input' or 'o:3' or 'out')")
+    n = parse_slot(slot)
     mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
-    if d:
-        del engine.inputs[n]
+    if n in engine.active_streams:
+        engine.active_streams[n].detach()
+        if verbose:
+            print "Stream detached"
     else:
-        del engine.outputs[n]
-    if verbose:
-        print "Stream detached"
+        if verbose:
+            print "No stream attached to slot %s" % slot
 
 def parse_slot(slot):
-    (g0,_,g2) = match('([a-z]+)(:([0-9]+))?$', slot).groups()
-    n = int(g2) if g2 else 1
-    if 'input'.startswith(g0):
-        return (True,n)
-    assert 'output'.startswith(g0)
-    return (False,n)
+    if slot == None:
+        return None
+    try:
+        return int(slot)
+    except:
+        raise FastScoreError("Malformed slot number '%s'" % slot)
  
