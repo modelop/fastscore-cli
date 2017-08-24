@@ -3,13 +3,9 @@ def watch(connect, **kwargs):
     pneumo = connect.pneumo()
     try:
         while True:
-            print pneumo.recv()
+            msg = pneumo.recv()
+            when = msg.timestamp.strftime("%X.%f")[:-3]
+            print "%s:%s: %s" % (when,msg.src,str(msg))
     except KeyboardInterrupt:
         pneumo.close
-
-def flush(connect, **kwargs):
-    raise FastScoreError("Not implemented")
-
-def wait(connect, msg_type=None, **kwargs):
-    raise FastScoreError("Not implemented")
 

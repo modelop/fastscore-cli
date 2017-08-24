@@ -12,7 +12,8 @@ from fastscore.errors import FastScoreError
 
 import cli.connect, cli.config, cli.pneumo
 import cli.model, cli.attachment, cli.snapshot
-import cli.schema, cli.stream, cli.engine, cli.sensor
+import cli.schema, cli.stream, cli.engine
+import cli.sensor, cli.monitor
 
 import logging
 import urllib3
@@ -33,7 +34,8 @@ COMMAND_HELP = [
   ("engine",     "Manage engine state"),
   ("sensor",     "Manage sensors/sensor descriptors"),
   ("stats",      "Show assorted statistics"),
-  ("pneumo",     "Listen for Pneumo messages")
+  ("monitor",    "Monitor data processing"),
+  ("pneumo",     "Listen for Pneumo messages"),
 ]
 
 def help_header():
@@ -67,6 +69,7 @@ def explain_options(**kwargs):
     print "  -json                   output as JSON (handy for scripts)"
     print "  -e                      open item for editing"
     print "  -wait                   wait for operation to complete"
+    print "  -m                      monitor engine operations"
 
 def explain_command(cmd, **kwargs):
     explain_command1(cmd)
@@ -126,10 +129,8 @@ COMMAND_PATTERNS = [
     (cli.sensor.inspect,      ["sensor","inspect","<tap_id>"]),
     (cli.sensor.inspect,      ["sensor","inspect"]),
     (cli.sensor.points,       ["sensor","points"]),
+    (cli.monitor.monitor,     ["monitor"]),
     (cli.pneumo.watch,        ["pneumo"]),
-    (cli.pneumo.flush,        ["pneumo","flush"]),
-    (cli.pneumo.wait,         ["pneumo","wait","<msgr_type>"]),
-    (cli.pneumo.wait,         ["pneumo","wait"])
 ]
 
 def explain_command1(cmd):
@@ -155,12 +156,16 @@ def main():
                 else:
                     savefile = expanduser("~/.fastscore")
                     if exists(savefile):
-                        co = Connect.load(savefile)
-                        cmd(co, *args, **opts)
-                        co.dump(savefile)
+                        connect = Connect.load(savefile)
+                        cmd(connect, *args, **opts)
+                        connect.dump(savefile)
+
+                        if opts['monitor']:
+                            cli.monitor.monitor(connect, **opts)
                         return 0
                     else:
                         raise FastScoreError("Not connected (use 'fastscore connect')")
+
             except FastScoreError as e:
                 if opts['asjson']:
                     print json.dumps({'error': str(e)}, indent=2)
@@ -171,14 +176,16 @@ def main():
     return 0
 
 def parse_opts(args):
-    opts = { 'asjson': False, 'embedded_schemas': {} }
+    opts = {
+        'asjson': False,
+        'embedded_schemas': {},
+        'monitor': False,
+    }
     for x in args:
         if x == '-v':
             opts['verbose'] = True
         elif x == '-json':
             opts['asjson'] = True
-        elif x == '-wait':
-            opts['wait'] = True
         elif x.startswith("-type:"):
             mtype = x.split(':')[1]
             if mtype in Model.TYPES:
@@ -212,6 +219,10 @@ def parse_opts(args):
                 print "Option '%s' ignored" % x
         elif x == '-e':
             opts['edit'] = True
+        elif x == '-wait':
+            opts['wait'] = True
+        elif x == '-m':
+            opts['monitor'] = True
         elif x[0] == '-':
             print "Unknown option '%s' ignored" % x
     words = [ x for x in args if x[0] != '-' ]

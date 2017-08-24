@@ -10,6 +10,7 @@ from re import match
 
 from fastscore import Stream
 from fastscore import FastScoreError
+from .editor import run_editor
 
 def add(connect, name, descfile=None, verbose=False, **kwargs):
     try:
@@ -26,10 +27,25 @@ def add(connect, name, descfile=None, verbose=False, **kwargs):
     if verbose:
         print "Stream updated" if updated else "Stream created"
 
-def show(connect, name, verbose=False, **kwargs):
+def show(connect, name, edit=False, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
     stream = mm.streams[name]
-    print json.dumps(stream.desc, indent=2)
+    if edit:
+        desc = json.dumps(stream.desc, indent=2)
+        desc1 = run_editor(desc, "STREAM_EDITING")
+        if desc1 != None:
+            try:
+                stream.desc = json.loads(desc1)
+            except:
+                raise FastScoreError("Invalid JSON")
+            stream.update()
+            if verbose:
+                print "Stream updated"
+        else:
+            if verbose:
+                print "No changes (or changes discarded)"
+    else:
+        print json.dumps(stream.desc, indent=2)
 
 def remove(connect, name, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
@@ -90,16 +106,16 @@ def inspect(connect, slot=None, verbose=False, asjson=False, **kwargs):
             doc = map(lambda x: x.to_dict(), engine.active_streams.values())
             print json.dumps(doc, indent=2)
         else:
-            t = [ [x.slot,transport(x.descriptor),str(x.eof)]
+            t = [ [x.slot,x.name,transport(x.descriptor),str(x.eof)]
                         for x in engine.active_streams.values() ]
-            print tabulate(t, headers=["Slot","Transport","EOF"])
+            print tabulate(t, headers=["Slot","Name","Transport","EOF"])
     elif n in engine.active_streams:
         info = engine.active_streams[n]
         if asjson:
             print json.dumps(info.to_dict(), indent=2)
         else:
-            t = [[info.slot,transport(info.descriptor),str(info.eof)]]
-            print tabulate(t, headers=["Slot","Transport","EOF"])
+            t = [[info.slot,info.name,transport(info.descriptor),str(info.eof)]]
+            print tabulate(t, headers=["Slot","Name","Transport","EOF"])
     else:
         if asjson:
             print "null"

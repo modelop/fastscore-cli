@@ -162,7 +162,14 @@ def unload(connect, verbose=False, **kwargs):
             print "Model not loaded"
 
 def scale(connect, count, verbose=False, **kwargs):
-    raise FastScoreError("Not implemented")
+    try:
+        n = int(count)
+    except:
+        raise FastScoreError("The number of jets must be a non-negative integer")
+    engine = connect.lookup('engine')
+    engine.scale(n)
+    if verbose:
+        print "Model scale changed"
 
 #    engine = connect.lookup('engine')
 #    n = int(count)
