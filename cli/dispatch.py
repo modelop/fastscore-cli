@@ -88,6 +88,7 @@ COMMAND_PATTERNS = [
     (cli.connect.use,         ["use","<instance_name>"]),
     (cli.connect.use,         ["use"]),
     (cli.run.run,             ["run","<model_name>","<stream0>","<stream1>"]),
+    (cli.run.run,             ["job","run","<model_name>","<stream0>","<stream1>"]),
     (cli.model.add,           ["model","add","<model_name>","<src_file>"]),
     (cli.model.add,           ["model","add","<model_name>"]),
     (cli.model.show,          ["model","show","<model_name>"]),
