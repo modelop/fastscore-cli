@@ -127,7 +127,7 @@ def transport(desc):
     transport = desc['Transport']
     return transport['Type'] if isinstance(transport, dict) else transport
 
-def verify(connect, name, slot, verbose=False, **kwargs):
+def verify(connect, name, slot, verbose=False, quiet=False, **kwargs):
     n = parse_slot(slot)
     mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
@@ -135,9 +135,8 @@ def verify(connect, name, slot, verbose=False, **kwargs):
     desc = stream.attach(engine, n, dry_run=True)
     if verbose:
         print json.dumps(desc, indent=2)
-        print tcol.OKGREEN + "Stream descriptor ok" + tcol.ENDC
-    else:
-        print "Ok"
+    if not quiet:
+        print tcol.OKGREEN + "The stream descriptor contains no errors" + tcol.ENDC
 
 def attach(connect, name, slot, verbose=False, **kwargs):
     n = parse_slot(slot)
@@ -146,7 +145,7 @@ def attach(connect, name, slot, verbose=False, **kwargs):
     stream = mm.streams[name]
     stream.attach(engine, n)
     if verbose:
-        print "Stream attached"
+        print "Stream attached to slot %s" % slot
 
 def detach(connect, slot, verbose=False, **kwargs):
     n = parse_slot(slot)

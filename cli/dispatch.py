@@ -13,7 +13,7 @@ from fastscore.errors import FastScoreError
 import cli.connect, cli.config, cli.pneumo
 import cli.model, cli.attachment, cli.snapshot
 import cli.schema, cli.stream, cli.engine
-import cli.sensor, cli.monitor
+import cli.sensor, cli.monitor, cli.run
 
 import logging
 import urllib3
@@ -27,6 +27,7 @@ COMMAND_HELP = [
   ("config",     "Configure the FastScore fleet"),
   ("fleet",      "Examine status of the FastScore fleet"),
   ("use",        "Select the target instance"),
+  ("run",        "Run easy model setups"),
   ("model",      "Manage analytic models"),
   ("attachment", "Manage model attachments"),
   ("snapshot",   "Manage model snapshots"),
@@ -86,6 +87,7 @@ COMMAND_PATTERNS = [
     (cli.connect.fleet,       ["fleet"]),
     (cli.connect.use,         ["use","<instance_name>"]),
     (cli.connect.use,         ["use"]),
+    (cli.run.run,             ["run","<model_name>","<stream0>","<stream1>"]),
     (cli.model.add,           ["model","add","<model_name>","<src_file>"]),
     (cli.model.add,           ["model","add","<model_name>"]),
     (cli.model.show,          ["model","show","<model_name>"]),

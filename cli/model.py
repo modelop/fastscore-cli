@@ -78,7 +78,7 @@ def remove(connect, name, verbose=False, **kwargs):
     if verbose:
         print "Model '%s' removed" % name
 
-def verify(connect, name, verbose=False, asjson=False, embedded_schemas={}, **kwargs):
+def verify(connect, name, verbose=False, quiet=False, asjson=False, embedded_schemas={}, **kwargs):
     mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
     model = mm.models[name]
@@ -109,7 +109,8 @@ def verify(connect, name, verbose=False, asjson=False, embedded_schemas={}, **kw
                 if info.snapshots != 'none':
                     print "The model snapshots mode is '%s'" % info.snapshots
                 
-            print tcol.OKGREEN + "The model contains no errors" + tcol.ENDC
+            if not quiet:
+                print tcol.OKGREEN + "The model contains no errors" + tcol.ENDC
 
     except FastScoreError as e:
         # one-line error message

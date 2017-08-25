@@ -82,7 +82,7 @@ def monitor(connect, verbose=False, **kwargs):
 
     term.insert('cellar', "")
 
-    pneumo = connect.pneumo()
+    pneumo = connect.pneumo.socket()
     try:
         while True:
             msg = pneumo.recv()
