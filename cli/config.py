@@ -3,6 +3,8 @@ from os.path import exists
 
 import yaml
 
+from fastscore import FastScoreError
+
 def set(connect, config_file, verbose=False, **kwargs):
     try:
         with open(config_file) as f:

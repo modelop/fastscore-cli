@@ -35,7 +35,7 @@ COMMAND_HELP = [
   ("sensor",     "Manage sensors/sensor descriptors"),
   ("stats",      "Show assorted statistics"),
   ("monitor",    "Monitor data processing"),
-  ("pneumo",     "Listen for Pneumo messages"),
+  ("pneumo",     "Access Pneumo messages"),
 ]
 
 def help_header():
@@ -133,6 +133,7 @@ COMMAND_PATTERNS = [
     (cli.sensor.points,       ["sensor","points"]),
     (cli.monitor.monitor,     ["monitor"]),
     (cli.pneumo.watch,        ["pneumo"]),
+    (cli.pneumo.history,      ["pneumo","history"]),
 ]
 
 def explain_command1(cmd):
