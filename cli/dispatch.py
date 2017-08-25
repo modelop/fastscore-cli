@@ -62,6 +62,7 @@ def explain_options(**kwargs):
     print "  -type:python3           --- Python 3"
     print "  -type:R                 --- R"
     print "  -type:c                 --- C"
+    print "  -type:octave            --- Octave"
     print "  -count:NNN              list no more than NNN items"
     print "  -since:DATETIME         show items created after DATETIME (iso8601)"
     print "  -until:DATETIME         show items created before DATETIME (iso8601)"

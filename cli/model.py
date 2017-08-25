@@ -18,7 +18,8 @@ KNOWN_MODEL_EXTENSIONS = {
   '.py':   'python',
   '.py3':  'python3',
   '.R':    'R',
-  '.c':    'c'
+  '.c':    'c',
+  '.m':    'octave',
 }
 
 KNOWN_ANCHORS = [
