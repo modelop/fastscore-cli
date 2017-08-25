@@ -1,8 +1,0 @@
-{
-  "type": "kafka",
-  "connect": {
-    "bootstrap-servers": "localhost:9092",
-    "topic": "test"
-  }
-}
-

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from fastscore import dispatch
+from cli import dispatch
 
 def main():
   dispatch.main()

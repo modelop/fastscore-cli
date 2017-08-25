@@ -1,7 +1,0 @@
-{
-  "type": "http",
-  "loop": true,
-  "connect": {
-    "url": "https://s3-us-west-1.amazonaws.com/fastscore-sample-data/sample1.dat"
-  }
-}
