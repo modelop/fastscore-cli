@@ -11,6 +11,7 @@ from re import match
 from fastscore import Stream
 from fastscore import FastScoreError
 from .editor import run_editor
+from .colors import tcol
 
 def add(connect, name, descfile=None, verbose=False, **kwargs):
     try:
@@ -125,6 +126,18 @@ def inspect(connect, slot=None, verbose=False, asjson=False, **kwargs):
 def transport(desc):
     transport = desc['Transport']
     return transport['Type'] if isinstance(transport, dict) else transport
+
+def verify(connect, name, slot, verbose=False, **kwargs):
+    n = parse_slot(slot)
+    mm = connect.lookup('model-manage')
+    engine = connect.lookup('engine')
+    stream = mm.streams[name]
+    desc = stream.attach(engine, n, dry_run=True)
+    if verbose:
+        print json.dumps(desc, indent=2)
+        print tcol.OKGREEN + "Stream descriptor ok" + tcol.ENDC
+    else:
+        print "Ok"
 
 def attach(connect, name, slot, verbose=False, **kwargs):
     n = parse_slot(slot)
