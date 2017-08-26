@@ -25,8 +25,8 @@ MODEL_LAYOUT = [
 
 HEADER_LAYOUT = [
     ('col1', 20, True),
-    ('col2', 14, False),
-    ('col3', 14, False),
+    ('col2', 16, False),
+    ('col3', 12, False),
 ]
 
 STREAM_LAYOUT = [

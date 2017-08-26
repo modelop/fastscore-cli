@@ -18,6 +18,8 @@ def monitor(connect, verbose=False, **kwargs):
     engine = connect.lookup('engine')
     stable = JetStable(engine)
 
+    PREINSTALLED_INTERVAL = 2.0
+
     def draw_engine(name, state):
         if state == "RUNNING":
             s = name + tcol.OKGREEN + " [RUNNING]" + tcol.ENDC
@@ -93,7 +95,7 @@ def monitor(connect, verbose=False, **kwargs):
             engine.clear()
 
             if isinstance(msg, EngineStateMsg):
-                l = draw_engine(msg.src, msg.state)
+                l = draw_engine(msg.src, msg.state.upper())
                 term.update('engine', l)
                 if msg.state == 'init':
                     # engine reset
@@ -142,18 +144,18 @@ def monitor(connect, verbose=False, **kwargs):
                     sandbox = m.group(1)
                     io = m.group(2)
                     (pos,width) = field(io, JET_LAYOUT)
-                    rps = msg.data / JetStable.INTERVAL
+                    rps = msg.data / Sensor.DEFAULT_INTERVAL
                     term.update(('jet',sandbox), rps_text(rps, width), pos=pos)
                 else:
                     m = re.match('manifold\\.(\\d+)\\.records\\.(count|size)', msg.point)
                     if m != None:
                         slot = int(m.group(1))
                         if m.group(2) == 'count':
-                            rps = msg.data / JetStable.INTERVAL
+                            rps = msg.data / PREINSTALLED_INTERVAL
                             (pos,width) = field('rps', STREAM_LAYOUT)
                             term.update(('stream',slot), rps_text(rps, width), pos=pos)
                         else: #size
-                            mbps = msg.data / JetStable.INTERVAL / 1048576.0
+                            mbps = msg.data / PREINSTALLED_INTERVAL / 1048576.0
                             (pos,width) = field('mbps', STREAM_LAYOUT)
                             term.update(('stream',slot), mbps_text(mbps, width), pos=pos)
 
