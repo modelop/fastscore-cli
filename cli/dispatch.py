@@ -137,7 +137,7 @@ COMMAND_PATTERNS = [
     (cli.sensor.points,  ["sensor","points"]),
     (cli.stats.memory,   ["stats","memory"]),
     (cli.stats.cpu_utilization, ["stats","cpu-utilization"]),
-    (cli.stats.model,    ["stats","model"]),
+    (cli.stats.jets,     ["stats","jets"]),
     (cli.stats.streams,  ["stats","streams"]),
     (cli.monitor.monitor, ["monitor"]),
     (cli.pneumo.watch,   ["pneumo"]),
