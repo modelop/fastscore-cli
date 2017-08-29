@@ -5,15 +5,17 @@ import yaml
 import json
 import iso8601
 
-from cli import RELEASE
 
 from fastscore.suite import Connect
+from fastscore.constants import MODEL_CONTENT_TYPES
 from fastscore.errors import FastScoreError
+
+from cli import RELEASE
 
 import cli.connect, cli.config, cli.pneumo
 import cli.model, cli.attachment, cli.snapshot
 import cli.schema, cli.stream, cli.engine
-import cli.sensor, cli.stats
+import cli.sensor, cli.stats, cli.policy
 import cli.monitor, cli.run
 
 import logging
@@ -32,6 +34,7 @@ COMMAND_HELP = [
   ("model",      "Manage analytic models"),
   ("attachment", "Manage model attachments"),
   ("snapshot",   "Manage model snapshots"),
+  ("policy",     "Manage import policies"),
   ("stream",     "Manage streams/stream descriptors"),
   ("engine",     "Manage engine state"),
   ("sensor",     "Manage sensors/sensor descriptors"),
@@ -105,6 +108,9 @@ COMMAND_PATTERNS = [
     (cli.attachment.upload, ["attachment","upload","<model_name>","<file_to_upload>"]),
     (cli.attachment.download, ["attachment","download","<model_name>","<att_name>"]),
     (cli.attachment.remove, ["attachment","remove","<model_name>","<att_name>"]),
+    (cli.policy.set,     ["policy","set","<policy_file>"]),
+    (cli.policy.set,     ["policy","set"]),
+    (cli.policy.show,    ["policy","show"]),
     (cli.schema.add,     ["schema","add","<schema_name>","<schema_file>"]),
     (cli.schema.add,     ["schema","add","<schema_name>"]),
     (cli.schema.show,    ["schema","show","<schema_name>"]),
@@ -199,7 +205,7 @@ def parse_opts(args):
             opts['asjson'] = True
         elif x.startswith("-type:"):
             mtype = x.split(':')[1]
-            if mtype in Model.TYPES:
+            if mtype in MODEL_CONTENT_TYPES:
                 opts['mtype'] = mtype
             else:
                 print "Model type '%s' is unknown" % mtype
