@@ -42,7 +42,7 @@ def download(connect, model_name, att_name, verbose=False, **kwargs):
     if verbose:
         print "Attachment downloaded"
 
-def remove(connect, model_name, att_name, verbosr=False, **kwargs):
+def remove(connect, model_name, att_name, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
     model = mm.models[model_name]
     del model.attachments[att_name]
