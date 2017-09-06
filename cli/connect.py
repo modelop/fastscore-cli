@@ -11,10 +11,25 @@ from .colors import tcol
 
 from tabulate import tabulate
 
-def connect(proxy_prefix, verbose=False, **kwargs):
-    co = Connect(proxy_prefix)
+def connect(proxy_prefix, verbose=False, wait=False, **kwargs):
+    connect = Connect(proxy_prefix)
+    if wait:
+        if verbose:
+            sys.stdout.write("Waiting...")
+            sys.stdout.flush()
+        while True:
+            try:
+                connect.check_health()
+                if verbose:
+                    print
+                break
+            except:
+                if verbose:
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
+                sleep(0.5)
     savefile = expanduser('~/.fastscore')
-    co.dump(savefile)
+    connect.dump(savefile)
     if verbose:
         print "Connected to FastScore proxy at %s" % proxy_prefix
 

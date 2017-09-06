@@ -1,4 +1,5 @@
 
+import sys
 from os.path import exists
 
 import yaml
@@ -20,7 +21,8 @@ def set(connect, config_file, verbose=False, **kwargs):
 def show(connect, **kwargs):
     config = connect.get_config()
     if config:
-        print config
+        s = yaml.safe_dump(config, encoding='utf-8', allow_unicode=True)
+        sys.stdout.write(s)
     else:
         print "FastScore not configured (use 'fastscore config set')"
 
