@@ -2,6 +2,7 @@
 import sys
 import re
 import json
+from os.path import splitext
 
 from tabulate import tabulate
 
@@ -211,7 +212,7 @@ def model_type_from_file(srcfile):
     if not ext in KNOWN_MODEL_EXTENSIONS:
         known = ", ".join(KNOWN_MODEL_EXTENSIONS.keys())
         raise FastScoreError("%s must have a proper extension (%s)" % (srcfile,known))
-    return KNOWN_EXTENSION[ext]
+    return KNOWN_MODEL_EXTENSIONS[ext]
 
 def model_type_from_source(source):
     for pat,mtype in KNOWN_ANCHORS:
