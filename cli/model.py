@@ -33,7 +33,7 @@ def add(connect, name, srcfile=None, mtype=None, verbose=False, **kwargs):
             with open(srcfile) as f:
                 source = f.read()
             if mtype == None:
-                mtype = model_type_from_file(srcfile, type)
+                mtype = model_type_from_file(srcfile)
         else:
             source = sys.stdin.read()
             if mtype == None:
