@@ -1,22 +1,11 @@
 FROM ubuntu
 
-RUN apt-get update && apt-get install -y \
-    libpcap0.8 \
-    libssl1.0.0 \
-    libyaml-0-2 \
-    python \
-    python-pip
+RUN apt-get update && apt-get -y install curl python-pip
 
-RUN mkdir -p /root/fastscore-cli/
-WORKDIR /root/fastscore-cli/
+# FIXME: without fastscore-sdk installed CLI refuses to install
+ADD sdk /sdk
+RUN cd /sdk/python && python setup.py install
 
-COPY setup.py ./
-COPY fastscore/ ./fastscore/
-COPY extra/ ./extra/
-COPY run.py ./
-
-RUN python setup.py install
-RUN mkdir -p /root/fastscore/
-WORKDIR /root/fastscore/
+ADD dist/fastscore-cli-dev.tar.gz .
+RUN cd fastscore-cli-dev && python setup.py install
 CMD fastscore
-    
