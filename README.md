@@ -6,11 +6,7 @@ $ cd fastscore-cli
 $ make build
 ```
 
-Find self-contained archive here: `dist/fastscore-cli-dev.tar.gz`
-
-## How to install
-```
-tar xzf dist/fastscore-cli-dev.tar.gz
-cd fastscore-cli-dev
-python setup.py install
-```
+This will create:
+* Package file `dist/fastscore-cli-dev.tar.gz`
+* docker image `fastscore/cli-build` used to build this package
+* docker image `fastscore/cli` with package installed
