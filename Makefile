@@ -1,5 +1,5 @@
 
-.PHONY: default build compile clean
+.PHONY: default build sdist clean
 
 default:
 	@echo "BUILD_DATE = \"`date`\"" > fastscore/version.py
@@ -8,12 +8,13 @@ default:
 
 build:
 	docker build -f Dockerfile.build --force-rm --build-arg uid=`id -u` --build-arg gid=`id -g` -t fastscore/cli-build .
-	docker run --rm -v $(CURDIR):/_ fastscore/cli-build make compile
+	docker run --rm -v $(CURDIR):/_ fastscore/cli-build make sdist
 	docker build --force-rm -t fastscore/cli .
 
-compile:
-	make -C sdk/python v1-api v2-api
+sdist:
+	make -C sdk/python sdist
 	python setup.py sdist
 
 clean:
-	echo TODO
+	make -sC sdk/python clean
+	rm -rf dist *.egg_info

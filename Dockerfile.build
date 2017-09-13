@@ -1,14 +1,12 @@
-FROM openjdk:jre-alpine
+FROM alpine
 
-RUN apk add --no-cache bash curl shadow make g++ libc-dev python2-dev py-setuptools py-pip
-
-RUN curl -L https://github.com/krallin/tini/releases/download/v0.15.0/tini-muslc-amd64 > /tini && chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
-
-RUN pip install pandas
+RUN apk add --no-cache bash curl shadow make py-setuptools openjdk8-jre
 
 RUN mkdir -p /home/user/bin &&\
 	curl http://central.maven.org/maven2/io/swagger/swagger-codegen-cli/2.2.3/swagger-codegen-cli-2.2.3.jar > /home/user/bin/swagger-codegen-cli.jar
+
+RUN curl -L https://github.com/krallin/tini/releases/download/v0.15.0/tini-muslc-amd64 > /tini && chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
 
 ARG uid
 ARG gid
