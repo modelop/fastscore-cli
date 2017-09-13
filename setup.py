@@ -11,7 +11,10 @@ setup(
     "iso8601==0.1.11",
     "PyYAML==3.11",
     "tabulate==0.7.5",
-    "websocket-client==0.37.0"
+    "websocket-client==0.37.0",
+    "urllib3 >= 1.15",
+    "certifi >= 14.05.14",
+    "avro >= 1.7.6"
   ],
 
   entry_points = {

@@ -12,9 +12,9 @@ build:
 	docker build --force-rm -t fastscore/cli .
 
 sdist:
-	make -C sdk/python sdist
+	make -C sdk/python v1-api v2-api
 	python setup.py sdist
 
 clean:
 	make -sC sdk/python clean
-	rm -rf dist *.egg_info
+	rm -rf dist *.egg-info
