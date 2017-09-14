@@ -76,7 +76,10 @@ def jets(connect, verbose=False, **kwargs):
         while True:
             msg = pneumo.recv()
             if msg.sid in vals:
-                vals[msg.sid] = msg.data / REPINT
+                if msg.delta_time:
+                    vals[msg.sid] = msg.data / msg.delta_time
+                else:
+                    vals[msg.sid] = msg.data / REPINT
 
     except KeyboardInterrupt:
         pneumo.close()

@@ -44,7 +44,7 @@ def monitor(connect, verbose=False, **kwargs):
         return "EOF" if eof else ""
 
     def rps_text(rps, width):
-        return '{:{width},} rps'.format(rps, width=width-4)
+        return '{:{width},.0f} rps'.format(rps, width=width-4)
 
     def mbps_text(mbps, width):
         return '{:{width}.1f} mbps'.format(mbps, width=width-5)
@@ -144,18 +144,27 @@ def monitor(connect, verbose=False, **kwargs):
                     sandbox = m.group(1)
                     io = m.group(2)
                     (pos,width) = field(io, JET_LAYOUT)
-                    rps = msg.data / Sensor.DEFAULT_INTERVAL
+                    if msg.delta_time:
+                        rps = msg.data / msg.delta_time
+                    else:
+                        rps = msg.data / Sensor.DEFAULT_INTERVAL
                     term.update(('jet',sandbox), rps_text(rps, width), pos=pos)
                 else:
                     m = re.match('manifold\\.(\\d+)\\.records\\.(count|size)', msg.point)
                     if m != None:
                         slot = int(m.group(1))
                         if m.group(2) == 'count':
-                            rps = msg.data / PREINSTALLED_INTERVAL
+                            if msg.delta_time:
+                                rps = msg.data / msg.delta_time
+                            else:
+                                rps = msg.data / PREINSTALLED_INTERVAL
                             (pos,width) = field('rps', STREAM_LAYOUT)
                             term.update(('stream',slot), rps_text(rps, width), pos=pos)
                         else: #size
-                            mbps = msg.data / PREINSTALLED_INTERVAL / 1048576.0
+                            if msg.delta_time:
+                                mbps = msg.data / msg.delta_time / 1048576.0
+                            else:
+                                mbps = msg.data / PREINSTALLED_INTERVAL / 1048576.0
                             (pos,width) = field('mbps', STREAM_LAYOUT)
                             term.update(('stream',slot), mbps_text(mbps, width), pos=pos)
 
