@@ -14,8 +14,7 @@ setup(
     "websocket-client==0.37.0",
     "urllib3 >= 1.15",
     "certifi >= 14.05.14",
-    "avro >= 1.7.6",
-    "pandas >= 0.19.0"
+    "avro >= 1.7.6"
   ],
 
   entry_points = {
