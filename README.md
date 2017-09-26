@@ -8,5 +8,4 @@ $ make build
 
 This will create:
 * Package file `dist/fastscore-cli-dev.tar.gz`
-* docker image `fastscore/cli-build` used to build this package
 * docker image `fastscore/cli` with package installed
