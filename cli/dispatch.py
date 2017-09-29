@@ -27,6 +27,7 @@ from cli.colors import tcol
 COMMAND_HELP = [
   ("help",       "Explain commands and options"),
   ("connect",    "Establish a FastScore connection"),
+  ("login",      "Login to FastScore"),
   ("config",     "Configure the FastScore fleet"),
   ("fleet",      "Examine status of the FastScore fleet"),
   ("use",        "Select the target instance"),
@@ -88,6 +89,8 @@ COMMAND_PATTERNS = [
     (explain_options,    ["help","options"]),
     (explain_command,    ["help","<cmd>"]),
     (cli.connect.connect, ["connect","<proxy_prefix>"]),
+    (cli.connect.login,  ["login","<username>"]),
+    (cli.connect.login,  ["login","<username>","<password>"]),
     (cli.config.set,     ["config","set","<config_file>"]),
     (cli.config.show,    ["config","show"]),
     (cli.connect.fleet,  ["fleet"]),

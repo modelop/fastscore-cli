@@ -10,6 +10,7 @@ from . import RELEASE
 from .colors import tcol
 
 from tabulate import tabulate
+from getpass import getpass
 
 def connect(proxy_prefix, verbose=False, wait=False, **kwargs):
     connect = Connect(proxy_prefix)
@@ -32,6 +33,13 @@ def connect(proxy_prefix, verbose=False, wait=False, **kwargs):
     connect.dump(savefile)
     if verbose:
         print "Connected to FastScore proxy at %s" % proxy_prefix
+
+def login(connect, username, password=None, verbose=False, **kwargs):
+    if password == None:
+        password = getpass("Password:")
+    connect.login(username, password)
+    if verbose:
+        print tcol.OKGREEN + "Login successfull" + tcol.ENDC
 
 def fleet(connect, verbose=False, asjson=False, wait=False, **kwargs):
     if wait:
