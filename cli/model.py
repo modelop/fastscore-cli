@@ -174,14 +174,32 @@ def scale(connect, count, verbose=False, **kwargs):
     if verbose:
         print "Model scale changed"
 
-#    engine = connect.lookup('engine')
-#    n = int(count)
-#    engine.scale(n)
-#    if verbose:
-#        print "Scaling complete"
+def input(connect, slot=None, verbose=False, **kwargs):
+    engine = connect.lookup('engine')
+    if slot == None:
+        slot = 0
+    try:
+        while True:
+            data = raw_input()
+            if data == '':
+                break
+            engine.input(data, slot)
+    except EOFError:
+        pass
 
-def input(connect, **kwargs):
-    raise FastScoreError("Not implemented")
+def output(connect, slot=None, verbose=False, **kwargs):
+    engine = connect.lookup('engine')
+    if slot == None:
+        slot = 1
+    while True:
+        try:
+            data = engine.output(slot)
+            if data != None:
+                print data
+        except EOFError:
+            break
+        except KeyboardInterrupt:
+            break
 
 def print_slot_map(slots):
     def stars(schema):
