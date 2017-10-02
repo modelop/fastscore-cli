@@ -191,7 +191,7 @@ def input(connect, slot=None, verbose=False, **kwargs):
             if data == '':
                 break
             engine.input(data, slot)
-    except EOFError:
+    except KeyboardInterrupt:
         pass
 
 def output(connect, slot=None, verbose=False, **kwargs):
@@ -205,15 +205,15 @@ def output(connect, slot=None, verbose=False, **kwargs):
             raise FastScoreError("The slot number must be an integer")
     if slot % 2 == 0:
         raise FastScoreError("{} is an input slot".format(slot))
-    while True:
-        try:
+    try:
+        while True:
             data = engine.output(slot)
             if data != None:
                 print data
-        except EOFError:
-            break
-        except KeyboardInterrupt:
-            break
+    except EOFError:
+        print tcol.OKBLUE + "(EOF)" + tcol.ENDC
+    except KeyboardInterrupt:
+        pass
 
 def print_slot_map(slots):
     def stars(schema):
