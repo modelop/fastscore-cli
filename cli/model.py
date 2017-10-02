@@ -178,6 +178,13 @@ def input(connect, slot=None, verbose=False, **kwargs):
     engine = connect.lookup('engine')
     if slot == None:
         slot = 0
+    else:
+        try:
+            slot = int(slot)
+        except:
+            raise FastScoreError("The slot number must be an integer")
+    if slot % 2 == 1:
+        raise FastScoreError("{} is an output slot".format(slot))
     try:
         while True:
             data = raw_input()
@@ -191,6 +198,13 @@ def output(connect, slot=None, verbose=False, **kwargs):
     engine = connect.lookup('engine')
     if slot == None:
         slot = 1
+    else:
+        try:
+            slot = int(slot)
+        except:
+            raise FastScoreError("The slot number must be an integer")
+    if slot % 2 == 0:
+        raise FastScoreError("{} is an input slot".format(slot))
     while True:
         try:
             data = engine.output(slot)
