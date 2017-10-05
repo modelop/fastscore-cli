@@ -191,6 +191,8 @@ def input(connect, slot=None, verbose=False, **kwargs):
             if data == '':
                 break
             engine.input(data, slot)
+    except EOFError:
+        pass
     except KeyboardInterrupt:
         pass
 
