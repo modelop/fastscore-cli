@@ -83,11 +83,11 @@ def explain_options(**kwargs):
 def explain_command(cmd, **kwargs):
     explain_command1(cmd)
 
-COMMAND-PATTERNS = [
-    (overview-commands,  []),
-    (overview-commands,  ["help"]),
-    (explain-options,    ["help","options"]),
-    (explain-command,    ["help","<cmd>"]),
+COMMAND_PATTERNS = [
+    (overview_commands,  []),
+    (overview_commands,  ["help"]),
+    (explain_options,    ["help","options"]),
+    (explain_command,    ["help","<cmd>"]),
     (cli.connect.connect, ["connect","<proxy-prefix>"]),
     (cli.connect.login,  ["login","<username>"]),
     (cli.connect.login,  ["login","<username>","<password>"]),
