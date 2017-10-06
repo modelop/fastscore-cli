@@ -13,6 +13,13 @@ from fastscore import FastScoreError
 from .editor import run_editor
 from .colors import tcol
 
+def to_stream(connect, lit_or_name):
+    if lit_or_name.find(':') != -1:
+        return Stream.expand(lit_or_name)
+    else:
+        mm = connect.lookup('model-manage')
+        return mm.streams[name]
+
 def add(connect, name, descfile=None, verbose=False, **kwargs):
     try:
         if descfile:
@@ -28,9 +35,13 @@ def add(connect, name, descfile=None, verbose=False, **kwargs):
     if verbose:
         print "Stream updated" if updated else "Stream created"
 
-def show(connect, name, edit=False, verbose=False, **kwargs):
-    mm = connect.lookup('model-manage')
-    stream = mm.streams[name]
+def show(connect, lit_or_name, edit=False, verbose=False, **kwargs):
+    if lit_or_name.find(':') != -1:
+        stream = Stream.expand(lit_or_name)
+        edit = False
+    else:
+        mm = connect.lookup('model-manage')
+        stream = mm.streams[name]
     if edit:
         desc = json.dumps(stream.desc, indent=2)
         desc1 = run_editor(desc, "STREAM_EDITING")
@@ -63,9 +74,8 @@ def roster(connect, verbose=False, asjson=False, **kwargs):
         for x in mm.streams.names():
             print x
 
-def sample(connect, name, count=None, **kwargs):
-    mm = connect.lookup('model-manage')
-    stream = mm.streams[name]
+def sample(connect, lit_or_name, count=None, **kwargs):
+    stream = to_stream(connect, lit_or_name)
     engine = connect.lookup('engine')
     args = [engine]
     if count:
@@ -127,22 +137,20 @@ def transport(desc):
     transport = desc['Transport']
     return transport['Type'] if isinstance(transport, dict) else transport
 
-def verify(connect, name, slot, verbose=False, quiet=False, **kwargs):
+def verify(connect, lit_or_name, slot, verbose=False, quiet=False, **kwargs):
+    stream = to_stream(connect, lit_or_name)
     n = parse_slot(slot)
-    mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
-    stream = mm.streams[name]
-    desc = stream.attach(engine, n, dry_run=True)
+    int_desc = stream.attach(engine, n, dry_run=True)
     if verbose:
-        print json.dumps(desc, indent=2)
+        print json.dumps(int_desc, indent=2)
     if not quiet:
         print tcol.OKGREEN + "The stream descriptor contains no errors" + tcol.ENDC
 
-def attach(connect, name, slot, verbose=False, **kwargs):
+def attach(connect, lit_or_name, slot, verbose=False, **kwargs):
+    stream = to_stream(connect, lit_or_name)
     n = parse_slot(slot)
-    mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
-    stream = mm.streams[name]
     stream.attach(engine, n)
     if verbose:
         print "Stream attached to slot %s" % slot
