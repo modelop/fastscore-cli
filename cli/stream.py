@@ -4,9 +4,9 @@ import json
 from tabulate import tabulate
 
 from base64 import b64decode
-from string import printable
-from binascii import b2a_hex
 from re import match
+
+from fastscore.utils import format_record
 
 from fastscore import Stream
 from fastscore import FastScoreError
@@ -81,33 +81,8 @@ def sample(connect, lit_or_name, count=None, **kwargs):
     if count:
         args.append(int(count))
     sample = map(b64decode, stream.sample(*args))
-    if all([ istext(x) for x in sample ]):
-        for i,x in enumerate(sample):
-            print "%4d: %s" % (i + 1,x)
-    else:
-
-##   1: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  0123456701234567
-##      01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01
-
-        for i,x in enumerate(sample):
-            chunks = [ x[s:s + 16] for s in range(0, len(x), 16) ]
-            if chunks == []:
-                print "%4d: (empty)"
-            else:
-                print "%4d: %s  %s" % (i,hex_pane(chunks[0]),str_pane(chunks[0]))
-                for y in chunks[1:]:
-                    print "      %s  %s" % (hex_pane(y),str_pane(y))
-
-def istext(s):
-    return all([ x in printable for x in s ])
-
-def hex_pane(s):
-    x = [ b2a_hex(s[i]) if i < len(s) else "  " for i in range(16) ]
-    return " ".join(x)
-
-def str_pane(s):
-    x = [ s[i] if i < len(s) and s[i] in printable else '.' for i in range(16) ]
-    return "".join(x)
+    for i,x in enumerate(sample, 1):
+        print format_record(x, i)
 
 def inspect(connect, slot=None, verbose=False, asjson=False, **kwargs):
     n = parse_slot(slot)

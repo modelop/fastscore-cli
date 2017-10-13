@@ -3,7 +3,9 @@ import cli.model, cli.stream
 
 from .colors import tcol
 
-from fastscore.pneumo import EngineStateMsg
+from fastscore.pneumo import EngineStateMsg, ModelErrorMsg
+
+from fastscore import FastScoreError
 
 def run(connect, model_name, stream_name0, stream_name1,
             verbose=False, embedded_schemas={}, wait=False, **kwargs):
@@ -27,5 +29,9 @@ def run(connect, model_name, stream_name0, stream_name1,
                     print "Engine state is " + msg.state.upper()
                 if msg.state == "finished":
                     break
+            elif isinstance(msg, ModelErrorMsg):
+                print tcol.FAIL + str(msg) + tcol.ENDC
+                break
+
         pneumo.close()
 

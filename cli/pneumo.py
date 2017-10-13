@@ -6,8 +6,7 @@ def watch(connect, **kwargs):
     try:
         while True:
             msg = pneumo.recv()
-            when = msg.timestamp.strftime("%X.%f")[:-3]
-            print "%s:%s: %s" % (when,msg.src,str(msg))
+            print msg
     except KeyboardInterrupt:
         pneumo.close
 
