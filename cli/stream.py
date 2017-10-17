@@ -18,7 +18,7 @@ def to_stream(connect, lit_or_name):
         return Stream.expand(lit_or_name)
     else:
         mm = connect.lookup('model-manage')
-        return mm.streams[name]
+        return mm.streams[lit_or_name]
 
 def add(connect, name, descfile=None, verbose=False, **kwargs):
     try:
@@ -41,7 +41,7 @@ def show(connect, lit_or_name, edit=False, verbose=False, **kwargs):
         edit = False
     else:
         mm = connect.lookup('model-manage')
-        stream = mm.streams[name]
+        stream = mm.streams[lit_or_name]
     if edit:
         desc = json.dumps(stream.desc, indent=2)
         desc1 = run_editor(desc, "STREAM_EDITING")

@@ -17,6 +17,7 @@ import cli.model, cli.attachment, cli.snapshot
 import cli.schema, cli.stream, cli.engine
 import cli.sensor, cli.stats, cli.policy
 import cli.debug, cli.monitor, cli.run
+import cli.profile
 
 import logging
 import urllib3
@@ -42,6 +43,7 @@ COMMAND_HELP = [
   ("sensor",     "Manage sensors/sensor descriptors"),
   ("stats",      "Show assorted statistics"),
   ("debug",      "Watch debugging messages"),
+  ("profile",    "Profile internal operations"),
   ("pneumo",     "Access Pneumo messages"),
   ("monitor",    "Monitor data processing"),
 ]
@@ -162,6 +164,7 @@ COMMAND_PATTERNS = [
     (cli.stats.streams,  ["stats","streams"]),
     (cli.debug.manifold, ["debug","manifold"]),
     (cli.debug.stream,   ["debug","stream","<slot>"]),
+    (cli.profile.stream, ["profile","stream","<slot>"]),
     (cli.pneumo.watch,   ["pneumo"]),
     (cli.pneumo.history, ["pneumo","history"]),
     (cli.monitor.monitor, ["monitor"]),
