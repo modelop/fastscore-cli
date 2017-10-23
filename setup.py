@@ -8,12 +8,13 @@ setup(
   use_2to3=True,
 
   install_requires = [
-    "iso8601==0.1.11",
-    "PyYAML==3.11",
-    "tabulate==0.7.5",
-    "websocket-client==0.37.0",
-    "urllib3 >= 1.15",
-    "certifi >= 14.05.14",
+    "iso8601>=0.1.11",
+    "PyYAML>=3.11",
+    "requests>=2.11.1",
+    "tabulate>=0.7.5",
+    "websocket-client>=0.37.0",
+    "urllib3 >= 1.2",
+    "certifi >= 2017.4.17",
     "avro >= 1.7.6"
   ],
 

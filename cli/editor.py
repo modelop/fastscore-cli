@@ -1,9 +1,9 @@
 
 from os import environ, system
-from md5 import md5
+import hashlib
 
 def run_editor(text, name):
-    checksum = md5(text).hexdigest()
+    checksum = hashlib.md5(text).hexdigest()
     filename = "/tmp/" + name
     with open(filename, "w") as f:
         f.write(text)
@@ -12,5 +12,5 @@ def run_editor(text, name):
     if status != 0:
         return None
     text1 = open(filename).read()
-    return text1 if md5(text1).hexdigest() != checksum else None
+    return text1 if hashlib.md5(text1).hexdigest() != checksum else None
 
