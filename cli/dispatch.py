@@ -80,6 +80,8 @@ def explain_options(**kwargs):
     print "  -json                   output as JSON (handy for scripts)"
     print "  -e                      open item for editing"
     print "  -wait                   wait for operation to complete"
+    print "  -nowait                 do not wait for data to become available"
+    print "  -c                      fetch outputs without exiting"
     print "  -m                      monitor engine operations"
 
 def explain_command(cmd, **kwargs):
@@ -259,6 +261,10 @@ def parse_opts(args):
             opts['edit'] = True
         elif x == '-wait':
             opts['wait'] = True
+        elif x == '-nowait':
+            opts['nowait'] = True
+        elif x == '-c':
+            opts['noexit'] = True
         elif x == '-m':
             opts['monitor'] = True
         elif x[0] == '-':
