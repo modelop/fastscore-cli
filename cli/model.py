@@ -6,10 +6,13 @@ from os.path import splitext
 
 from tabulate import tabulate
 
-from fastscore import Model, FastScoreError
+from fastscore import Model, Sensor, FastScoreError
 from fastscore.v1.rest import ApiException
 from .editor import run_editor
 from .colors import tcol
+
+from threading import Thread
+import readline
 
 KNOWN_MODEL_EXTENSIONS = {
   '.pfa':  'pfa-json',
@@ -216,6 +219,76 @@ def output(connect, slot=None, verbose=False, **kwargs):
         print tcol.OKBLUE + "(EOF)" + tcol.ENDC
     except KeyboardInterrupt:
         pass
+
+def interact(connect, **kwargs):
+    engine = connect.lookup('engine')
+    if engine.state != 'RUNNING':
+        raise FastScoreError("{} is not running".format(engine.name))
+
+    slots = [ x.slot for x in engine.active_model.slots ]
+
+    by_schema = {}
+    for slot in slots:
+        point = "manifold.{}.records.rejected.by.schema".format(slot)
+        sid = Sensor.prep(point, aggregate='accumulate').install(engine)
+        by_schema[sid] = slot
+    by_encoding = {}
+    for slot in slots:
+        point = "manifold.{}.records.rejected.by.encoding".format(slot)
+        sid = Sensor.prep(point, aggregate='accumulate').install(engine)
+        by_encoding[sid] = slot
+
+    pneumo = connect.pneumo.socket(src=engine.name,
+                                   type='sensor-report',
+                                   timeout=0.25)
+    cur_slot = 0
+    try:
+        while engine.state == 'RUNNING':
+            prompt = '> ' if cur_slot == 0 else '{}> '.format(cur_slot)
+            data = raw_input(prompt)
+            if data == '':
+                pass
+            elif data.startswith('~'):
+                try:
+                    new_slot = int(data[1:])
+                    if new_slot in slots and new_slot % 2 == 0:
+                        cur_slot = new_slot
+                except:
+                    pass
+            else:
+                engine.input(data, cur_slot)
+            
+            try:
+                while True:
+                    msg = pneumo.recv()
+                    if msg.sid in by_schema:
+                        for x in msg.data:
+                            s =  "REJECTED-By-Schema:{}: {}".format(by_schema[msg.sid], x)
+                            print tcol.FAIL + s + tcol.ENDC
+                    if msg.sid in by_encoding:
+                        for x in msg.data:
+                            s = "REJECTED-By-Encoding:{}: {}".format(by_encoding[msg.sid], x)
+                            print tcol.FAIL + s + tcol.ENDC
+            except:
+                pass
+
+            for slot in slots:
+                if slot % 2 == 1:
+                    data = engine.output(slot)
+                    if data != None:
+                        s = data if slot == 1 else "[{}] {}".format(slot, data)
+                        print tcol.OKGREEN + s + tcol.ENDC
+
+    except EOFError:
+        print
+    except KeyboardInterrupt:
+        pass
+
+    pneumo.close()
+    for sid in by_encoding:
+        engine.active_sensors[sid].uninstall()
+    for sid in by_schema:
+        engine.active_sensors[sid].uninstall()
 
 def print_slot_map(slots):
     def stars(schema):

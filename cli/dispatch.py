@@ -114,6 +114,7 @@ COMMAND_PATTERNS = [
     (cli.model.input,    ["model","input","<slot>"]),
     (cli.model.output,   ["model","output",]),
     (cli.model.output,   ["model","output","<slot>"]),
+    (cli.model.interact, ["model","interact"]),
     (cli.attachment.roster, ["attachment","list","<model-name>"]),
     (cli.attachment.upload, ["attachment","upload","<model-name>","<file-to-upload>"]),
     (cli.attachment.download, ["attachment","download","<model-name>","<att-name>"]),
