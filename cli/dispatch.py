@@ -81,6 +81,7 @@ def explain_options(**kwargs):
     print "  -e                      open item for editing"
     print "  -wait                   wait for operation to complete"
     print "  -nowait                 do not wait for data to become available"
+    print "  -preinstall             preinstall all libraries"
     print "  -c                      fetch outputs without exiting"
     print "  -m                      monitor engine operations"
 
@@ -263,6 +264,8 @@ def parse_opts(args):
             opts['wait'] = True
         elif x == '-nowait':
             opts['nowait'] = True
+        elif x == '-preinstall':
+            opts['preinstall'] = True
         elif x == '-c':
             opts['noexit'] = True
         elif x == '-m':

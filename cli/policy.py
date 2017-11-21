@@ -3,7 +3,7 @@ import sys
 
 from fastscore import FastScoreError
 
-def set(connect, policy_file=None, mtype=None, verbose=False, **kwargs):
+def set(connect, policy_file=None, mtype=None, preinstall=False, verbose=False, **kwargs):
     if mtype == None:
         raise FastScoreError("Model type not set (use -type: option)")
     try:
@@ -15,7 +15,7 @@ def set(connect, policy_file=None, mtype=None, verbose=False, **kwargs):
     except Exception as e:
         raise FastScoreError("Unable to set policy", caused_by=e)
     engine = connect.lookup('engine')
-    engine.policy.set('import', mtype, text)
+    engine.policy.set('import', mtype, text, preinstall)
     if verbose:
         print "Import policy updated"
 
