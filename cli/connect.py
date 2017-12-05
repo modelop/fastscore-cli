@@ -12,9 +12,9 @@ from .colors import tcol
 from tabulate import tabulate
 from getpass import getpass
 
-def connect(proxy_prefix, verbose=False, wait=False, **kwargs):
+def connect(proxy_prefix, verbose=False, nowait=False, **kwargs):
     connect = Connect(proxy_prefix)
-    if wait:
+    if not nowait:
         if verbose:
             sys.stdout.write("Waiting...")
             sys.stdout.flush()
