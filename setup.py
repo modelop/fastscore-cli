@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
   name = "fastscore-cli",
   description = "FastScore CLI",
-  version = "dev",
+  version = "1.7.3",
   packages = find_packages(),
   use_2to3=True,
 
@@ -15,7 +15,8 @@ setup(
     "websocket-client>=0.37.0",
     "urllib3 >= 1.2",
     "certifi >= 2017.4.17",
-    "avro >= 1.7.6"
+    "avro >= 1.7.6",
+    "parse >= 1.8.2"
   ],
 
   entry_points = {
