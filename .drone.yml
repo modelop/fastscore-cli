@@ -1,0 +1,13 @@
+branches: dev
+
+pipeline:
+  build:
+    image: fastscore/maker
+    commands:
+      - make build
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+workspace:
+  base: /_
+  path: .
