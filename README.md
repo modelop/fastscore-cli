@@ -3,9 +3,7 @@ Ensure docker is running, then:
 ```
 $ git clone --recursive git@github.com:opendatagroup/fastscore-cli.git
 $ cd fastscore-cli
-$ make build
+$ make
 ```
 
-This will create:
-* Package file `dist/fastscore-cli-dev.tar.gz`
-* docker image `fastscore/cli` with package installed
+This will create `dist` directory with distribution files.

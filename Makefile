@@ -1,21 +1,20 @@
-
-.PHONY: build wheel sdk clean s3-push
-
 build: sdk
-	python setup.py sdist
+	docker build --rm -t fastscore/cli-build .
+	ID=`docker create fastscore/cli-build` && docker cp $$ID:/_/dist . && docker rm $$ID
 
-wheel: sdk
-	rm -rf build *.egg-info
-	python2 setup.py bdist_wheel
-	rm -rf build *.egg-info
-	python3 setup.py bdist_wheel
+dist:
+	rm -rf build && python2 setup.py sdist
+	rm -rf build && python2 setup.py bdist_wheel
+	rm -rf build && python3 setup.py bdist_wheel
 
 sdk:
-	make -C sdk/python build
+	docker build --force-rm -t fastscore/sdk-build sdk
+	ID=`docker create fastscore/sdk-build` && docker cp $$ID:/_/python/fastscore . && docker rm $$ID
 
 clean:
-	make -sC sdk/python clean
-	rm -rf dist build *.egg-info
+	rm -rf dist build *.egg-info fastscore
 
 s3-push:
 	aws s3 cp --acl public-read dist/fastscore-cli-dev.tar.gz s3://fastscore-cli/
+
+.PHONY: build dist sdk clean s3-push
