@@ -5,7 +5,6 @@ pipeline:
     image: fastscore/maker
     commands:
       - make build
-      - ls -la dist
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
