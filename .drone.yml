@@ -1,4 +1,4 @@
-branches: dev
+branches: master
 
 pipeline:
   build:
