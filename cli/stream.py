@@ -6,7 +6,7 @@ from tabulate import tabulate
 from base64 import b64decode
 from re import match
 
-from fastscore.utils import format_record
+from fastscore.utils import format_record, hide
 
 from fastscore import Stream
 from fastscore import FastScoreError
@@ -42,6 +42,7 @@ def show(connect, lit_or_name, edit=False, verbose=False, **kwargs):
     else:
         mm = connect.lookup('model-manage')
         stream = mm.streams[lit_or_name]
+        stream.desc = hide(stream.desc)     # *****
     if edit:
         desc = json.dumps(stream.desc, indent=2)
         desc1 = run_editor(desc, "STREAM_EDITING")
