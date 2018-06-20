@@ -94,6 +94,8 @@ COMMAND_PATTERNS = [
     (explain_options,    ["help","options"]),
     (explain_command,    ["help","<cmd>"]),
     (cli.connect.connect, ["connect","<proxy-prefix>"]),
+    (cli.connect.connectbasic, ["connect", "basicauth", "<proxy-prefix>", "<username>"]),
+    (cli.connect.connectbasic, ["connect", "basicauth", "<proxy-prefix>", "<username>", "<password>"]),
     (cli.connect.login,  ["login","<username>"]),
     (cli.connect.login,  ["login","<username>","<password>"]),
     (cli.config.set,     ["config","set","<config-file>"]),

@@ -3,6 +3,8 @@ import sys
 import json
 from os.path import expanduser
 from time import sleep
+from base64 import b64encode
+from six.moves.urllib.parse import quote
 
 from fastscore.suite import Connect
 from .version import BUILD_DATE
@@ -14,6 +16,41 @@ from getpass import getpass
 
 def connect(proxy_prefix, verbose=False, nowait=False, **kwargs):
     connect = Connect(proxy_prefix)
+    if not nowait:
+        if verbose:
+            sys.stdout.write("Waiting...")
+            sys.stdout.flush()
+        while True:
+            try:
+                connect.check_health()
+                if verbose:
+                    print
+                break
+            except:
+                if verbose:
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
+                sleep(0.5)
+    savefile = expanduser('~/.fastscore')
+    connect.dump(savefile)
+    if verbose:
+        print "Connected to FastScore proxy at %s" % proxy_prefix
+
+def encode(username, password):
+    """Returns an HTTP basic authentication encrypted string given a valid
+    username and password.
+    """
+    if ':' in username:
+        raise EncodeError
+
+    username_password = '%s:%s' % (quote(username), quote(password))
+    return 'Basic ' + b64encode(username_password.encode()).decode()
+
+
+def connectbasic(proxy_prefix, username, password=None, verbose=False, nowait=False, **kwargs):
+    if password == None:
+        password = getpass("Password")
+    connect = Connect(proxy_prefix, basicauth_secret=encode(username, password))
     if not nowait:
         if verbose:
             sys.stdout.write("Waiting...")
