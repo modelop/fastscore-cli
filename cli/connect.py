@@ -14,43 +14,31 @@ from .colors import tcol
 from tabulate import tabulate
 from getpass import getpass
 
-def connect(proxy_prefix, verbose=False, nowait=False, **kwargs):
-    connect = Connect(proxy_prefix)
-    if not nowait:
-        if verbose:
-            sys.stdout.write("Waiting...")
-            sys.stdout.flush()
-        while True:
-            try:
-                connect.check_health()
-                if verbose:
-                    print
-                break
-            except:
-                if verbose:
-                    sys.stdout.write('.')
-                    sys.stdout.flush()
-                sleep(0.5)
-    savefile = expanduser('~/.fastscore')
-    connect.dump(savefile)
-    if verbose:
-        print "Connected to FastScore proxy at %s" % proxy_prefix
-
 def encode(username, password):
     """Returns an HTTP basic authentication encrypted string given a valid
     username and password.
     """
     if ':' in username:
-        raise EncodeError
+        raise FastScoreError('invalid username')
 
     username_password = '%s:%s' % (quote(username), quote(password))
     return 'Basic ' + b64encode(username_password.encode()).decode()
 
+def connect(proxy_prefix, verbose=False, nowait=False, basic_auth=False, ldap_auth=False, username=None, password=None, **kwargs):
+    connect = Connect(proxy_prefix)
 
-def connectbasic(proxy_prefix, username, password=None, verbose=False, nowait=False, **kwargs):
-    if password == None:
-        password = getpass("Password")
-    connect = Connect(proxy_prefix, basicauth_secret=encode(username, password))
+    if basic_auth:
+        if password == None:
+            password = getpass("Password:")
+        connect = Connect(proxy_prefix, basicauth_secret=encode(username, password))
+
+    if ldap_auth:
+        if password == None:
+            password = getpass("Password:")
+        connect.login(username, password)
+        if verbose:
+            print tcol.OKGREEN + "Login successfull" + tcol.ENDC
+        
     if not nowait:
         if verbose:
             sys.stdout.write("Waiting...")
@@ -70,13 +58,6 @@ def connectbasic(proxy_prefix, username, password=None, verbose=False, nowait=Fa
     connect.dump(savefile)
     if verbose:
         print "Connected to FastScore proxy at %s" % proxy_prefix
-
-def login(connect, username, password=None, verbose=False, **kwargs):
-    if password == None:
-        password = getpass("Password:")
-    connect.login(username, password)
-    if verbose:
-        print tcol.OKGREEN + "Login successfull" + tcol.ENDC
 
 def fleet(connect, verbose=False, asjson=False, wait=False, **kwargs):
     if wait:

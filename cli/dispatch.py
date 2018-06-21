@@ -28,7 +28,6 @@ from cli.colors import tcol
 COMMAND_HELP = [
   ("help",       "Explain commands and options"),
   ("connect",    "Establish a FastScore connection"),
-  ("login",      "Login to FastScore"),
   ("config",     "Configure the FastScore fleet"),
   ("fleet",      "Examine status of the FastScore fleet"),
   ("use",        "Select the target instance"),
@@ -63,27 +62,29 @@ def overview_commands(**kwargs):
 def explain_options(**kwargs):
     help_header()
     print "Options:"
-    print "  -v                      be verbose"
-    print "  -type:<model-type>      set model type (ignore file extension)"
-    print "  -type:pfa-json          --- PFA (json)"
-    print "  -type:pfa-pretty        --- PrettyPFA"
-    print "  -type:pfa-yaml          --- PFA (yaml)"
-    print "  -type:python            --- Python"
-    print "  -type:python3           --- Python 3"
-    print "  -type:R                 --- R"
-    print "  -type:c                 --- C"
-    print "  -type:octave            --- Octave"
-    print "  -count:NNN              list no more than NNN items"
-    print "  -since:DATETIME         show items created after DATETIME (iso8601)"
-    print "  -until:DATETIME         show items created before DATETIME (iso8601)"
-    print "  -schema:<name>:<schema> embed schema when loading a model"
-    print "  -json                   output as JSON (handy for scripts)"
-    print "  -e                      open item for editing"
-    print "  -wait                   wait for operation to complete"
-    print "  -nowait                 do not wait for data to become available"
-    print "  -preinstall             preinstall all libraries"
-    print "  -c                      fetch outputs without exiting"
-    print "  -m                      monitor engine operations"
+    print "  -v                                            be verbose"
+    print "  -type:<model-type>                            set model type (ignore file extension)"
+    print "  -type:pfa-json                                --- PFA (json)"
+    print "  -type:pfa-pretty                              --- PrettyPFA"
+    print "  -type:pfa-yaml                                --- PFA (yaml)"
+    print "  -type:python                                  --- Python"
+    print "  -type:python3                                 --- Python 3"
+    print "  -type:R                                       --- R"
+    print "  -type:c                                       --- C"
+    print "  -type:octave                                  --- Octave"
+    print "  -count:NNN                                    list no more than NNN items"
+    print "  -since:DATETIME                               show items created after DATETIME (iso8601)"
+    print "  -until:DATETIME                               show items created before DATETIME (iso8601)"
+    print "  -schema:<name>:<schema>                       embed schema when loading a model"
+    print "  -json                                         output as JSON (handy for scripts)"
+    print "  -e                                            open item for editing"
+    print "  -wait                                         wait for operation to complete"
+    print "  -nowait                                       do not wait for data to become available"
+    print "  -preinstall                                   preinstall all libraries"
+    print "  -c                                            fetch outputs without exiting"
+    print "  -m                                            monitor engine operations"
+    print "  -basic-auth:<username>:<password>             include basic auth headers"
+    print "  -ldap-auth:<username>:<password>              authenticate with ldap"
 
 def explain_command(cmd, **kwargs):
     explain_command1(cmd)
@@ -94,10 +95,6 @@ COMMAND_PATTERNS = [
     (explain_options,    ["help","options"]),
     (explain_command,    ["help","<cmd>"]),
     (cli.connect.connect, ["connect","<proxy-prefix>"]),
-    (cli.connect.connectbasic, ["connect", "basicauth", "<proxy-prefix>", "<username>"]),
-    (cli.connect.connectbasic, ["connect", "basicauth", "<proxy-prefix>", "<username>", "<password>"]),
-    (cli.connect.login,  ["login","<username>"]),
-    (cli.connect.login,  ["login","<username>","<password>"]),
     (cli.config.set,     ["config","set","<config-file>"]),
     (cli.config.show,    ["config","show"]),
     (cli.connect.fleet,  ["fleet"]),
@@ -260,6 +257,22 @@ def parse_opts(args):
                 opts['embedded_schemas'][name] = data
             except:
                 print "Option '%s' ignored" % x
+        elif x.startswith('-basic-auth'):
+            try:
+                a = x.split(':')
+                opts['basic_auth'] = True
+                opts['username'] = a[1]
+                opts['password'] = a[2] if len(a) == 3 else None
+            except:
+                print "Option '%s' ignored" %x
+        elif x.startswith('-ldap-auth'):
+            try:
+                a = x.split(':')
+                opts['ldap_auth'] = True
+                opts['username'] = a[1]
+                opts['password'] = a[2] if len(a) == 3 else None
+            except:
+                print "Option '%s' ignored" %x
         elif x == '-e':
             opts['edit'] = True
         elif x == '-wait':
