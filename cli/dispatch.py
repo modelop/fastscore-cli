@@ -110,6 +110,7 @@ COMMAND_PATTERNS = [
     (cli.model.remove,   ["model","remove","<model-name>"]),
     (cli.model.verify,   ["model","verify","<model-name>"]),
     (cli.model.load,     ["model","load","<model-name>"]),
+    (cli.model.load,     ["model","load","<model-name>", "<attachment>"]),
     (cli.model.inspect,  ["model","inspect"]),
     (cli.model.unload,   ["model","unload"]),
     (cli.model.scale,    ["model","scale","<count>"]),

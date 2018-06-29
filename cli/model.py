@@ -7,6 +7,7 @@ from os.path import splitext
 from tabulate import tabulate
 
 from fastscore import Model, Sensor, FastScoreError
+from fastscore.model import Attachment
 from fastscore.v1.rest import ApiException
 from .editor import run_editor
 from .colors import tcol
@@ -123,11 +124,15 @@ def verify(connect, name, verbose=False, quiet=False, asjson=False, embedded_sch
         else:
             raise e
 
-def load(connect, name, verbose=False, embedded_schemas={}, **kwargs):
+def load(connect, name, attachment_file=None, verbose=False, embedded_schemas={}, **kwargs):
     mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
     model = mm.models[name]
-    engine.load_model(model, embedded_schemas=embedded_schemas)
+    if attachment_file == None:
+        engine.load_model(model, embedded_schemas=embedded_schemas)
+    else:
+        attachment = Attachment("override", datafile=attachment_file)
+        engine.load_model(model, attachment_override_list=[ attachment ], force_inline=True, embedded_schemas=embedded_schemas)
     if verbose:
         print "Model loaded"
 
