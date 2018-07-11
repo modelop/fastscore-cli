@@ -16,15 +16,16 @@ from threading import Thread
 import readline
 
 KNOWN_MODEL_EXTENSIONS = {
-  '.pfa':  'pfa-json',
-  '.ppfa': 'pfa-pretty',
-  '.json': 'pfa-json',
-  '.yaml': 'pfa-yaml',
-  '.py':   'python',
-  '.py3':  'python3',
-  '.R':    'R',
-  '.c':    'c',
-  '.m':    'octave',
+  '.pfa':   'pfa-json',
+  '.ppfa':  'pfa-pretty',
+  '.json':  'pfa-json',
+  '.yaml':  'pfa-yaml',
+  '.py':    'python',
+  '.py3':   'python3',
+  '.R':     'R',
+  '.c':     'c',
+  '.m':     'octave',
+  '.scala': 'scala',
 }
 
 KNOWN_ANCHORS = [
