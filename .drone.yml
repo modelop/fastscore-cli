@@ -41,3 +41,5 @@ pipeline:
     when:
       branch: master
       event: push
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
