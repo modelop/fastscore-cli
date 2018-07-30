@@ -1,2 +1,3 @@
 graft extra
-exclude MANIFEST.in
+exclude MANIFEST.ininclude versioneer.py
+include cli/_version.py

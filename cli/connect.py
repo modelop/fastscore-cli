@@ -6,7 +6,7 @@ from time import sleep
 
 from fastscore.suite import Connect
 from .version import BUILD_DATE
-from . import RELEASE
+from . import __version__
 from .colors import tcol
 
 from tabulate import tabulate
@@ -70,7 +70,7 @@ def fleet(connect, verbose=False, asjson=False, wait=False, **kwargs):
             doc = [{'name': 'CLI',
                     'api': 'UI',
                     'health': 'ok',
-                    'release': RELEASE,
+                    'release': __version__,
                     'built_on': BUILD_DATE},
                    {'name': 'connect',
                     'api': 'connect',
@@ -79,7 +79,7 @@ def fleet(connect, verbose=False, asjson=False, wait=False, **kwargs):
                     'built_on': y.built_on}] + map(lambda x: x.to_dict(), xx)
             print json.dumps(doc, indent=2)
         else:
-            t = [["CLI","UI",paintok("ok"),RELEASE,BUILD_DATE],
+            t = [["CLI","UI",paintok("ok"),__version__,BUILD_DATE],
                  ["connect","connect",paintok("ok"),y.release,y.built_on]]
             t += [ [x.name,x.api,paintok(x.health),x.release,x.built_on] for x in xx ]
             print tabulate(t, headers=["Name","API","Health","Release","Built On"])

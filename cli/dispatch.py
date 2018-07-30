@@ -10,7 +10,7 @@ from fastscore.suite import Connect
 from fastscore.constants import MODEL_CONTENT_TYPES
 from fastscore.errors import FastScoreError
 
-from cli import RELEASE
+from cli import __version__
 
 import cli.connect, cli.config, cli.pneumo
 import cli.model, cli.attachment, cli.snapshot
@@ -49,7 +49,7 @@ COMMAND_HELP = [
 ]
 
 def help_header():
-    print tcol.BOLD + "FastScore CLI v%s" % RELEASE + tcol.ENDC
+    print tcol.BOLD + "FastScore CLI v%s" % __version__ + tcol.ENDC
 
 def overview_commands(**kwargs):
     help_header()

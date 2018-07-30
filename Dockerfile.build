@@ -1,0 +1,9 @@
+FROM alpine:3.8
+
+RUN apk add --no-cache curl make py2-pip python3 openjdk8-jre-base git &&\
+	pip2 install wheel &&\
+	pip3 install wheel &&\
+	curl http://central.maven.org/maven2/io/swagger/swagger-codegen-cli/2.2.3/swagger-codegen-cli-2.2.3.jar \
+		>/swagger-codegen-cli.jar
+
+WORKDIR /cli
