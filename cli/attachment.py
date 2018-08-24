@@ -5,6 +5,7 @@ from fastscore.model import Attachment
 from fastscore import FastScoreError
 
 from tabulate import tabulate
+import os
 
 KNOWN_ATTACHMENT_EXTENSIONS = {
     '.zip':    'zip',
@@ -28,8 +29,10 @@ def roster(connect, model_name, verbose=False, **kwargs):
 def upload(connect, model_name, file_to_upload, verbose=False, **kwargs):
     mm = connect.lookup('model-manage')
     model = mm.models[model_name]
-    aname = file_to_upload
-    atype = guess_attachment_type(file_to_upload)
+    f = open(file_to_upload)
+    filename = os.path.basename(file_to_upload)
+    aname = filename
+    atype = guess_attachment_type(filename)
     att = Attachment(aname, atype=atype, datafile=file_to_upload, model=model)
     att.upload()
     if verbose:
