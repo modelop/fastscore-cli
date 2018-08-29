@@ -25,6 +25,7 @@ KNOWN_MODEL_EXTENSIONS = {
   '.R':    'R',
   '.c':    'c',
   '.m':    'octave',
+  '.java': 'java',
 }
 
 KNOWN_ANCHORS = [
