@@ -4,8 +4,9 @@ from time import sleep
 
 import re
 import json
-
+from fastscore.pneumo import EngineStateMsg, EngineConfigMsg, SensorReportMsg
 from fastscore import Sensor, FastScoreError
+
 
 def memory(connect, verbose=False, **kwargs):
     fmt = lambda data: "%.1fmb" % (data / 1048576.0)
@@ -31,6 +32,7 @@ def sensor_trail(connect, point, formatter):
         connect.target.active_sensors[sid].uninstall()
 
 def jets(connect, verbose=False, **kwargs):
+
     engine = connect.lookup('engine')
     if engine.active_model == None:
         raise FastScoreError("Model not loaded")
@@ -53,6 +55,8 @@ def jets(connect, verbose=False, **kwargs):
                 for sid in self._vals:
                     self._vals[sid] = None
                 sleep(2)
+                #
+
 
     vals = {}
     jets = {}
@@ -71,15 +75,32 @@ def jets(connect, verbose=False, **kwargs):
     watcher.daemon = True
     watcher.start()
 
-    pneumo = connect.pneumo.socket(src=engine.name, type='sensor-report')
+    pneumo = connect.pneumo.socket(src=engine.name)
+
     try:
         while True:
             msg = pneumo.recv()
-            if msg.sid in vals:
-                if msg.delta_time:
-                    vals[msg.sid] = msg.data / msg.delta_time
-                else:
-                    vals[msg.sid] = msg.data / REPINT
+
+            if isinstance(msg, SensorReportMsg):
+
+                if msg.sid in vals:
+                    if msg.delta_time:
+                        vals[msg.sid] = msg.data / msg.delta_time
+                    else:
+                        vals[msg.sid] = msg.data / REPINT
+
+            if isinstance(msg, EngineConfigMsg):
+                print "change detected"
+                print msg.op
+                if msg.op == 'start':
+                    for jet in engine.active_model.jets:
+                        itap = 'jet.{}.input.records.count'.format(jet.sandbox)
+                        sid1 = Sensor.prep(itap, interval=REPINT).install(engine)
+                        otap = 'jet.{}.output.records.count'.format(jet.sandbox)
+                        sid2 = Sensor.prep(otap, interval=REPINT).install(engine)
+                        vals[sid1] = None
+                        vals[sid2] = None
+                        jets[jet.sandbox] = (sid1,sid2)
 
     except KeyboardInterrupt:
         pneumo.close()
