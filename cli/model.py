@@ -16,16 +16,17 @@ from threading import Thread
 import readline
 
 KNOWN_MODEL_EXTENSIONS = {
-  '.pfa':  'pfa-json',
-  '.ppfa': 'pfa-pretty',
-  '.json': 'pfa-json',
-  '.yaml': 'pfa-yaml',
-  '.py':   'python',
-  '.py3':  'python3',
-  '.R':    'R',
-  '.c':    'c',
-  '.m':    'octave',
-  '.java': 'java',
+  '.pfa':   'pfa-json',
+  '.ppfa':  'pfa-pretty',
+  '.json':  'pfa-json',
+  '.yaml':  'pfa-yaml',
+  '.py':    'python',
+  '.py3':   'python3',
+  '.R':     'R',
+  '.c':     'c',
+  '.m':     'octave',
+  '.ipynb': 'jupyter',
+  '.java':  'java',
 }
 
 KNOWN_ANCHORS = [
@@ -114,7 +115,7 @@ def verify(connect, name, verbose=False, quiet=False, asjson=False, embedded_sch
                     print "Libraries to be found in attachment(s): %s." % ", ".join(info.attach_libs)
                 if info.snapshots != 'none':
                     print "The model snapshots mode is '%s'" % info.snapshots
-                
+
             if not quiet:
                 print tcol.OKGREEN + "The model contains no errors" + tcol.ENDC
 
@@ -271,7 +272,7 @@ def interact(connect, **kwargs):
                     pass
             else:
                 engine.input(data, cur_slot)
-            
+
             try:
                 while True:
                     msg = pneumo.recv()
@@ -340,4 +341,3 @@ def model_type_from_source(source):
         if re.search(pat, source, flags=re.MULTILINE):
             return mtype
     raise FastScoreError("Cannot guess model type (use -type:<model_type>)")
-
