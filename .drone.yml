@@ -23,8 +23,8 @@ pipeline:
       - aws ecr get-login --no-include-email --region us-east-2 | sh
       - git clone https://$${GIT_USER}:$${GIT_PASS}@github.com/opendatagroup/fastscore-test.git
       - ./fastscore-test/fastest pull-env
-      - ./fastscore-test/fastest copy-wheel CLI dist/fastscore_cli-*.whl
-      - ./fastscore-test/fastest copy-wheel SDK sdk/python/dist/fastscore-*.whl
+      - ./fastscore-test/fastest copy-wheel CLI "dist/fastscore_cli-*.whl"
+      - ./fastscore-test/fastest copy-wheel SDK "sdk/python/dist/fastscore-*.whl"
       - ./fastscore-test/all.sh
       ## Upload wheels
       - mkdir ~/.ssh && echo "$${SSH_KEY}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
