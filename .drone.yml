@@ -1,5 +1,7 @@
-branches: master
-
+clone:
+  git:
+    image: plugins/git
+    tags: true
 pipeline:
   build:
     image: fastscore/maker
@@ -7,7 +9,37 @@ pipeline:
       - make build
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-workspace:
-  base: /_
-  path: .
+  unit-test:
+    image: fastscore/maker
+    commands:
+      - make test
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  integrate:
+    image: fastscore/maker
+    secrets: [ aws_access_key_id, aws_secret_access_key, git_user, git_pass, ssh_key, ssh_key2 ]
+    commands:
+      ## Run all tests
+      - aws ecr get-login --no-include-email --region us-east-2 | sh
+      - git clone https://$${GIT_USER}:$${GIT_PASS}@github.com/opendatagroup/fastscore-test.git
+      - ./fastscore-test/fastest pull-env
+      - ./fastscore-test/fastest copy-wheel CLI "dist/fastscore_cli-*.whl"
+      - ./fastscore-test/fastest copy-wheel SDK "sdk/python/dist/fastscore-*.whl"
+      - ./fastscore-test/all.sh
+      ## Upload wheels
+      - mkdir ~/.ssh && echo "$${SSH_KEY2}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+      - ssh-keyscan -H 54.201.85.144 2>/dev/null >> /root/.ssh/known_hosts
+      - scp sdk/python/dist/* ec2-user@54.201.85.144:www/pypi/dev/fastscore/
+      - scp dist/*            ec2-user@54.201.85.144:www/pypi/dev/fastscore-cli/
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  promote:
+    image: fastscore/maker
+    secrets: [ ssh_key ]
+    commands:
+      - ./fastscore-test/fastest push-env
+    when:
+      branch: master
+      event: push
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

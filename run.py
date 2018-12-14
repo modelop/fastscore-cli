@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
 from cli import dispatch
+import sys
 
 def main():
-  dispatch.main()
+  return dispatch.main()
 
 if __name__ == "__main__":
-  main()
+  sys.exit(main())
 
