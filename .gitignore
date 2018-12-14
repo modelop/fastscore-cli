@@ -4,6 +4,3 @@ dist/
 *.egg-info/
 
 *.pyc
-
-fastscore_
-fastscore
