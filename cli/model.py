@@ -7,6 +7,7 @@ from os.path import splitext
 from tabulate import tabulate
 
 from fastscore import Model, Sensor, FastScoreError
+from fastscore.model import Attachment
 from fastscore.v1.rest import ApiException
 from .editor import run_editor
 from .colors import tcol
@@ -15,15 +16,17 @@ from threading import Thread
 import readline
 
 KNOWN_MODEL_EXTENSIONS = {
-  '.pfa':  'pfa-json',
-  '.ppfa': 'pfa-pretty',
-  '.json': 'pfa-json',
-  '.yaml': 'pfa-yaml',
-  '.py':   'python',
-  '.py3':  'python3',
-  '.R':    'R',
-  '.c':    'c',
-  '.m':    'octave',
+  '.pfa':   'pfa-json',
+  '.ppfa':  'pfa-pretty',
+  '.json':  'pfa-json',
+  '.yaml':  'pfa-yaml',
+  '.py':    'python',
+  '.py3':   'python3',
+  '.R':     'R',
+  '.c':     'c',
+  '.m':     'octave',
+  '.ipynb': 'jupyter',
+  '.java':  'java',
 }
 
 KNOWN_ANCHORS = [
@@ -112,7 +115,7 @@ def verify(connect, name, verbose=False, quiet=False, asjson=False, embedded_sch
                     print "Libraries to be found in attachment(s): %s." % ", ".join(info.attach_libs)
                 if info.snapshots != 'none':
                     print "The model snapshots mode is '%s'" % info.snapshots
-                
+
             if not quiet:
                 print tcol.OKGREEN + "The model contains no errors" + tcol.ENDC
 
@@ -123,11 +126,15 @@ def verify(connect, name, verbose=False, quiet=False, asjson=False, embedded_sch
         else:
             raise e
 
-def load(connect, name, verbose=False, embedded_schemas={}, **kwargs):
+def load(connect, name, attachment_file=None, verbose=False, embedded_schemas={}, **kwargs):
     mm = connect.lookup('model-manage')
     engine = connect.lookup('engine')
     model = mm.models[name]
-    engine.load_model(model, embedded_schemas=embedded_schemas)
+    if attachment_file == None:
+        engine.load_model(model, embedded_schemas=embedded_schemas)
+    else:
+        attachment = Attachment("override", datafile=attachment_file)
+        engine.load_model(model, attachment_override_list=[ attachment ], force_inline=True, embedded_schemas=embedded_schemas)
     if verbose:
         print "Model loaded"
 
@@ -265,7 +272,7 @@ def interact(connect, **kwargs):
                     pass
             else:
                 engine.input(data, cur_slot)
-            
+
             try:
                 while True:
                     msg = pneumo.recv()
@@ -334,4 +341,3 @@ def model_type_from_source(source):
         if re.search(pat, source, flags=re.MULTILINE):
             return mtype
     raise FastScoreError("Cannot guess model type (use -type:<model_type>)")
-

@@ -10,7 +10,7 @@ from fastscore.suite import Connect
 from fastscore.constants import MODEL_CONTENT_TYPES
 from fastscore.errors import FastScoreError
 
-from cli import RELEASE
+from cli import __version__
 
 import cli.connect, cli.config, cli.pneumo
 import cli.model, cli.attachment, cli.snapshot
@@ -48,7 +48,7 @@ COMMAND_HELP = [
 ]
 
 def help_header():
-    print tcol.BOLD + "FastScore CLI v%s" % RELEASE + tcol.ENDC
+    print tcol.BOLD + "FastScore CLI v%s" % __version__ + tcol.ENDC
 
 def overview_commands(**kwargs):
     help_header()
@@ -72,6 +72,7 @@ def explain_options(**kwargs):
     print "  -type:R                                       --- R"
     print "  -type:c                                       --- C"
     print "  -type:octave                                  --- Octave"
+    print "  -type:jupyter                                 --- Jupyter"
     print "  -count:NNN                                    list no more than NNN items"
     print "  -since:DATETIME                               show items created after DATETIME (iso8601)"
     print "  -until:DATETIME                               show items created before DATETIME (iso8601)"
@@ -109,6 +110,7 @@ COMMAND_PATTERNS = [
     (cli.model.remove,   ["model","remove","<model-name>"]),
     (cli.model.verify,   ["model","verify","<model-name>"]),
     (cli.model.load,     ["model","load","<model-name>"]),
+    (cli.model.load,     ["model","load","<model-name>", "<attachment>"]),
     (cli.model.inspect,  ["model","inspect"]),
     (cli.model.unload,   ["model","unload"]),
     (cli.model.scale,    ["model","scale","<count>"]),
@@ -299,4 +301,3 @@ def match(acc, (t,s)):
     if t == s:
         return acc
     return None
-

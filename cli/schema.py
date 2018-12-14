@@ -64,7 +64,7 @@ def verify(connect, name, data_file=False, verbose=False, **kwargs):
     data = []
     if data_file:
         if not exists(data_file):
-            raise FastScoreError("{} not found").format(data_file)
+            raise FastScoreError("{} not found".format(data_file))
         with open(data_file) as f:
             data = f.readlines()
     mm = connect.lookup('model-manage')
