@@ -11,19 +11,7 @@ build:
 	$(BUILD_VOL) docker run --rm -v $$VOL:/cli build/cli make dist
 
 dist:
-	cd sdk/python &&\
-		java -DapiTests=false -DmodelTests=false \
-			-jar /swagger-codegen-cli.jar generate \
-			-i ../api/suite-proxy-v1.yaml \
-			-l python \
-			-c cg-v1.json \
-			-o fastscore &&\
-		java -DapiTests=false -DmodelTests=false \
-			-jar /swagger-codegen-cli.jar generate \
-			-i ../api/suite-proxy-v2.yaml \
-			-l python \
-			-c cg-v2.json \
-			-o fastscore &&\
+	cd sdk &&\
 		rm -rf build && python2 setup.py bdist_wheel &&\
 		rm -rf build && python3 setup.py bdist_wheel
 	rm -rf build && python2 setup.py bdist_wheel

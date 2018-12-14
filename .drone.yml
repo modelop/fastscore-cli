@@ -24,12 +24,12 @@ pipeline:
       - git clone https://$${GIT_USER}:$${GIT_PASS}@github.com/opendatagroup/fastscore-test.git
       - ./fastscore-test/fastest pull-env
       - ./fastscore-test/fastest copy-wheel CLI "dist/fastscore_cli-*.whl"
-      - ./fastscore-test/fastest copy-wheel SDK "sdk/python/dist/fastscore-*.whl"
+      - ./fastscore-test/fastest copy-wheel SDK "sdk/dist/fastscore-*.whl"
       - ./fastscore-test/all.sh
       ## Upload wheels
       - mkdir ~/.ssh && echo "$${SSH_KEY2}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
       - ssh-keyscan -H 54.201.85.144 2>/dev/null >> /root/.ssh/known_hosts
-      - scp sdk/python/dist/* ec2-user@54.201.85.144:www/pypi/dev/fastscore/
+      - scp sdk/dist/* ec2-user@54.201.85.144:www/pypi/dev/fastscore/
       - scp dist/*            ec2-user@54.201.85.144:www/pypi/dev/fastscore-cli/
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

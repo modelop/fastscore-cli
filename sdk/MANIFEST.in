@@ -1,0 +1,2 @@
+include versioneer.py
+include fastscore/_version.py

@@ -1,0 +1,12 @@
+fastscore/.gitignore
+fastscore/.swagger-codegen*
+fastscore/.travis.yml
+fastscore/README.md
+fastscore/docs/
+fastscore/git_push.sh
+fastscore/requirements.txt
+fastscore/setup.py
+fastscore/test-requirements.txt
+fastscore/tox.ini
+fastscore/v1/
+fastscore/v2/
