@@ -12,7 +12,8 @@ setup(
   install_requires = [
     "fastscore>=1.6.1",
     "avro>=1.7.6",
-    "parse>=1.8.2"
+    "parse>=1.8.2",
+    "requests_oauthlib>=0.8.0"
   ],
 
   entry_points = {
