@@ -12,7 +12,7 @@ from fastscore.errors import FastScoreError
 
 from cli import __version__
 
-import cli.connect, cli.config, cli.pneumo
+import cli.connect, cli.config, cli.pneumo, cli.login
 import cli.model, cli.attachment, cli.snapshot
 import cli.schema, cli.stream, cli.engine
 import cli.sensor, cli.stats, cli.policy
@@ -28,6 +28,7 @@ from cli.colors import tcol
 COMMAND_HELP = [
   ("help",       "Explain commands and options"),
   ("connect",    "Establish a FastScore connection"),
+  ("login",      "Authenticate a FastScore connection"),
   ("config",     "Configure the FastScore fleet"),
   ("fleet",      "Examine status of the FastScore fleet"),
   ("use",        "Select the target instance"),
@@ -84,8 +85,12 @@ def explain_options(**kwargs):
     print "  -preinstall                                   preinstall all libraries"
     print "  -c                                            fetch outputs without exiting"
     print "  -m                                            monitor engine operations"
-    print "  -basic-auth:<username>:<password>             include basic auth headers"
-    print "  -ldap-auth:<username>:<password>              authenticate with ldap"
+    print "  -username                                     username (basicauth/ldap)"
+    print "  -password                                     password (basicauth/ldap)"
+    print "  -discover-endpoint                            OAuth2 discover endpoint"
+    print "  -cliend-id                                    OAuth2 Client ID"
+    print "  -client-secret                                OAuth2 Client Secret (optional)"
+    print "  -login-url                                    Login URL (sessioncookie)"
 
 def explain_command(cmd, **kwargs):
     explain_command1(cmd)
@@ -96,6 +101,7 @@ COMMAND_PATTERNS = [
     (explain_options,    ["help","options"]),
     (explain_command,    ["help","<cmd>"]),
     (cli.connect.connect, ["connect","<proxy-prefix>"]),
+    (cli.login.login,    ["login", "<oauth2/ldap/basicauth/sessioncookie>", ]),
     (cli.config.set,     ["config","set","<config-file>"]),
     (cli.config.show,    ["config","show"]),
     (cli.connect.fleet,  ["fleet"]),
@@ -209,7 +215,9 @@ def main():
                         raise FastScoreError("Not connected (use 'fastscore connect')")
 
             except FastScoreError as e:
-                if opts['asjson']:
+                if hasattr(e.caused_by, 'status') and e.caused_by.status == 401 and not opts['asjson']:
+                    print tcol.FAIL + "Authorization required" + tcol.ENDC
+                elif opts['asjson']:
                     print json.dumps({'error': str(e)}, indent=2)
                 else:
                     print tcol.FAIL + str(e) + tcol.ENDC
@@ -259,20 +267,22 @@ def parse_opts(args):
                 opts['embedded_schemas'][name] = data
             except:
                 print "Option '%s' ignored" % x
-        elif x.startswith('-basic-auth'):
+        elif x.startswith('-username'):
             try:
                 a = x.split(':')
-                opts['basic_auth'] = True
                 opts['username'] = a[1]
-                opts['password'] = a[2] if len(a) == 3 else None
             except:
                 print "Option '%s' ignored" %x
-        elif x.startswith('-ldap-auth'):
+        elif x.startswith('-password'):
             try:
                 a = x.split(':')
-                opts['ldap_auth'] = True
-                opts['username'] = a[1]
-                opts['password'] = a[2] if len(a) == 3 else None
+                opts['password'] = a[1]
+            except:
+                print "Option '%s' ignored" %x
+        elif x.startswith('-auth-endpoint'):
+            try:
+                a = x.split(':')
+                opts['auth_endpoint'] = a[1]
             except:
                 print "Option '%s' ignored" %x
         elif x == '-e':

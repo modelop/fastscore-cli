@@ -3,41 +3,16 @@ import sys
 import json
 from os.path import expanduser
 from time import sleep
-from base64 import b64encode
-from six.moves.urllib.parse import quote
-
 from fastscore.suite import Connect
+from fastscore.errors import FastScoreError
 from .version import BUILD_DATE
 from . import __version__
 from .colors import tcol
 
 from tabulate import tabulate
-from getpass import getpass
 
-def encode(username, password):
-    """Returns an HTTP basic authentication encrypted string given a valid
-    username and password.
-    """
-    if ':' in username:
-        raise FastScoreError('invalid username')
-
-    username_password = '%s:%s' % (quote(username), quote(password))
-    return 'Basic ' + b64encode(username_password.encode()).decode()
-
-def connect(proxy_prefix, verbose=False, nowait=False, basic_auth=False, ldap_auth=False, username=None, password=None, **kwargs):
+def connect(proxy_prefix, verbose=False, nowait=False, **kwargs):
     connect = Connect(proxy_prefix)
-
-    if basic_auth:
-        if password == None:
-            password = getpass("Password:")
-        connect = Connect(proxy_prefix, basicauth_secret=encode(username, password))
-
-    if ldap_auth:
-        if password == None:
-            password = getpass("Password:")
-        connect.login(username, password)
-        if verbose:
-            print tcol.OKGREEN + "Login successfull" + tcol.ENDC
         
     if not nowait:
         if verbose:
@@ -49,6 +24,15 @@ def connect(proxy_prefix, verbose=False, nowait=False, basic_auth=False, ldap_au
                 if verbose:
                     print
                 break
+            except FastScoreError as e:
+                if (hasattr(e.caused_by, 'status') and e.caused_by.status == 401):
+                    savefile = expanduser('~/.fastscore')
+                    connect.dump(savefile)
+                    raise e
+                if verbose:
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
+                sleep(0.5)
             except:
                 if verbose:
                     sys.stdout.write('.')
