@@ -224,12 +224,9 @@ def output(connect, slot=None, nowait=False, noexit=False, **kwargs):
             print data
     else:
         try:
-            while True:
-                data = engine.output(slot)
-                if data != None:
-                    print data
-                    if not noexit:
-                        break
+            data = engine.output(slot)
+            if data != None:
+                print data
         except EOFError:
             print tcol.OKBLUE + "(EOF)" + tcol.ENDC
         except KeyboardInterrupt:
