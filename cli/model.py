@@ -184,7 +184,13 @@ def scale(connect, count, verbose=False, **kwargs):
     if verbose:
         print "Model scale changed"
 
-def input(connect, slot=None, verbose=False, **kwargs):
+###
+# This is now called `input_data` and not `input`,
+# b/c when converting python2 to python3 with `2to3`,
+# `raw_input` gets renamed to `input`, causing a name
+# collision 
+###
+def input_data(connect, slot=None, verbose=False, **kwargs):
     engine = connect.lookup('engine')
     if slot == None:
         slot = 0
@@ -227,7 +233,7 @@ def output(connect, slot=None, nowait=False, noexit=False, **kwargs):
             while True:
                 data = engine.output(slot)
                 if data != None:
-                    print data
+                    print data.decode()
                     if not noexit:
                         break
         except EOFError:
@@ -292,7 +298,7 @@ def interact(connect, **kwargs):
                     data = engine.output(slot)
                     if data != None:
                         s = data if slot == 1 else "[{}] {}".format(slot, data)
-                        print tcol.OKGREEN + s + tcol.ENDC
+                        print tcol.OKGREEN + s.decode() + tcol.ENDC
 
     except EOFError:
         print
