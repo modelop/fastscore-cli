@@ -1,5 +1,5 @@
 clone:
-  git:
+  clone:
     image: plugins/git
     tags: true
 pipeline:
@@ -15,7 +15,7 @@ pipeline:
       - make test
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-  integrate:
+  fastscore-test:
     image: fastscore/maker
     secrets: [ aws_access_key_id, aws_secret_access_key, git_user, git_pass, ssh_key, ssh_key2 ]
     commands:
@@ -28,12 +28,12 @@ pipeline:
       - ./fastscore-test/all.sh
       ## Upload wheels
       - mkdir ~/.ssh && echo "$${SSH_KEY2}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
-      - ssh-keyscan -H 54.201.85.144 2>/dev/null >> /root/.ssh/known_hosts
-      - scp sdk/python/dist/* ec2-user@54.201.85.144:www/pypi/dev/fastscore/
-      - scp dist/*            ec2-user@54.201.85.144:www/pypi/dev/fastscore-cli/
+      - ssh-keyscan -H pkg.fastscore.tools 2>/dev/null >> /root/.ssh/known_hosts
+      - scp sdk/python/dist/* ec2-user@pkg.fastscore.tools:www/fastscore-sdk/
+      - scp dist/*            ec2-user@pkg.fastscore.tools:www/fastscore-cli/
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-  promote:
+  integrate:
     image: fastscore/maker
     secrets: [ ssh_key ]
     commands:
