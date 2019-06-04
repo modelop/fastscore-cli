@@ -38,7 +38,7 @@ REDIRECT_URI_QUERYPARAMS = [
 def read_config():
     try:
         with open(CONFIG_PATH, 'r') as f:
-            return yaml.load(f)
+            return yaml.load(f, loader=yaml.BaseLoader)
     except IOError:
         return DEFAULT_CONFIG
 

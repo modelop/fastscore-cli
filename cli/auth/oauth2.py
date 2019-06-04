@@ -32,7 +32,7 @@ REDIRECT_URI = 'http://localhost:1234/auth_callback'
 def read_config():
     try:
         with open(CONFIG_PATH, 'r') as f:
-            return yaml.load(f)
+            return yaml.load(f, loader=yaml.BaseLoader)
     except IOError:
         return DEFAULT_CONFIG
 

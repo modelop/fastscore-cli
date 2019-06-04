@@ -9,7 +9,7 @@ from fastscore import FastScoreError
 def set(connect, config_file, verbose=False, **kwargs):
     try:
         with open(config_file) as f:
-            reconf = connect.configure(yaml.load(f))
+            reconf = connect.configure(yaml.load(f, loader=yaml.BaseLoader))
             if verbose:
                 if reconf:
                     print "Configuration updated"
