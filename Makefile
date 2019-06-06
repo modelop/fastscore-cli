@@ -10,7 +10,7 @@ build:
 	docker build -f Dockerfile.build -t build/cli .
 	$(BUILD_VOL) docker run --rm -v $$VOL:/cli build/cli make dist
 
-dist:
+swagger-codegen:
 	cd sdk/python &&\
 		java -DapiTests=false -DmodelTests=false \
 			-jar /swagger-codegen-cli.jar generate \
@@ -23,7 +23,10 @@ dist:
 			-i ../api/suite-proxy-v2.yaml \
 			-l python \
 			-c cg-v2.json \
-			-o fastscore &&\
+			-o fastscore
+
+dist:
+	cd sdk/python &&\
 		rm -rf build && python2 setup.py bdist_wheel &&\
 		rm -rf build && python3 setup.py bdist_wheel
 	rm -rf build && python2 setup.py bdist_wheel
