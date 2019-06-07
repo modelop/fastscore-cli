@@ -1,6 +1,7 @@
 
 import sys
 import json
+import csv
 from os.path import exists
 
 from tabulate import tabulate
@@ -89,3 +90,16 @@ def verify(connect, name, data_file=False, verbose=False, **kwargs):
         print
     engine.unverify_schema(sid)
 
+def infer(connect, filename, format="jsons", verbose=False, **kwargs):
+    with open(filename, 'r') as f:
+        if format == "jsons":
+            data = f.read()
+            samples = [json.loads(l.strip()) for l in data.split('\n')]
+            schema = Schema.infer(filename, samples)
+            print(json.dumps(json.loads(schema.source), indent=2))
+        elif format == "csv":
+            samples = [dict(l) for l in csv.DictReader(f)]
+            schema = Schema.infer(filename, samples)
+            print(json.dumps(json.loads(schema.source), indent=2))
+        else:
+            print tcol.FAIL + "Format " + format + " not recognized" + tcol.ENDC
