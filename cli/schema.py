@@ -89,3 +89,12 @@ def verify(connect, name, data_file=False, verbose=False, **kwargs):
         print
     engine.unverify_schema(sid)
 
+def infer(connect, filename, format="jsons", verbose=False, **kwargs):
+    with open(filename, 'r') as f:
+        data = f.read()
+        if format == "jsons":
+            samples = [json.loads(l.strip()) for l in data.split('\n')]
+            schema = Schema.infer(filename, samples)
+            print(json.dumps(json.loads(schema.source), indent=2))
+        else:
+            print tcol.FAIL + "Format " + format + " not recognized" + tcol.ENDC

@@ -139,6 +139,7 @@ COMMAND_PATTERNS = [
     (cli.schema.roster,  ["schema","list"]),
     (cli.schema.verify,  ["schema","verify","<schema-name>"]),
     (cli.schema.verify,  ["schema","verify","<schema-name>","<data-file>"]),
+    (cli.schema.infer,   ["schema","infer","<filename>"]),
     (cli.snapshot.roster, ["snapshot","list","<model-name>"]),
     (cli.snapshot.show,  ["snapshot","show","<model-name>","<snap-id>"]),
     (cli.snapshot.restore, ["snapshot","restore","<model-name>"]),
@@ -297,6 +298,12 @@ def parse_opts(args):
             opts['noexit'] = True
         elif x == '-m':
             opts['monitor'] = True
+        elif x.startswith('-format'):
+            try:
+                a = x.split(':')
+                opts['format'] = a[1]
+            except:
+                print "Option '%s' ignored" % x
         elif x[0] == '-':
             print "Unknown option '%s' ignored" % x
     words = [ x for x in args if x[0] != '-' ]
