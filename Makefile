@@ -28,7 +28,7 @@ swagger-codegen:
 dist:
 	cd sdk/python &&\
 		rm -rf build && python2 setup.py bdist_wheel &&\
-		rm -rf build && python3 setup.py bdist_wheel
+		rm -rf build && python3 setup.py bdist_wheel && python3 setup.py sdist
 	rm -rf build && python2 setup.py bdist_wheel
 	rm -rf build && python3 setup.py bdist_wheel
 
