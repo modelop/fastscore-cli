@@ -1,6 +1,6 @@
 FROM alpine:3.8
 
-RUN apk add --no-cache py2-pip python3
+RUN apk add --no-cache py2-pip python3 gcc python2-dev python3-dev musl-dev
 
 COPY sdk/python/dist /dist
 COPY dist /dist
