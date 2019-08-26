@@ -1,0 +1,79 @@
+kind: pipeline
+name: default
+
+steps:
+- name: clone
+  pull: default
+  image: plugins/git
+  settings:
+    tags: true
+
+- name: build
+  pull: default
+  image: fastscore/maker
+  commands:
+  - make build
+  volumes:
+  - name: docker.sock
+    path: /var/run/docker.sock
+
+- name: unit-test
+  image: fastscore/maker
+  commands:
+  - make test
+  volumes:
+  - name: docker.sock
+    path: /var/run/docker.sock
+
+- name: fastscore-test
+  pull: if-not-exists
+  image: fastscore/maker
+  user: root
+  environment:
+    AWS_ACCESS_KEY_ID:
+      from_secret: aws_access_key_id
+    AWS_SECRET_ACCESS_KEY:
+      from_secret: aws_secret_access_key
+    GIT_PASS:
+      from_secret: git_pass
+    GIT_USER:
+      from_secret: git_user
+    CLOUDREPO_USERNAME:
+      from_secret: CLOUDREPO_USERNAME
+    CLOUDREPO_PASSPHRASE:
+      from_secret: CLOUDREPO_PASSPHRASE
+  commands:
+  - aws ecr get-login --no-include-email --region us-east-2 | sh
+  - "git clone https://$${GIT_USER}:$${GIT_PASS}@github.com/opendatagroup/fastscore-test.git"
+  - ./fastscore-test/fastest pull-env
+  - "./fastscore-test/fastest copy-wheel CLI \"dist/fastscore_cli-*.whl\""
+  # - ./fastscore-test/all.sh
+  - chmod +rwx ./fastscore-test/create-pypirc.sh
+  - export REPO_NAME="fastscore-cli" | envsubst ${REPO_NAME} < ./fastscore-test/settings.template
+  - ./fastscore-test/create-pypirc.sh
+  - twine upload dist/* --repository cloudrepo
+  volumes:
+  - name: docker.sock
+    path: /var/run/docker.sock
+
+- name: integrate
+  pull: default
+  image: fastscore/maker
+  commands:
+  - ./fastscore-test/fastest push-env
+  environment:
+    SSH_KEY:
+      from_secret: ssh_key
+  volumes:
+  - name: docker.sock
+    path: /var/run/docker.sock
+  when:
+    branch:
+    - master
+    event:
+    - push
+
+volumes:
+- name: docker.sock
+  host:
+    path: /var/run/docker.sock
