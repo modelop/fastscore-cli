@@ -1,13 +1,7 @@
 kind: pipeline
-name: default
+name: fastscore-cli
 
 steps:
-- name: clone
-  pull: default
-  image: plugins/git
-  settings:
-    tags: true
-
 - name: build
   pull: default
   image: fastscore/maker
