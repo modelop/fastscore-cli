@@ -41,7 +41,7 @@ steps:
   - "git clone https://$${GIT_USER}:$${GIT_PASS}@github.com/opendatagroup/fastscore-test.git"
   - ./fastscore-test/fastest pull-env
   - "./fastscore-test/fastest copy-wheel CLI \"dist/fastscore_cli-*.whl\""
-  # - ./fastscore-test/all.sh
+  - ./fastscore-test/all.sh
   - chmod +rwx ./fastscore-test/create-pypirc.sh
   - export REPO_NAME="fastscore-cli" | envsubst ${REPO_NAME} < ./fastscore-test/settings.template
   - ./fastscore-test/create-pypirc.sh
