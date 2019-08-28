@@ -1,7 +1,7 @@
 BUILD_VOL=\
 	if [ -f /.dockerenv ]; then\
 		SRC=`docker inspect --format='{{range .Mounts}}{{if (eq .Destination "/drone/src")}}{{.Source}}{{end}}{{end}}' $$HOSTNAME`;\
-		VOL=$${SRC}$${DRONE_WORKSPACE\#/drone};\
+		VOL=$${SRC}$${DRONE_WORKSPACE\#/drone/src};\
 	else \
 		VOL=$(PWD);\
 	fi &&
