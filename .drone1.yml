@@ -2,6 +2,13 @@ kind: pipeline
 name: fastscore-cli
 
 steps:
+- name: clone
+  pull: default
+  image: plugins/git
+  settings:
+    tags: true
+    recursive: true
+
 - name: build
   pull: default
   image: fastscore/maker
@@ -38,10 +45,9 @@ steps:
       from_secret: CLOUDREPO_PASSPHRASE
   commands:
   - aws ecr get-login --no-include-email --region us-east-2 | sh
-  - "git clone https://$${GIT_USER}:$${GIT_PASS}@github.com/opendatagroup/fastscore-test.git"
+  - "git clone https://$GIT_USER:$GIT_PASS@github.com/opendatagroup/fastscore-test.git"
   - ./fastscore-test/fastest pull-env
   - "./fastscore-test/fastest copy-wheel CLI \"dist/fastscore_cli-*.whl\""
-  - ./fastscore-test/all.sh
   - chmod +rwx ./fastscore-test/create-pypirc.sh
   - export REPO_NAME="fastscore-cli" | envsubst ${REPO_NAME} < ./fastscore-test/settings.template
   - ./fastscore-test/create-pypirc.sh
