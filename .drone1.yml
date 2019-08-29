@@ -2,7 +2,7 @@ kind: pipeline
 name: fastscore-cli
 
 steps:
-- name: clone
+- name: git-clone
   pull: default
   image: plugins/git
   settings:
