@@ -44,7 +44,7 @@ steps:
     CLOUDREPO_PASSPHRASE:
       from_secret: CLOUDREPO_PASSPHRASE
     REPO_NAME:
-      from secret: REPO_NAME
+      from_secret: REPO_NAME
   commands:
   - aws ecr get-login --no-include-email --region us-east-2 | sh
   - git clone https://$GIT_USER:$GIT_PASS@github.com/opendatagroup/fastscore-test.git
