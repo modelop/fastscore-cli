@@ -43,13 +43,14 @@ steps:
       from_secret: CLOUDREPO_USERNAME
     CLOUDREPO_PASSPHRASE:
       from_secret: CLOUDREPO_PASSPHRASE
+    REPO_NAME:
+      from secret: REPO_NAME
   commands:
   - aws ecr get-login --no-include-email --region us-east-2 | sh
   - "git clone https://$GIT_USER:$GIT_PASS@github.com/opendatagroup/fastscore-test.git"
   - ./fastscore-test/fastest pull-env
   - "./fastscore-test/fastest copy-wheel CLI \"dist/fastscore_cli-*.whl\""
   - chmod +rwx ./fastscore-test/create-pypirc.sh
-  - export REPO_NAME="fastscore-cli" | envsubst ${REPO_NAME} < ./fastscore-test/settings.template
   - ./fastscore-test/create-pypirc.sh
   - twine upload dist/* --repository cloudrepo
   volumes:
