@@ -47,7 +47,7 @@ steps:
       from secret: REPO_NAME
   commands:
   - aws ecr get-login --no-include-email --region us-east-2 | sh
-  - "git clone https://$GIT_USER:$GIT_PASS@github.com/opendatagroup/fastscore-test.git"
+  - git clone https://$GIT_USER:$GIT_PASS@github.com/opendatagroup/fastscore-test.git
   - ./fastscore-test/fastest pull-env
   - "./fastscore-test/fastest copy-wheel CLI \"dist/fastscore_cli-*.whl\""
   - chmod +rwx ./fastscore-test/create-pypirc.sh
